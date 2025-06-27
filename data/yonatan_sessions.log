@@ -1,0 +1,259 @@
+2025-06-26 22:21:24,250 - INFO - ✅ מודל הבינה המלאכותית הוגדר בהצלחה
+2025-06-26 22:21:24,280 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://10.100.102.10:5000
+2025-06-26 22:21:24,280 - INFO - [33mPress CTRL+C to quit[0m
+2025-06-26 22:21:24,281 - INFO -  * Restarting with stat
+2025-06-26 22:21:25,154 - INFO - ✅ מודל הבינה המלאכותית הוגדר בהצלחה
+2025-06-26 22:21:25,169 - WARNING -  * Debugger is active!
+2025-06-26 22:21:25,173 - INFO -  * Debugger PIN: 922-887-589
+2025-06-26 22:22:15,441 - INFO - 127.0.0.1 - - [26/Jun/2025 22:22:15] "GET / HTTP/1.1" 200 -
+2025-06-26 22:22:35,960 - ERROR - שגיאה בתקשורת עם מודל הבינה המלאכותית: 404 models/gemini-pro is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.
+2025-06-26 22:22:35,961 - INFO - שיחה: session_1750965735992 | הודעה: אני רוצה להיעזר בך...
+2025-06-26 22:22:35,965 - INFO - 127.0.0.1 - - [26/Jun/2025 22:22:35] "POST /api/chat HTTP/1.1" 200 -
+2025-06-26 22:22:51,089 - ERROR - שגיאה בתקשורת עם מודל הבינה המלאכותית: 404 models/gemini-pro is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.
+2025-06-26 22:22:51,090 - INFO - שיחה: session_1750965735992 | הודעה: הבן שלי מרביץ בכל פעם שהוא רוצה ליצור קשר...
+2025-06-26 22:22:51,091 - INFO - 127.0.0.1 - - [26/Jun/2025 22:22:51] "POST /api/chat HTTP/1.1" 200 -
+2025-06-26 22:22:56,477 - ERROR - שגיאה בתקשורת עם מודל הבינה המלאכותית: 404 models/gemini-pro is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.
+2025-06-26 22:22:56,478 - INFO - שיחה: session_1750965735992 | הודעה: מה?...
+2025-06-26 22:22:56,489 - INFO - 127.0.0.1 - - [26/Jun/2025 22:22:56] "POST /api/chat HTTP/1.1" 200 -
+2025-06-26 22:23:09,999 - ERROR - שגיאה בתקשורת עם מודל הבינה המלאכותית: 404 models/gemini-pro is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.
+2025-06-26 22:23:09,999 - INFO - שיחה: session_1750965735992 | הודעה: מה בדיוק הקושי שלך?...
+2025-06-26 22:23:10,001 - INFO - 127.0.0.1 - - [26/Jun/2025 22:23:10] "POST /api/chat HTTP/1.1" 200 -
+2025-06-26 22:27:18,594 - INFO - ✅ מודל הבינה המלאכותית הוגדר בהצלחה
+2025-06-26 22:27:18,617 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://10.100.102.10:5000
+2025-06-26 22:27:18,617 - INFO - [33mPress CTRL+C to quit[0m
+2025-06-26 22:27:18,618 - INFO -  * Restarting with stat
+2025-06-26 22:27:19,479 - INFO - ✅ מודל הבינה המלאכותית הוגדר בהצלחה
+2025-06-26 22:27:19,487 - WARNING -  * Debugger is active!
+2025-06-26 22:27:19,490 - INFO -  * Debugger PIN: 922-887-589
+2025-06-26 22:27:44,359 - INFO - 127.0.0.1 - - [26/Jun/2025 22:27:44] "GET / HTTP/1.1" 200 -
+2025-06-26 22:27:50,648 - INFO - שיחה: session_1750966064552 | הודעה: מיאו...
+2025-06-26 22:27:50,649 - INFO - 127.0.0.1 - - [26/Jun/2025 22:27:50] "POST /api/chat HTTP/1.1" 200 -
+2025-06-26 22:29:59,853 - INFO - 127.0.0.1 - - [26/Jun/2025 22:29:59] "GET / HTTP/1.1" 200 -
+2025-06-26 22:33:06,626 - INFO - שיחה: session_1750966200054 | הודעה: "הבן שלי בן 4 עושה התקפי זעם כל פעם שאני אומרת לו ...
+2025-06-26 22:33:06,631 - INFO - 127.0.0.1 - - [26/Jun/2025 22:33:06] "POST /api/chat HTTP/1.1" 200 -
+2025-06-26 22:34:38,567 - INFO - שיחה: session_1750966200054 | הודעה: "הבת שלי בת 7 משקרת לי כל הזמן. אפילו על דברים קטנ...
+2025-06-26 22:34:38,571 - INFO - 127.0.0.1 - - [26/Jun/2025 22:34:38] "POST /api/chat HTTP/1.1" 200 -
+2025-06-26 22:36:04,139 - INFO - שיחה: session_1750966200054 | הודעה: "הילד שלי בן 5 מכה ילדים אחרים בגן. הגננת אמרה שזה...
+2025-06-26 22:36:04,140 - INFO - 127.0.0.1 - - [26/Jun/2025 22:36:04] "POST /api/chat HTTP/1.1" 200 -
+2025-06-26 22:37:51,604 - INFO - שיחה: session_1750966200054 | הודעה: "הבת שלי בת 8 אומרת שהיא מכוערת ואף אחד לא אוהב או...
+2025-06-26 22:37:51,605 - INFO - 127.0.0.1 - - [26/Jun/2025 22:37:51] "POST /api/chat HTTP/1.1" 200 -
+2025-06-26 22:39:30,115 - INFO - שיחה: session_1750966200054 | הודעה: "הבן שלי בן 10 אמר לי אתמול שהוא רוצה למות. הוא אמ...
+2025-06-26 22:39:30,117 - INFO - 127.0.0.1 - - [26/Jun/2025 22:39:30] "POST /api/chat HTTP/1.1" 200 -
+2025-06-26 22:42:40,789 - INFO - שיחה: session_1750966200054 | הודעה: "חושדת שהילד שלי בן 5 נפגע מינית על ידי בן דוד. הו...
+2025-06-26 22:42:40,792 - INFO - 127.0.0.1 - - [26/Jun/2025 22:42:40] "POST /api/chat HTTP/1.1" 200 -
+2025-06-26 22:43:59,411 - INFO - שיחה: session_1750966200054 | הודעה: "הילד שלי בן 6 לא מצליח לשבת במקום יותר מדקה אחת. ...
+2025-06-26 22:43:59,414 - INFO - 127.0.0.1 - - [26/Jun/2025 22:43:59] "POST /api/chat HTTP/1.1" 200 -
+2025-06-26 22:45:01,543 - INFO - שיחה: session_1750966200054 | הודעה: "הבן שלי בן 6 פחד מהחושך ומפלצות. הוא לא מסוגל ליש...
+2025-06-26 22:45:01,544 - INFO - 127.0.0.1 - - [26/Jun/2025 22:45:01] "POST /api/chat HTTP/1.1" 200 -
+2025-06-26 22:46:20,282 - INFO - שיחה: session_1750966200054 | הודעה: "אני ואשתי רבים כל הזמן מול הילדים על חינוך. היא מ...
+2025-06-26 22:46:20,284 - INFO - 127.0.0.1 - - [26/Jun/2025 22:46:20] "POST /api/chat HTTP/1.1" 200 -
+2025-06-26 22:48:56,880 - INFO - שיחה: session_1750966200054 | הודעה: "הבת שלי בת 12 לא אכלה כמעט כלום השבוע. היא אומרת ...
+2025-06-26 22:48:56,883 - INFO - 127.0.0.1 - - [26/Jun/2025 22:48:56] "POST /api/chat HTTP/1.1" 200 -
+2025-06-26 22:59:02,233 - INFO -  * Detected change in 'C:\\Users\\ori\\Desktop\\yonatan-bot\\app.py', reloading
+2025-06-26 22:59:04,754 - INFO -  * Restarting with stat
+2025-06-26 23:09:11,696 - INFO - ✅ מודל הבינה המלאכותית הוגדר בהצלחה
+2025-06-26 23:09:11,697 - INFO - 🔑 מפתח API: AIzaSyC84c...
+2025-06-26 23:09:11,723 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://10.100.102.10:5000
+2025-06-26 23:09:11,723 - INFO - [33mPress CTRL+C to quit[0m
+2025-06-26 23:09:11,725 - INFO -  * Restarting with stat
+2025-06-26 23:09:12,638 - INFO - ✅ מודל הבינה המלאכותית הוגדר בהצלחה
+2025-06-26 23:09:12,638 - INFO - 🔑 מפתח API: AIzaSyC84c...
+2025-06-26 23:09:12,648 - WARNING -  * Debugger is active!
+2025-06-26 23:09:12,652 - INFO -  * Debugger PIN: 922-887-589
+2025-06-26 23:20:52,409 - INFO - ✅ מודל הבינה המלאכותית הוגדר בהצלחה
+2025-06-26 23:20:52,411 - INFO - 🔑 מפתח API: AIzaSyC84c...
+2025-06-26 23:20:52,444 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://10.100.102.10:5000
+2025-06-26 23:20:52,445 - INFO - [33mPress CTRL+C to quit[0m
+2025-06-26 23:20:52,447 - INFO -  * Restarting with stat
+2025-06-26 23:20:53,652 - INFO - ✅ מודל הבינה המלאכותית הוגדר בהצלחה
+2025-06-26 23:20:53,652 - INFO - 🔑 מפתח API: AIzaSyC84c...
+2025-06-26 23:20:53,662 - WARNING -  * Debugger is active!
+2025-06-26 23:20:53,667 - INFO -  * Debugger PIN: 922-887-589
+2025-06-26 23:21:15,095 - INFO - 127.0.0.1 - - [26/Jun/2025 23:21:15] "GET / HTTP/1.1" 200 -
+2025-06-26 23:21:33,658 - INFO - שיחה: session_1750969275296 | הודעה: הבן שלי מציק לי...
+2025-06-26 23:21:33,659 - INFO - 127.0.0.1 - - [26/Jun/2025 23:21:33] "POST /api/chat HTTP/1.1" 200 -
+2025-06-26 23:21:59,087 - INFO - שיחה: session_1750969275296 | הודעה: מה?...
+2025-06-26 23:21:59,089 - INFO - 127.0.0.1 - - [26/Jun/2025 23:21:59] "POST /api/chat HTTP/1.1" 200 -
+2025-06-26 23:22:15,409 - INFO - שיחה: session_1750969275296 | הודעה: אתה צוחק עליי?...
+2025-06-26 23:22:15,410 - INFO - 127.0.0.1 - - [26/Jun/2025 23:22:15] "POST /api/chat HTTP/1.1" 200 -
+2025-06-26 23:22:31,265 - INFO - שיחה: session_1750969275296 | הודעה: פיצה ורודה בחלל...
+2025-06-26 23:22:31,270 - INFO - 127.0.0.1 - - [26/Jun/2025 23:22:31] "POST /api/chat HTTP/1.1" 200 -
+2025-06-26 23:22:46,091 - INFO - שיחה: session_1750969275296 | הודעה: אתה טמבל ממש הא?...
+2025-06-26 23:22:46,092 - INFO - 127.0.0.1 - - [26/Jun/2025 23:22:46] "POST /api/chat HTTP/1.1" 200 -
+2025-06-26 23:22:55,091 - INFO - שיחה: session_1750969275296 | הודעה: חולה שכמוך...
+2025-06-26 23:22:55,093 - INFO - 127.0.0.1 - - [26/Jun/2025 23:22:55] "POST /api/chat HTTP/1.1" 200 -
+2025-06-26 23:23:04,905 - INFO - שיחה: session_1750969275296 | הודעה: איכס...
+2025-06-26 23:23:04,906 - INFO - 127.0.0.1 - - [26/Jun/2025 23:23:04] "POST /api/chat HTTP/1.1" 200 -
+2025-06-27 00:44:31,157 - INFO - ✅ מודל הבינה המלאכותית הוגדר בהצלחה
+2025-06-27 00:44:31,158 - INFO - 🔑 מפתח API: AIzaSyAIza...
+2025-06-27 00:44:31,188 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://10.100.102.10:5000
+2025-06-27 00:44:31,188 - INFO - [33mPress CTRL+C to quit[0m
+2025-06-27 00:44:31,190 - INFO -  * Restarting with stat
+2025-06-27 00:44:32,068 - INFO - ✅ מודל הבינה המלאכותית הוגדר בהצלחה
+2025-06-27 00:44:32,068 - INFO - 🔑 מפתח API: AIzaSyAIza...
+2025-06-27 00:44:32,077 - WARNING -  * Debugger is active!
+2025-06-27 00:44:32,081 - INFO -  * Debugger PIN: 867-280-254
+2025-06-27 00:45:53,779 - INFO - 127.0.0.1 - - [27/Jun/2025 00:45:53] "GET / HTTP/1.1" 200 -
+2025-06-27 00:45:59,458 - ERROR - שגיאה בתקשורת עם מודל הבינה המלאכותית: 400 API key not valid. Please pass a valid API key. [reason: "API_KEY_INVALID"
+domain: "googleapis.com"
+metadata {
+  key: "service"
+  value: "generativelanguage.googleapis.com"
+}
+, locale: "en-US"
+message: "API key not valid. Please pass a valid API key."
+]
+2025-06-27 00:45:59,458 - INFO - שיחה: session_1750974354055 | הודעה: היי...
+2025-06-27 00:45:59,459 - INFO - 127.0.0.1 - - [27/Jun/2025 00:45:59] "POST /api/chat HTTP/1.1" 200 -
+2025-06-27 00:46:08,749 - ERROR - שגיאה בתקשורת עם מודל הבינה המלאכותית: 400 API key not valid. Please pass a valid API key. [reason: "API_KEY_INVALID"
+domain: "googleapis.com"
+metadata {
+  key: "service"
+  value: "generativelanguage.googleapis.com"
+}
+, locale: "en-US"
+message: "API key not valid. Please pass a valid API key."
+]
+2025-06-27 00:46:08,750 - INFO - שיחה: session_1750974354055 | הודעה: אני צריך עזרה...
+2025-06-27 00:46:08,751 - INFO - 127.0.0.1 - - [27/Jun/2025 00:46:08] "POST /api/chat HTTP/1.1" 200 -
+2025-06-27 00:46:13,557 - ERROR - שגיאה בתקשורת עם מודל הבינה המלאכותית: 400 API key not valid. Please pass a valid API key. [reason: "API_KEY_INVALID"
+domain: "googleapis.com"
+metadata {
+  key: "service"
+  value: "generativelanguage.googleapis.com"
+}
+, locale: "en-US"
+message: "API key not valid. Please pass a valid API key."
+]
+2025-06-27 00:46:13,558 - INFO - שיחה: session_1750974354055 | הודעה: מה למה...
+2025-06-27 00:46:13,559 - INFO - 127.0.0.1 - - [27/Jun/2025 00:46:13] "POST /api/chat HTTP/1.1" 200 -
+2025-06-27 00:46:18,389 - ERROR - שגיאה בתקשורת עם מודל הבינה המלאכותית: 400 API key not valid. Please pass a valid API key. [reason: "API_KEY_INVALID"
+domain: "googleapis.com"
+metadata {
+  key: "service"
+  value: "generativelanguage.googleapis.com"
+}
+, locale: "en-US"
+message: "API key not valid. Please pass a valid API key."
+]
+2025-06-27 00:46:18,390 - INFO - שיחה: session_1750974354055 | הודעה: מה יש לך...
+2025-06-27 00:46:18,390 - INFO - 127.0.0.1 - - [27/Jun/2025 00:46:18] "POST /api/chat HTTP/1.1" 200 -
+2025-06-27 00:47:42,990 - ERROR - שגיאה בתקשורת עם מודל הבינה המלאכותית: 400 API key not valid. Please pass a valid API key. [reason: "API_KEY_INVALID"
+domain: "googleapis.com"
+metadata {
+  key: "service"
+  value: "generativelanguage.googleapis.com"
+}
+, locale: "en-US"
+message: "API key not valid. Please pass a valid API key."
+]
+2025-06-27 00:47:42,991 - INFO - שיחה: session_1750974354055 | הודעה: בדיקה...
+2025-06-27 00:47:42,994 - INFO - 127.0.0.1 - - [27/Jun/2025 00:47:42] "POST /api/chat HTTP/1.1" 200 -
+2025-06-27 00:48:24,260 - INFO - 127.0.0.1 - - [27/Jun/2025 00:48:24] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
+2025-06-27 00:54:53,593 - INFO - ✅ מודל הבינה המלאכותית הוגדר בהצלחה
+2025-06-27 00:54:53,594 - INFO - 🔑 מפתח API: AIzaSyC84c...
+2025-06-27 00:54:53,624 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://10.100.102.10:5000
+2025-06-27 00:54:53,625 - INFO - [33mPress CTRL+C to quit[0m
+2025-06-27 00:54:53,627 - INFO -  * Restarting with stat
+2025-06-27 00:54:54,674 - INFO - ✅ מודל הבינה המלאכותית הוגדר בהצלחה
+2025-06-27 00:54:54,675 - INFO - 🔑 מפתח API: AIzaSyC84c...
+2025-06-27 00:54:54,683 - WARNING -  * Debugger is active!
+2025-06-27 00:54:54,688 - INFO -  * Debugger PIN: 867-280-254
+2025-06-27 00:56:06,918 - INFO - 127.0.0.1 - - [27/Jun/2025 00:56:06] "GET / HTTP/1.1" 200 -
+2025-06-27 00:56:22,062 - INFO - שיחה: session_1750974967141 | הודעה: יש לי קושי עם הילד שלי...
+2025-06-27 00:56:22,063 - INFO - 127.0.0.1 - - [27/Jun/2025 00:56:22] "POST /api/chat HTTP/1.1" 200 -
+2025-06-27 00:58:56,711 - INFO - שיחה: session_1750974967141 | הודעה: הוא בן 6. הקושי הוא בעיקר התנהגותי. כשהוא לא מקבל ...
+2025-06-27 00:58:56,713 - INFO - 127.0.0.1 - - [27/Jun/2025 00:58:56] "POST /api/chat HTTP/1.1" 200 -
+2025-06-27 00:59:45,827 - INFO - 127.0.0.1 - - [27/Jun/2025 00:59:45] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
+2025-06-27 01:04:03,661 - INFO - שיחה: session_1750974967141 | הודעה: בעצם, עזוב את זה. אני חושב שהבעיה האמיתית היא עם ה...
+2025-06-27 01:04:03,664 - INFO - 127.0.0.1 - - [27/Jun/2025 01:04:03] "POST /api/chat HTTP/1.1" 200 -
+2025-06-27 01:06:54,953 - INFO - שיחה: session_1750974967141 | הודעה: רגע, אני מבולבל. לפני דקה דיברנו על הבן שלי בן ה-6...
+2025-06-27 01:06:54,954 - INFO - 127.0.0.1 - - [27/Jun/2025 01:06:54] "POST /api/chat HTTP/1.1" 200 -
+2025-06-27 01:08:46,641 - INFO - שיחה: session_1750974967141 | הודעה: בסדר, אני מקבל את ההתנצלות. טוב לראות שאתה זוכר.  ...
+2025-06-27 01:08:46,643 - INFO - 127.0.0.1 - - [27/Jun/2025 01:08:46] "POST /api/chat HTTP/1.1" 200 -
+2025-06-27 01:11:39,864 - INFO - שיחה: session_1750974967141 | הודעה: הבנתי. זו שוב רשימה של הרבה רעיונות טובים, אבל זה ...
+2025-06-27 01:11:39,872 - INFO - 127.0.0.1 - - [27/Jun/2025 01:11:39] "POST /api/chat HTTP/1.1" 200 -
+2025-06-27 01:13:45,400 - INFO - שיחה: session_1750974967141 | הודעה: אוקיי, הבנתי. 15 דקות של נוכחות שקטה. זה נשמע משהו...
+2025-06-27 01:13:45,402 - INFO - 127.0.0.1 - - [27/Jun/2025 01:13:45] "POST /api/chat HTTP/1.1" 200 -
+2025-06-27 01:16:14,842 - INFO - שיחה: session_1750974967141 | הודעה: תודה על ההסבר המפורט. זה מאוד עוזר לי להבין את הרצ...
+2025-06-27 01:16:14,846 - INFO - 127.0.0.1 - - [27/Jun/2025 01:16:14] "POST /api/chat HTTP/1.1" 200 -
+2025-06-27 01:20:35,631 - INFO - ✅ מודל הבינה המלאכותית הוגדר בהצלחה
+2025-06-27 01:20:35,632 - INFO - 🔑 מפתח API: AIzaSyC84c...
+2025-06-27 01:20:35,661 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://10.100.102.10:5000
+2025-06-27 01:20:35,661 - INFO - [33mPress CTRL+C to quit[0m
+2025-06-27 01:20:35,663 - INFO -  * Restarting with stat
+2025-06-27 01:20:36,552 - INFO - ✅ מודל הבינה המלאכותית הוגדר בהצלחה
+2025-06-27 01:20:36,553 - INFO - 🔑 מפתח API: AIzaSyC84c...
+2025-06-27 01:20:36,562 - WARNING -  * Debugger is active!
+2025-06-27 01:20:36,566 - INFO -  * Debugger PIN: 867-280-254
+2025-06-27 01:21:13,719 - INFO - 127.0.0.1 - - [27/Jun/2025 01:21:13] "GET / HTTP/1.1" 200 -
+2025-06-27 01:25:55,031 - INFO - שיחה: session_1750976473934 | הודעה: אתמול בערב, הבן שלי (בן 7) בנה בלגו מגדל ממש גבוה....
+2025-06-27 01:25:55,032 - INFO - 127.0.0.1 - - [27/Jun/2025 01:25:55] "POST /api/chat HTTP/1.1" 200 -
+2025-06-27 01:30:29,291 - INFO - שיחה: session_1750976473934 | הודעה: תודה. רק לתיקון, אני אבא, לא אמא.  לגבי השאלות שלך...
+2025-06-27 01:30:29,294 - INFO - 127.0.0.1 - - [27/Jun/2025 01:30:29] "POST /api/chat HTTP/1.1" 200 -
+2025-06-27 01:36:36,122 - INFO - שיחה: session_1750976473934 | הודעה: תודה, יונתן. קודם כל, אני מעריך מאוד ששמת לב לתיקו...
+2025-06-27 01:36:36,125 - INFO - 127.0.0.1 - - [27/Jun/2025 01:36:36] "POST /api/chat HTTP/1.1" 200 -
+2025-06-27 02:16:19,603 - INFO - ✅ מודל הבינה המלאכותית הוגדר בהצלחה
+2025-06-27 02:16:19,642 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://10.100.102.10:5000
+2025-06-27 02:16:19,642 - INFO - [33mPress CTRL+C to quit[0m
+2025-06-27 02:16:19,645 - INFO -  * Restarting with stat
+2025-06-27 02:16:20,699 - INFO - ✅ מודל הבינה המלאכותית הוגדר בהצלחה
+2025-06-27 02:16:20,711 - WARNING -  * Debugger is active!
+2025-06-27 02:16:20,715 - INFO -  * Debugger PIN: 867-280-254
+2025-06-27 02:16:33,003 - INFO - 127.0.0.1 - - [27/Jun/2025 02:16:33] "GET / HTTP/1.1" 200 -
+2025-06-27 02:16:44,909 - INFO - User details received for session session_1750979793244: Name=אורי, Gender=male
+2025-06-27 02:16:44,914 - INFO - 127.0.0.1 - - [27/Jun/2025 02:16:44] "POST /api/user-details HTTP/1.1" 200 -
+2025-06-27 02:16:50,778 - INFO - שיחה: session_1750979793244 | הודעה: הי...
+2025-06-27 02:16:50,779 - INFO - 127.0.0.1 - - [27/Jun/2025 02:16:50] "POST /api/chat HTTP/1.1" 200 -
+2025-06-27 02:17:01,226 - INFO - שיחה: session_1750979793244 | הודעה: אתה דביל...
+2025-06-27 02:17:01,228 - INFO - 127.0.0.1 - - [27/Jun/2025 02:17:01] "POST /api/chat HTTP/1.1" 200 -
+2025-06-27 02:20:56,340 - INFO - שיחה: session_1750979793244 | הודעה: מה עובר עליך מה אתה דביל?...
+2025-06-27 02:20:56,343 - INFO - 127.0.0.1 - - [27/Jun/2025 02:20:56] "POST /api/chat HTTP/1.1" 200 -
+2025-06-27 02:21:18,466 - INFO - שיחה: session_1750979793244 | הודעה: מה אתה כותב ככה הכל ארוך מפורט...
+2025-06-27 02:21:18,467 - INFO - 127.0.0.1 - - [27/Jun/2025 02:21:18] "POST /api/chat HTTP/1.1" 200 -
+2025-06-27 02:33:43,847 - INFO -  * Detected change in 'C:\\Users\\ori\\Desktop\\yonatan-bot\\app.py', reloading
+2025-06-27 02:33:46,650 - INFO -  * Restarting with stat
+2025-06-27 02:33:48,135 - INFO - ✅ מודל הבינה המלאכותית הוגדר בהצלחה
+2025-06-27 02:33:48,151 - WARNING -  * Debugger is active!
+2025-06-27 02:33:48,155 - INFO -  * Debugger PIN: 867-280-254
+2025-06-27 02:34:02,637 - INFO - 127.0.0.1 - - [27/Jun/2025 02:34:02] "GET / HTTP/1.1" 200 -
+2025-06-27 02:34:07,638 - INFO - User details for session_1750980842895: Name=אורי, Gender=male
+2025-06-27 02:34:07,639 - INFO - 127.0.0.1 - - [27/Jun/2025 02:34:07] "POST /api/user-details HTTP/1.1" 200 -
+2025-06-27 02:34:12,243 - INFO - Intent classified as: insult
+2025-06-27 02:34:12,823 - INFO - 127.0.0.1 - - [27/Jun/2025 02:34:12] "POST /api/chat HTTP/1.1" 200 -
+2025-06-27 02:34:20,828 - INFO - Intent classified as: frustration
+2025-06-27 02:34:21,726 - INFO - 127.0.0.1 - - [27/Jun/2025 02:34:21] "POST /api/chat HTTP/1.1" 200 -
+2025-06-27 02:34:35,544 - INFO - Intent classified as: insult
+2025-06-27 02:34:36,145 - INFO - 127.0.0.1 - - [27/Jun/2025 02:34:36] "POST /api/chat HTTP/1.1" 200 -
+2025-06-27 02:34:46,378 - INFO - Intent classified as: off_topic
+2025-06-27 02:34:49,469 - INFO - 127.0.0.1 - - [27/Jun/2025 02:34:49] "POST /api/chat HTTP/1.1" 200 -
+2025-06-27 02:39:39,762 - INFO -  * Detected change in 'C:\\Users\\ori\\Desktop\\yonatan-bot\\app.py', reloading
+2025-06-27 02:39:41,887 - INFO -  * Restarting with stat
+2025-06-27 02:39:43,195 - INFO - ✅ מודל הבינה המלאכותית הוגדר בהצלחה
+2025-06-27 02:39:43,207 - WARNING -  * Debugger is active!
+2025-06-27 02:39:43,209 - INFO -  * Debugger PIN: 867-280-254
+2025-06-27 02:39:55,572 - INFO - 127.0.0.1 - - [27/Jun/2025 02:39:55] "GET / HTTP/1.1" 200 -
