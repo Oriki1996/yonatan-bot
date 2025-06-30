@@ -1,4 +1,4 @@
-# app.py - v4.0 - Complete API Implementation
+# app.py - v5.0 - AI Chat & Dashboard Fixes
 
 import os
 import logging
@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 from models import db, Parent, Child, Conversation, Message, Reflection, PracticeLog, SavedArticle
 import google.generativeai as genai
 from sqlalchemy.exc import SQLAlchemyError
+from datetime import datetime
 
 # --- App Initialization ---
 load_dotenv()
@@ -111,7 +112,7 @@ def handle_children():
 
 @app.route('/api/chat', methods=['POST'])
 def handle_chat():
-    """Handles chat interactions and AI responses."""
+    """Handles chat interactions and AI responses, now with real AI."""
     data = request.get_json()
     session_id = data.get('session_id')
     child_id = data.get('child_id')
@@ -120,17 +121,52 @@ def handle_chat():
     if not all([session_id, child_id, history]):
         return jsonify({"error": "Missing chat data"}), 400
 
-    # For now, we'll return a simple, canned response.
-    # In a real application, this is where you would call the genai model.
-    # e.g., response = model.generate_content(history)
-    bot_response = "תודה ששיתפת. אני כאן כדי להקשיב. איך אני יכול לעזור לך היום עם הנושא הזה?"
+    # Ensure parent and child exist
+    parent = Parent.query.get(session_id)
+    child = Child.query.get(child_id)
+    if not parent or not child:
+        return jsonify({"error": "Parent or child not found"}), 404
+
+    # Find or create a conversation
+    conversation = Conversation.query.filter_by(parent_id=session_id, child_id=child_id, is_open=True).first()
+    if not conversation:
+        conversation = Conversation(parent_id=session_id, child_id=child_id, start_time=datetime.utcnow())
+        db.session.add(conversation)
+        db.session.commit() # Commit to get conversation.id
+
+    # Save user message
+    user_message_content = history[-1]['parts'][0]['text']
+    user_message = Message(conversation_id=conversation.id, role='user', content=user_message_content)
+    db.session.add(user_message)
+
+    bot_response_text = ""
+    try:
+        if not model:
+            raise ConnectionError("Google AI Model not configured.")
+        
+        # Generate AI response
+        # Note: The history format from the client matches what the API expects.
+        response = model.generate_content(history)
+        bot_response_text = response.text
+
+        # Save bot response
+        bot_message = Message(conversation_id=conversation.id, role='model', content=bot_response_text)
+        db.session.add(bot_message)
+
+    except Exception as e:
+        logger.error(f"AI chat generation failed: {e}")
+        bot_response_text = "אני מתנצל, אני חווה תקלה טכנית כרגע. נוכל לנסות שוב בעוד כמה רגעים?"
     
-    # Placeholder for conversation ID logic
-    conversation_id = data.get('conversation_id', 1) 
+    try:
+        db.session.commit()
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        logger.error(f"Database error on saving chat messages: {e}")
+        return jsonify({"error": "Database operation failed"}), 500
 
     return jsonify({
-        "response": bot_response,
-        "conversation_id": conversation_id
+        "response": bot_response_text,
+        "conversation_id": conversation.id
     })
 
 @app.route('/api/dashboard-data')
@@ -144,9 +180,11 @@ def get_dashboard_data():
     if not parent:
         return jsonify({"error": "Parent not found"}), 404
     
+    # --- Children Data ---
     children_data = [{"id": c.id, "name": c.name, "gender": c.gender, "age_range": c.age_range} for c in parent.children]
-    conversations = Conversation.query.filter_by(parent_id=session_id).order_by(Conversation.start_time.desc()).limit(5).all()
     
+    # --- Recent Conversations Data ---
+    conversations = Conversation.query.filter_by(parent_id=session_id).order_by(Conversation.start_time.desc()).limit(5).all()
     conversations_data = []
     for conv in conversations:
         child = Child.query.get(conv.child_id)
@@ -159,13 +197,23 @@ def get_dashboard_data():
             "summary": reflection.summary if reflection else "אין עדיין סיכום זמין."
         })
 
+    # --- FIX: Query for Saved Articles and Goals ---
+    saved_articles = SavedArticle.query.filter_by(parent_id=session_id).order_by(SavedArticle.saved_at.desc()).all()
+    saved_articles_data = [{"article_key": sa.article_key, "saved_at": sa.saved_at.isoformat()} for sa in saved_articles]
+    
+    goals = PracticeLog.query.filter_by(parent_id=session_id).order_by(PracticeLog.last_updated.desc()).all()
+    goals_data = [{"technique_name": g.technique_name, "status": g.status} for g in goals]
+
+    # --- Build the full payload ---
     dashboard_payload = {
         "parent_name": parent.name,
         "children": children_data,
         "recent_conversations": conversations_data,
+        "saved_articles": saved_articles_data, # FIX: Added saved articles list
+        "goals": goals_data,                   # FIX: Added goals list
         "stats": {
             "conversations_count": Conversation.query.filter_by(parent_id=session_id).count(),
-            "saved_articles_count": SavedArticle.query.filter_by(parent_id=session_id).count(),
+            "saved_articles_count": len(saved_articles_data),
             "goals_completed_count": PracticeLog.query.filter_by(parent_id=session_id, status='completed').count()
         }
     }
@@ -192,6 +240,11 @@ def serve_dashboard():
 def serve_widget():
     """Serves the JavaScript file for the chat widget."""
     return send_from_directory('.', 'widget.js')
+
+@app.route('/character-animation.json')
+def serve_animation():
+    """Serves the Lottie animation file."""
+    return send_from_directory('.', 'character-animation.json')
 
 # --- Main Execution ---
 if __name__ == '__main__':
