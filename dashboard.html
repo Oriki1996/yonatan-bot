@@ -80,12 +80,42 @@
         const loadingState = document.getElementById('loading-state');
         const dashboardContent = document.getElementById('dashboard-content');
         
-        // --- Mock article data on client-side to get details from key ---
         const articlesMasterData = {
-            'anger': { title: 'הבנת התקפי זעם', summary: 'למה ילדים חווים התקפי זעם ואיך להגיב אליהם בצורה בונה...' },
-            'listening': { title: 'אומנות ההקשבה הפעילה', summary: 'כיצד להקשיב לילדכם באופן שירגיש מובן ומוערך...' },
-            'play': { title: 'משחק ככלי להתפתחות', summary: 'החשיבות של זמן משחק חופשי לפיתוח יצירתיות...' }
+            'anger-management': { title: 'הבנת התקפי זעם', summary: 'למה ילדים חווים התקפי זעם ואיך להגיב אליהם בצורה בונה...' },
+            'active-listening': { title: 'אומנות ההקשבה הפעילה', summary: 'כיצד להקשיב לילדכם באופן שירגיש מובן ומוערך...' },
+            'play-development': { title: 'משחק ככלי להתפתחות', summary: 'החשיבות של זמן משחק חופשי לפיתוח יצירתיות...' },
+            'positive-discipline': { title: 'עקרונות החינוך החיובי', summary: 'חינוך חיובי מתמקד בבניית מערכת יחסים של כבוד הדדי...' },
+            'building-independence': { title: 'טיפוח עצמאות וביטחון עצמי', summary: 'ילדים זקוקים להזדמנויות כדי להאמין בעצמם...' },
+            'anxiety-in-children': { title: 'זיהוי והתמודדות עם חרדה', summary: 'חרדה היא רגש טבעי, אך לעיתים היא עלולה להפוך למגבילה...' },
+            'sibling-rivalry': { title: 'מריבות בין אחים', summary: 'קונפליקטים בין אחים הם חלק בלתי נמנע מהחיים...' },
+            'screen-time': { title: 'ניהול זמן מסך בריא', summary: 'מסכים הם חלק מחיינו, והמטרה היא לא לאסור אלא לנהל...' },
+            'self-esteem': { title: 'חיזוק הדימוי העצמי', summary: 'דימוי עצמי בריא הוא המתנה הגדולה ביותר...' },
+            'social-skills': { title: 'פיתוח כישורים חברתיים', summary: 'היכולת ליצור ולשמר חברויות היא מיומנות נרכשת...' },
+            'sleep-issues': { title: 'התמודדות עם קשיי שינה', summary: 'שינה איכותית חיונית להתפתחות הפיזית והרגשית...' },
+            'transitions': { title: 'התמודדות עם שינויים ומעברים', summary: 'בין אם מדובר במעבר לגן חדש, הולדת אח או גירושין...' },
+            'mindfulness': { title: 'מיינדפולנס וקשיבות לילדים', summary: 'בעולם מלא בגירויים, היכולת להיות נוכח ברגע הזה...' },
+            'nutrition-mood': { title: 'הקשר בין תזונה למצב הרוח', summary: 'מה שהילדים שלנו אוכלים משפיע לא רק על הגוף...' },
+            'chores-responsibility': { title: 'מטלות ופיתוח אחריות', summary: 'מטלות בית אינן רק עזרה להורים...' }
         };
+        
+        // *** NEW FUNCTION: Re-creates the user session if the server forgot it ***
+        async function recreateSession(sessionId) {
+            const userDetails = JSON.parse(localStorage.getItem('yonatan_user_details'));
+            if (!userDetails) {
+                throw new Error("לא נמצאו פרטי משתמש בזיכרון הדפדפן.");
+            }
+            console.warn("Dashboard: Server session not found. Re-creating session...");
+            const response = await fetch(`/api/session`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    session_id: sessionId, 
+                    name: userDetails.name, 
+                    gender: userDetails.gender 
+                })
+            });
+            if (!response.ok) throw new Error('Failed to re-create session for dashboard');
+        }
 
         async function fetchDashboardData() {
             const sessionId = localStorage.getItem('yonatan_session_id');
@@ -95,7 +125,15 @@
             }
 
             try {
-                const response = await fetch(`/api/dashboard-data?session_id=${sessionId}`);
+                let response = await fetch(`/api/dashboard-data?session_id=${sessionId}`);
+                
+                // *** NEW LOGIC: Handle 404 error by recreating the session ***
+                if (response.status === 404) {
+                    await recreateSession(sessionId);
+                    // Retry fetching data after session is recreated
+                    response = await fetch(`/api/dashboard-data?session_id=${sessionId}`);
+                }
+
                 if (!response.ok) {
                     const err = await response.json();
                     throw new Error(err.error || `שגיאת רשת: ${response.statusText}`);
@@ -117,7 +155,7 @@
 
             // --- Render Children ---
             const childrenAvatars = document.getElementById('children-avatars');
-            if (data.children.length > 0) {
+            if (data.children && data.children.length > 0) {
                 childrenAvatars.innerHTML = data.children.map(child => 
                     `<div class="w-10 h-10 rounded-full flex items-center justify-center bg-gray-200 border-2 border-white text-gray-600 font-bold" title="${child.name}">${child.gender === 'male' ? '👦' : '👧'}</div>`
                 ).join('');
@@ -127,7 +165,7 @@
 
             // --- Render Recent Conversations ---
             const conversationsList = document.getElementById('conversations-list');
-            if (data.recent_conversations.length > 0) {
+            if (data.recent_conversations && data.recent_conversations.length > 0) {
                 conversationsList.innerHTML = data.recent_conversations.map(convo => `
                     <div class="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
                         <div class="flex justify-between items-start">
@@ -145,7 +183,7 @@
 
             // --- Render Saved Articles ---
             const savedArticlesList = document.getElementById('saved-articles-list');
-            if(data.saved_articles.length > 0) {
+            if(data.saved_articles && data.saved_articles.length > 0) {
                 savedArticlesList.innerHTML = data.saved_articles.map(sa => {
                     const articleDetails = articlesMasterData[sa.article_key] || {title: 'מאמר לא ידוע'};
                     return `<div class="flex items-center p-2 rounded-lg hover:bg-gray-100">
@@ -162,7 +200,7 @@
             
             // --- Render Goals ---
             const goalsList = document.getElementById('goals-list');
-            if(data.goals.length > 0) {
+            if(data.goals && data.goals.length > 0) {
                  goalsList.innerHTML = data.goals.map(goal => `
                     <div>
                         <div class="flex justify-between items-center mb-1">
