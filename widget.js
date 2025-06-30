@@ -1,4 +1,4 @@
-// Yonatan Premium Enhanced Widget v2.2 - Bug Fixes & Stability
+// Yonatan Premium Enhanced Widget v2.3 - Resilience Update
 (function() {
     // --- SETUP ---
     if (window.yonatanWidgetLoaded) {
@@ -8,7 +8,7 @@
 
     // --- CONFIGURATION ---
     const API_URL = window.location.origin;
-    const WIDGET_VERSION = '2.2.0';
+    const WIDGET_VERSION = '2.3.0';
 
     // --- STATE MANAGEMENT ---
     let state = {
@@ -332,11 +332,46 @@
     }
 
     // --- LOGIC / API HANDLERS ---
-    async function handleGetChildren() {
+    
+    // *** NEW FUNCTION ***
+    // This function re-creates the user session if the server forgot about it.
+    async function recreateSession() {
+        console.warn("Server session not found. Re-creating session...");
+        try {
+            // Use the details stored in the browser to create a new session on the server
+            const { name, gender } = state.userDetails;
+            const response = await fetch(`${API_URL}/api/session`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ session_id: state.sessionId, name, gender })
+            });
+            if (!response.ok) throw new Error('Failed to re-create session');
+            
+            // After re-creating the session, try fetching the children again.
+            // Since it's a new session, the list will be empty.
+            await handleGetChildren(true); // Pass a flag to avoid loop
+        } catch(error) {
+            console.error('Failed to recreate session:', error);
+            // If re-creation fails, force the user to start over.
+            resetSession();
+        }
+    }
+
+    async function handleGetChildren(isRetry = false) {
         setState({uiState: 'loading'});
         try {
             const response = await fetch(`${API_URL}/api/children?session_id=${state.sessionId}`);
+            
+            // *** MODIFIED LOGIC ***
+            // If the parent is not found (404) and this is the first attempt...
+            if (response.status === 404 && !isRetry) {
+                // ...it means the server database was reset. Let's fix it.
+                await recreateSession();
+                return; // Stop execution here, recreateSession will take over.
+            }
+
             if (!response.ok) throw new Error('Network response was not ok');
+            
             const children = await response.json();
             setState({ children, uiState: 'select_child' });
         } catch (error) {
