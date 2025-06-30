@@ -1,0 +1,274 @@
+2025-06-30 07:17:53,802 - INFO - check_and_heal_db:124 - Database integrity check passed
+2025-06-30 07:17:55,536 - INFO - _log:187 - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://10.100.102.10:5000
+2025-06-30 07:17:55,538 - INFO - _log:187 - [33mPress CTRL+C to quit[0m
+2025-06-30 07:17:55,544 - INFO - _log:187 -  * Restarting with stat
+2025-06-30 07:17:57,028 - INFO - check_and_heal_db:124 - Database integrity check passed
+2025-06-30 07:17:58,872 - WARNING - _log:187 -  * Debugger is active!
+2025-06-30 07:17:58,880 - INFO - _log:187 -  * Debugger PIN: 867-280-254
+2025-06-30 07:25:01,343 - INFO - _log:187 -  * Detected change in 'C:\\Users\\ori\\Desktop\\yonatan-bot\\app.py', reloading
+2025-06-30 07:25:04,273 - INFO - _log:187 -  * Restarting with stat
+2025-06-30 07:25:06,253 - INFO - <module>:72 - 🧠 Unicode support test successful
+2025-06-30 07:25:06,254 - INFO - test_emoji_support:93 - 🚀 Testing emoji support in logging...
+2025-06-30 07:25:06,266 - INFO - check_and_heal_db:220 - Database integrity check passed
+2025-06-30 07:25:07,321 - INFO - log_with_emoji:125 - ✅ AI model configured and tested successfully
+2025-06-30 07:25:07,331 - INFO - log_with_emoji:125 - ✅ Database initialized successfully
+2025-06-30 07:25:08,150 - INFO - log_with_emoji:125 - ✅ AI model configured and tested successfully
+2025-06-30 07:25:08,151 - INFO - log_with_emoji:125 - 🚀 Starting Yonatan server...
+2025-06-30 07:25:08,177 - WARNING - _log:187 -  * Debugger is active!
+2025-06-30 07:25:08,182 - INFO - _log:187 -  * Debugger PIN: 867-280-254
+2025-06-30 07:25:35,261 - INFO - <module>:72 - 🧠 Unicode support test successful
+2025-06-30 07:25:35,261 - INFO - test_emoji_support:93 - 🚀 Testing emoji support in logging...
+2025-06-30 07:25:35,264 - INFO - check_and_heal_db:220 - Database integrity check passed
+2025-06-30 07:25:36,126 - INFO - log_with_emoji:125 - ✅ AI model configured and tested successfully
+2025-06-30 07:25:36,136 - INFO - log_with_emoji:125 - ✅ Database initialized successfully
+2025-06-30 07:25:37,054 - INFO - log_with_emoji:125 - ✅ AI model configured and tested successfully
+2025-06-30 07:25:37,055 - INFO - log_with_emoji:125 - 🚀 Starting Yonatan server...
+2025-06-30 07:25:37,090 - INFO - _log:187 - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://10.100.102.10:5000
+2025-06-30 07:25:37,090 - INFO - _log:187 - [33mPress CTRL+C to quit[0m
+2025-06-30 07:25:37,092 - INFO - _log:187 -  * Restarting with stat
+2025-06-30 07:25:38,179 - INFO - <module>:72 - 🧠 Unicode support test successful
+2025-06-30 07:25:38,179 - INFO - test_emoji_support:93 - 🚀 Testing emoji support in logging...
+2025-06-30 07:25:38,182 - INFO - check_and_heal_db:220 - Database integrity check passed
+2025-06-30 07:25:38,767 - INFO - log_with_emoji:125 - ✅ AI model configured and tested successfully
+2025-06-30 07:25:38,771 - INFO - log_with_emoji:125 - ✅ Database initialized successfully
+2025-06-30 07:25:39,447 - INFO - log_with_emoji:125 - ✅ AI model configured and tested successfully
+2025-06-30 07:25:39,449 - INFO - log_with_emoji:125 - 🚀 Starting Yonatan server...
+2025-06-30 07:25:39,464 - WARNING - _log:187 -  * Debugger is active!
+2025-06-30 07:25:39,466 - INFO - _log:187 -  * Debugger PIN: 867-280-254
+2025-06-30 07:26:08,554 - INFO - log_request_info:367 - REQUEST_START [1751257568-127.0.0.1]: GET /
+2025-06-30 07:26:08,571 - INFO - log_response_info:372 - REQUEST_END [1751257568-127.0.0.1]: 200 - 0.017s
+2025-06-30 07:26:08,572 - INFO - _log:187 - 127.0.0.1 - - [30/Jun/2025 07:26:08] "GET / HTTP/1.1" 200 -
+2025-06-30 07:26:08,650 - INFO - log_request_info:367 - REQUEST_START [1751257568-127.0.0.1]: GET /widget.js
+2025-06-30 07:26:08,922 - INFO - log_response_info:372 - REQUEST_END [1751257568-127.0.0.1]: 200 - 0.271s
+2025-06-30 07:26:08,923 - INFO - _log:187 - 127.0.0.1 - - [30/Jun/2025 07:26:08] "GET /widget.js?v=17.0 HTTP/1.1" 200 -
+2025-06-30 07:27:44,202 - INFO - log_request_info:367 - REQUEST_START [1751257664-127.0.0.1]: GET /.well-known/appspecific/com.chrome.devtools.json
+2025-06-30 07:27:44,205 - INFO - log_response_info:372 - REQUEST_END [1751257664-127.0.0.1]: 404 - 0.003s
+2025-06-30 07:27:44,205 - INFO - _log:187 - 127.0.0.1 - - [30/Jun/2025 07:27:44] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
+2025-06-30 07:31:41,201 - INFO - log_request_info:367 - REQUEST_START [1751257901-127.0.0.1]: GET /dashboard
+2025-06-30 07:31:41,555 - INFO - log_response_info:372 - REQUEST_END [1751257901-127.0.0.1]: 200 - 0.356s
+2025-06-30 07:31:41,564 - INFO - _log:187 - 127.0.0.1 - - [30/Jun/2025 07:31:41] "GET /dashboard HTTP/1.1" 200 -
+2025-06-30 07:31:41,630 - INFO - log_request_info:367 - REQUEST_START [1751257901-127.0.0.1]: GET /widget.js
+2025-06-30 07:31:41,641 - INFO - log_response_info:372 - REQUEST_END [1751257901-127.0.0.1]: 200 - 0.010s
+2025-06-30 07:31:41,642 - INFO - _log:187 - 127.0.0.1 - - [30/Jun/2025 07:31:41] "GET /widget.js?v=2.0 HTTP/1.1" 200 -
+2025-06-30 07:31:41,762 - INFO - log_request_info:367 - REQUEST_START [1751257901-127.0.0.1]: GET /sw.js
+2025-06-30 07:31:41,764 - INFO - log_response_info:372 - REQUEST_END [1751257901-127.0.0.1]: 404 - 0.002s
+2025-06-30 07:31:41,765 - INFO - _log:187 - 127.0.0.1 - - [30/Jun/2025 07:31:41] "[33mGET /sw.js HTTP/1.1[0m" 404 -
+2025-06-30 07:58:10,405 - INFO - <module>:72 - 🧠 Unicode support test successful
+2025-06-30 07:58:10,407 - INFO - test_emoji_support:93 - 🚀 Testing emoji support in logging...
+2025-06-30 07:58:10,448 - INFO - check_and_heal_db:220 - Database integrity check passed
+2025-06-30 07:58:11,578 - INFO - log_with_emoji:125 - ✅ AI model configured and tested successfully
+2025-06-30 07:58:11,584 - INFO - log_with_emoji:125 - ✅ Database initialized successfully
+2025-06-30 07:58:12,161 - INFO - log_with_emoji:125 - ✅ AI model configured and tested successfully
+2025-06-30 07:58:12,162 - INFO - log_with_emoji:125 - 🚀 Starting Yonatan server...
+2025-06-30 07:58:12,253 - INFO - _log:187 - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://10.100.102.10:5000
+2025-06-30 07:58:12,253 - INFO - _log:187 - [33mPress CTRL+C to quit[0m
+2025-06-30 07:58:12,260 - INFO - _log:187 -  * Restarting with stat
+2025-06-30 07:58:13,480 - INFO - <module>:72 - 🧠 Unicode support test successful
+2025-06-30 07:58:13,480 - INFO - test_emoji_support:93 - 🚀 Testing emoji support in logging...
+2025-06-30 07:58:13,484 - INFO - check_and_heal_db:220 - Database integrity check passed
+2025-06-30 07:58:14,328 - INFO - log_with_emoji:125 - ✅ AI model configured and tested successfully
+2025-06-30 07:58:14,340 - INFO - log_with_emoji:125 - ✅ Database initialized successfully
+2025-06-30 07:58:15,275 - INFO - log_with_emoji:125 - ✅ AI model configured and tested successfully
+2025-06-30 07:58:15,277 - INFO - log_with_emoji:125 - 🚀 Starting Yonatan server...
+2025-06-30 07:58:15,296 - WARNING - _log:187 -  * Debugger is active!
+2025-06-30 07:58:15,303 - INFO - _log:187 -  * Debugger PIN: 867-280-254
+2025-06-30 07:58:52,906 - INFO - log_request_info:367 - REQUEST_START [1751259532-127.0.0.1]: GET /
+2025-06-30 07:58:52,982 - INFO - log_response_info:372 - REQUEST_END [1751259532-127.0.0.1]: 200 - 0.077s
+2025-06-30 07:58:52,985 - INFO - _log:187 - 127.0.0.1 - - [30/Jun/2025 07:58:52] "GET / HTTP/1.1" 200 -
+2025-06-30 07:59:17,740 - INFO - log_request_info:367 - REQUEST_START [1751259557-127.0.0.1]: GET /.well-known/appspecific/com.chrome.devtools.json
+2025-06-30 07:59:17,742 - INFO - log_response_info:372 - REQUEST_END [1751259557-127.0.0.1]: 404 - 0.002s
+2025-06-30 07:59:17,744 - INFO - _log:187 - 127.0.0.1 - - [30/Jun/2025 07:59:17] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
+2025-06-30 08:07:58,426 - INFO - <module>:72 - 🧠 Unicode support test successful
+2025-06-30 08:07:58,427 - INFO - test_emoji_support:93 - 🚀 Testing emoji support in logging...
+2025-06-30 08:07:58,442 - INFO - check_and_heal_db:220 - Database integrity check passed
+2025-06-30 08:07:59,360 - INFO - log_with_emoji:125 - ✅ AI model configured and tested successfully
+2025-06-30 08:07:59,370 - INFO - log_with_emoji:125 - ✅ Database initialized successfully
+2025-06-30 08:07:59,926 - INFO - log_with_emoji:125 - ✅ AI model configured and tested successfully
+2025-06-30 08:07:59,927 - INFO - log_with_emoji:125 - 🚀 Starting Yonatan server...
+2025-06-30 08:07:59,969 - INFO - _log:187 - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://10.100.102.10:5000
+2025-06-30 08:07:59,970 - INFO - _log:187 - [33mPress CTRL+C to quit[0m
+2025-06-30 08:07:59,975 - INFO - _log:187 -  * Restarting with stat
+2025-06-30 08:08:01,167 - INFO - <module>:72 - 🧠 Unicode support test successful
+2025-06-30 08:08:01,167 - INFO - test_emoji_support:93 - 🚀 Testing emoji support in logging...
+2025-06-30 08:08:01,171 - INFO - check_and_heal_db:220 - Database integrity check passed
+2025-06-30 08:08:01,776 - INFO - log_with_emoji:125 - ✅ AI model configured and tested successfully
+2025-06-30 08:08:01,781 - INFO - log_with_emoji:125 - ✅ Database initialized successfully
+2025-06-30 08:08:02,683 - INFO - log_with_emoji:125 - ✅ AI model configured and tested successfully
+2025-06-30 08:08:02,684 - INFO - log_with_emoji:125 - 🚀 Starting Yonatan server...
+2025-06-30 08:08:02,701 - WARNING - _log:187 -  * Debugger is active!
+2025-06-30 08:08:02,708 - INFO - _log:187 -  * Debugger PIN: 867-280-254
+2025-06-30 08:08:13,206 - INFO - log_request_info:367 - REQUEST_START [1751260093-127.0.0.1]: GET /
+2025-06-30 08:08:13,231 - INFO - log_response_info:372 - REQUEST_END [1751260093-127.0.0.1]: 200 - 0.024s
+2025-06-30 08:08:13,232 - INFO - _log:187 - 127.0.0.1 - - [30/Jun/2025 08:08:13] "GET / HTTP/1.1" 200 -
+2025-06-30 08:08:32,468 - INFO - log_request_info:367 - REQUEST_START [1751260112-127.0.0.1]: GET /.well-known/appspecific/com.chrome.devtools.json
+2025-06-30 08:08:32,472 - INFO - log_response_info:372 - REQUEST_END [1751260112-127.0.0.1]: 404 - 0.004s
+2025-06-30 08:08:32,474 - INFO - _log:187 - 127.0.0.1 - - [30/Jun/2025 08:08:32] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
+2025-06-30 08:33:24,384 - INFO - <module>:72 - 🧠 Unicode support test successful
+2025-06-30 08:33:24,386 - INFO - test_emoji_support:93 - 🚀 Testing emoji support in logging...
+2025-06-30 08:33:24,420 - INFO - check_and_heal_db:220 - Database integrity check passed
+2025-06-30 08:33:25,473 - INFO - log_with_emoji:125 - ✅ AI model configured and tested successfully
+2025-06-30 08:33:25,483 - INFO - log_with_emoji:125 - ✅ Database initialized successfully
+2025-06-30 08:33:26,043 - INFO - log_with_emoji:125 - ✅ AI model configured and tested successfully
+2025-06-30 08:33:26,044 - INFO - log_with_emoji:125 - 🚀 Starting Yonatan server...
+2025-06-30 08:33:26,100 - INFO - _log:187 - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://10.100.102.10:5000
+2025-06-30 08:33:26,100 - INFO - _log:187 - [33mPress CTRL+C to quit[0m
+2025-06-30 08:33:26,108 - INFO - _log:187 -  * Restarting with stat
+2025-06-30 08:33:29,156 - INFO - <module>:72 - 🧠 Unicode support test successful
+2025-06-30 08:33:29,157 - INFO - test_emoji_support:93 - 🚀 Testing emoji support in logging...
+2025-06-30 08:33:29,168 - INFO - check_and_heal_db:220 - Database integrity check passed
+2025-06-30 08:33:30,162 - INFO - log_with_emoji:125 - ✅ AI model configured and tested successfully
+2025-06-30 08:33:30,173 - INFO - log_with_emoji:125 - ✅ Database initialized successfully
+2025-06-30 08:33:31,078 - INFO - log_with_emoji:125 - ✅ AI model configured and tested successfully
+2025-06-30 08:33:31,079 - INFO - log_with_emoji:125 - 🚀 Starting Yonatan server...
+2025-06-30 08:33:31,114 - WARNING - _log:187 -  * Debugger is active!
+2025-06-30 08:33:31,132 - INFO - _log:187 -  * Debugger PIN: 867-280-254
+2025-06-30 08:33:47,761 - INFO - log_request_info:367 - REQUEST_START [1751261627-127.0.0.1]: GET /
+2025-06-30 08:33:47,791 - INFO - log_response_info:372 - REQUEST_END [1751261627-127.0.0.1]: 200 - 0.030s
+2025-06-30 08:33:47,799 - INFO - _log:187 - 127.0.0.1 - - [30/Jun/2025 08:33:47] "GET / HTTP/1.1" 200 -
+2025-06-30 08:33:48,004 - INFO - log_request_info:367 - REQUEST_START [1751261628-127.0.0.1]: GET /widget.js
+2025-06-30 08:33:48,412 - INFO - log_response_info:372 - REQUEST_END [1751261628-127.0.0.1]: 200 - 0.408s
+2025-06-30 08:33:48,415 - INFO - _log:187 - 127.0.0.1 - - [30/Jun/2025 08:33:48] "GET /widget.js?v=17.0 HTTP/1.1" 200 -
+2025-06-30 08:34:46,344 - INFO - log_request_info:367 - REQUEST_START [1751261686-127.0.0.1]: GET /.well-known/appspecific/com.chrome.devtools.json
+2025-06-30 08:34:46,375 - INFO - log_response_info:372 - REQUEST_END [1751261686-127.0.0.1]: 404 - 0.030s
+2025-06-30 08:34:46,390 - INFO - _log:187 - 127.0.0.1 - - [30/Jun/2025 08:34:46] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
+2025-06-30 08:41:15,072 - INFO - <module>:72 - 🧠 Unicode support test successful
+2025-06-30 08:41:15,074 - INFO - test_emoji_support:93 - 🚀 Testing emoji support in logging...
+2025-06-30 08:41:15,108 - INFO - check_and_heal_db:220 - Database integrity check passed
+2025-06-30 08:41:16,361 - INFO - log_with_emoji:125 - ✅ AI model configured and tested successfully
+2025-06-30 08:41:16,393 - INFO - log_with_emoji:125 - ✅ Database initialized successfully
+2025-06-30 08:41:17,249 - INFO - log_with_emoji:125 - ✅ AI model configured and tested successfully
+2025-06-30 08:41:17,249 - INFO - log_with_emoji:125 - 🚀 Starting Yonatan server...
+2025-06-30 08:41:17,304 - INFO - _log:187 - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://10.100.102.10:5000
+2025-06-30 08:41:17,305 - INFO - _log:187 - [33mPress CTRL+C to quit[0m
+2025-06-30 08:41:17,316 - INFO - _log:187 -  * Restarting with stat
+2025-06-30 08:41:21,949 - INFO - <module>:72 - 🧠 Unicode support test successful
+2025-06-30 08:41:21,950 - INFO - test_emoji_support:93 - 🚀 Testing emoji support in logging...
+2025-06-30 08:41:21,964 - INFO - check_and_heal_db:220 - Database integrity check passed
+2025-06-30 08:41:22,659 - INFO - log_with_emoji:125 - ✅ AI model configured and tested successfully
+2025-06-30 08:41:22,669 - INFO - log_with_emoji:125 - ✅ Database initialized successfully
+2025-06-30 08:41:23,510 - INFO - log_with_emoji:125 - ✅ AI model configured and tested successfully
+2025-06-30 08:41:23,511 - INFO - log_with_emoji:125 - 🚀 Starting Yonatan server...
+2025-06-30 08:41:23,536 - WARNING - _log:187 -  * Debugger is active!
+2025-06-30 08:41:23,544 - INFO - _log:187 -  * Debugger PIN: 867-280-254
+2025-06-30 08:41:40,240 - INFO - log_request_info:367 - REQUEST_START [1751262100-127.0.0.1]: GET /
+2025-06-30 08:41:40,262 - INFO - log_response_info:372 - REQUEST_END [1751262100-127.0.0.1]: 200 - 0.022s
+2025-06-30 08:41:40,264 - INFO - _log:187 - 127.0.0.1 - - [30/Jun/2025 08:41:40] "GET / HTTP/1.1" 200 -
+2025-06-30 08:50:39,777 - INFO - <module>:72 - 🧠 Unicode support test successful
+2025-06-30 08:50:39,778 - INFO - test_emoji_support:93 - 🚀 Testing emoji support in logging...
+2025-06-30 08:50:39,798 - INFO - check_and_heal_db:220 - Database integrity check passed
+2025-06-30 08:50:40,861 - INFO - log_with_emoji:125 - ✅ AI model configured and tested successfully
+2025-06-30 08:50:40,882 - INFO - log_with_emoji:125 - ✅ Database initialized successfully
+2025-06-30 08:50:41,469 - INFO - log_with_emoji:125 - ✅ AI model configured and tested successfully
+2025-06-30 08:50:41,470 - INFO - log_with_emoji:125 - 🚀 Starting Yonatan server...
+2025-06-30 08:50:41,514 - INFO - _log:187 - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://10.100.102.10:5000
+2025-06-30 08:50:41,515 - INFO - _log:187 - [33mPress CTRL+C to quit[0m
+2025-06-30 08:50:41,521 - INFO - _log:187 -  * Restarting with stat
+2025-06-30 08:50:43,785 - INFO - <module>:72 - 🧠 Unicode support test successful
+2025-06-30 08:50:43,786 - INFO - test_emoji_support:93 - 🚀 Testing emoji support in logging...
+2025-06-30 08:50:43,791 - INFO - check_and_heal_db:220 - Database integrity check passed
+2025-06-30 08:50:44,359 - INFO - log_with_emoji:125 - ✅ AI model configured and tested successfully
+2025-06-30 08:50:44,366 - INFO - log_with_emoji:125 - ✅ Database initialized successfully
+2025-06-30 08:50:44,927 - INFO - log_with_emoji:125 - ✅ AI model configured and tested successfully
+2025-06-30 08:50:44,936 - INFO - log_with_emoji:125 - 🚀 Starting Yonatan server...
+2025-06-30 08:50:44,947 - WARNING - _log:187 -  * Debugger is active!
+2025-06-30 08:50:44,956 - INFO - _log:187 -  * Debugger PIN: 867-280-254
+2025-06-30 08:51:04,640 - INFO - log_request_info:367 - REQUEST_START [1751262664-127.0.0.1]: GET /
+2025-06-30 08:51:04,663 - INFO - log_response_info:372 - REQUEST_END [1751262664-127.0.0.1]: 200 - 0.023s
+2025-06-30 08:51:04,665 - INFO - _log:187 - 127.0.0.1 - - [30/Jun/2025 08:51:04] "GET / HTTP/1.1" 200 -
+2025-06-30 08:51:39,863 - INFO - log_request_info:367 - REQUEST_START [1751262699-127.0.0.1]: GET /.well-known/appspecific/com.chrome.devtools.json
+2025-06-30 08:51:39,871 - INFO - log_response_info:372 - REQUEST_END [1751262699-127.0.0.1]: 404 - 0.008s
+2025-06-30 08:51:39,880 - INFO - _log:187 - 127.0.0.1 - - [30/Jun/2025 08:51:39] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
+2025-06-30 09:00:35,133 - INFO - <module>:72 - 🧠 Unicode support test successful
+2025-06-30 09:00:35,135 - INFO - test_emoji_support:93 - 🚀 Testing emoji support in logging...
+2025-06-30 09:00:35,163 - INFO - check_and_heal_db:220 - Database integrity check passed
+2025-06-30 09:00:36,392 - INFO - log_with_emoji:125 - ✅ AI model configured and tested successfully
+2025-06-30 09:00:36,399 - INFO - log_with_emoji:125 - ✅ Database initialized successfully
+2025-06-30 09:00:37,396 - INFO - log_with_emoji:125 - ✅ AI model configured and tested successfully
+2025-06-30 09:00:37,397 - INFO - log_with_emoji:125 - 🚀 Starting Yonatan server...
+2025-06-30 09:00:37,454 - INFO - _log:187 - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://10.100.102.10:5000
+2025-06-30 09:00:37,455 - INFO - _log:187 - [33mPress CTRL+C to quit[0m
+2025-06-30 09:00:37,461 - INFO - _log:187 -  * Restarting with stat
+2025-06-30 09:00:40,148 - INFO - <module>:72 - 🧠 Unicode support test successful
+2025-06-30 09:00:40,148 - INFO - test_emoji_support:93 - 🚀 Testing emoji support in logging...
+2025-06-30 09:00:40,155 - INFO - check_and_heal_db:220 - Database integrity check passed
+2025-06-30 09:00:41,063 - INFO - log_with_emoji:125 - ✅ AI model configured and tested successfully
+2025-06-30 09:00:41,071 - INFO - log_with_emoji:125 - ✅ Database initialized successfully
+2025-06-30 09:00:41,972 - INFO - log_with_emoji:125 - ✅ AI model configured and tested successfully
+2025-06-30 09:00:41,973 - INFO - log_with_emoji:125 - 🚀 Starting Yonatan server...
+2025-06-30 09:00:42,001 - WARNING - _log:187 -  * Debugger is active!
+2025-06-30 09:00:42,008 - INFO - _log:187 -  * Debugger PIN: 867-280-254
+2025-06-30 09:00:53,082 - INFO - log_request_info:367 - REQUEST_START [1751263253-127.0.0.1]: GET /
+2025-06-30 09:00:53,110 - INFO - log_response_info:372 - REQUEST_END [1751263253-127.0.0.1]: 200 - 0.027s
+2025-06-30 09:00:53,117 - INFO - _log:187 - 127.0.0.1 - - [30/Jun/2025 09:00:53] "GET / HTTP/1.1" 200 -
+2025-06-30 09:01:46,674 - INFO - log_request_info:367 - REQUEST_START [1751263306-127.0.0.1]: GET /.well-known/appspecific/com.chrome.devtools.json
+2025-06-30 09:01:46,680 - INFO - log_response_info:372 - REQUEST_END [1751263306-127.0.0.1]: 404 - 0.007s
+2025-06-30 09:01:46,683 - INFO - _log:187 - 127.0.0.1 - - [30/Jun/2025 09:01:46] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
+2025-06-30 09:11:14,006 - INFO - <module>:72 - 🧠 Unicode support test successful
+2025-06-30 09:11:14,009 - INFO - test_emoji_support:93 - 🚀 Testing emoji support in logging...
+2025-06-30 09:11:14,045 - INFO - check_and_heal_db:220 - Database integrity check passed
+2025-06-30 09:11:15,221 - INFO - log_with_emoji:125 - ✅ AI model configured and tested successfully
+2025-06-30 09:11:15,230 - INFO - log_with_emoji:125 - ✅ Database initialized successfully
+2025-06-30 09:11:15,898 - INFO - log_with_emoji:125 - ✅ AI model configured and tested successfully
+2025-06-30 09:11:15,900 - INFO - log_with_emoji:125 - 🚀 Starting Yonatan server...
+2025-06-30 09:11:15,950 - INFO - _log:187 - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://10.100.102.10:5000
+2025-06-30 09:11:15,951 - INFO - _log:187 - [33mPress CTRL+C to quit[0m
+2025-06-30 09:11:15,958 - INFO - _log:187 -  * Restarting with stat
+2025-06-30 09:11:18,438 - INFO - <module>:72 - 🧠 Unicode support test successful
+2025-06-30 09:11:18,438 - INFO - test_emoji_support:93 - 🚀 Testing emoji support in logging...
+2025-06-30 09:11:18,445 - INFO - check_and_heal_db:220 - Database integrity check passed
+2025-06-30 09:11:19,193 - INFO - log_with_emoji:125 - ✅ AI model configured and tested successfully
+2025-06-30 09:11:19,203 - INFO - log_with_emoji:125 - ✅ Database initialized successfully
+2025-06-30 09:11:19,775 - INFO - log_with_emoji:125 - ✅ AI model configured and tested successfully
+2025-06-30 09:11:19,776 - INFO - log_with_emoji:125 - 🚀 Starting Yonatan server...
+2025-06-30 09:11:19,794 - WARNING - _log:187 -  * Debugger is active!
+2025-06-30 09:11:19,799 - INFO - _log:187 -  * Debugger PIN: 867-280-254
+2025-06-30 09:12:28,237 - INFO - log_request_info:367 - REQUEST_START [1751263948-127.0.0.1]: GET /
+2025-06-30 09:12:28,264 - INFO - log_response_info:372 - REQUEST_END [1751263948-127.0.0.1]: 200 - 0.027s
+2025-06-30 09:12:28,266 - INFO - _log:187 - 127.0.0.1 - - [30/Jun/2025 09:12:28] "GET / HTTP/1.1" 200 -
+2025-06-30 09:12:49,377 - INFO - log_request_info:367 - REQUEST_START [1751263969-127.0.0.1]: POST /api/session
+2025-06-30 09:12:49,440 - INFO - log_with_emoji:125 - 👶 Creating new parent: אורי
+2025-06-30 09:12:49,477 - INFO - log_with_emoji:125 - ✅ Session handled successfully for: אורי
+2025-06-30 09:12:49,478 - INFO - wrapper:141 - PERFORMANCE: handle_session - 0.100s
+2025-06-30 09:12:49,478 - INFO - log_response_info:372 - REQUEST_END [1751263969-127.0.0.1]: 200 - 0.102s
+2025-06-30 09:12:49,481 - INFO - _log:187 - 127.0.0.1 - - [30/Jun/2025 09:12:49] "POST /api/session HTTP/1.1" 200 -
+2025-06-30 09:12:49,512 - INFO - log_request_info:367 - REQUEST_START [1751263969-127.0.0.1]: GET /api/children
+2025-06-30 09:12:49,542 - INFO - wrapper:141 - PERFORMANCE: handle_children - 0.030s
+2025-06-30 09:12:49,543 - INFO - log_response_info:372 - REQUEST_END [1751263969-127.0.0.1]: 200 - 0.032s
+2025-06-30 09:12:49,547 - INFO - _log:187 - 127.0.0.1 - - [30/Jun/2025 09:12:49] "GET /api/children?session_id=session_1751262146318_0.0913023862299992 HTTP/1.1" 200 -
+2025-06-30 09:12:57,822 - INFO - log_request_info:367 - REQUEST_START [1751263977-127.0.0.1]: GET /api/children
+2025-06-30 09:12:57,833 - INFO - wrapper:141 - PERFORMANCE: handle_children - 0.011s
+2025-06-30 09:12:57,835 - INFO - log_response_info:372 - REQUEST_END [1751263977-127.0.0.1]: 200 - 0.013s
+2025-06-30 09:12:57,837 - INFO - _log:187 - 127.0.0.1 - - [30/Jun/2025 09:12:57] "GET /api/children?session_id=session_1751262146318_0.0913023862299992 HTTP/1.1" 200 -
+2025-06-30 09:16:31,812 - INFO - log_request_info:367 - REQUEST_START [1751264191-127.0.0.1]: GET /
+2025-06-30 09:16:31,813 - INFO - log_response_info:372 - REQUEST_END [1751264191-127.0.0.1]: 200 - 0.001s
+2025-06-30 09:16:31,813 - INFO - _log:187 - 127.0.0.1 - - [30/Jun/2025 09:16:31] "GET / HTTP/1.1" 200 -
+2025-06-30 09:18:04,050 - INFO - log_request_info:367 - REQUEST_START [1751264284-127.0.0.1]: GET /
+2025-06-30 09:18:04,051 - INFO - log_response_info:372 - REQUEST_END [1751264284-127.0.0.1]: 200 - 0.001s
+2025-06-30 09:18:04,052 - INFO - _log:187 - 127.0.0.1 - - [30/Jun/2025 09:18:04] "GET / HTTP/1.1" 200 -

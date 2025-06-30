@@ -1,151 +1,79 @@
-# models.py - מודלי הנתונים של מערכת "יונתן" (גרסה משודרגת)
+# models.py - v3.0 - Full Project Implementation
+# Added SavedArticle model to support the dashboard feature set.
 
-import datetime
-import json
-import uuid
-from collections import defaultdict
+from flask_sqlalchemy import SQLAlchemy
+from datetime import datetime
 
-class ParentProfile:
-    """פרופיל הורה במערכת יונתן - גרסה מורחבת"""
-    
-    def __init__(self, parent_id, name=None, gender=None):
-        self.parent_id = parent_id
-        self.name = name
-        self.gender = gender # 'male' או 'female'
-        self.created_at = datetime.datetime.now()
-        self.last_active = datetime.datetime.now()
-        self.session_count = 0
-        self.message_count = 0
-        
-        # מידע על הילד
-        self.child = {
-            "age": None,
-            "gender": None,
-            "challenges": [],
-            "strengths": []
-        }
-        
-        # מידע טיפולי
-        self.treatment_phase = 1
-        self.risk_level = 0
-        self.tools = []
-        self.goals = []
-        self.measurements = []
-        
-        self.interaction_history = []
-    
-    def to_dict(self):
-        """המרת הפרופיל למילון"""
-        return {
-            "parent_id": self.parent_id,
-            "name": self.name,
-            "gender": self.gender,
-            "created_at": self.created_at.isoformat(),
-            "last_active": self.last_active.isoformat(),
-            "session_count": self.session_count,
-            "message_count": self.message_count,
-            "child": self.child,
-            "treatment_phase": self.treatment_phase,
-            "risk_level": self.risk_level,
-            "tools": self.tools,
-            "goals": self.goals,
-            "measurements": self.measurements
-        }
-    
-    @classmethod
-    def from_dict(cls, data):
-        """יצירת פרופיל מתוך מילון"""
-        profile = cls(data["parent_id"], data.get("name"), data.get("gender"))
-        profile.created_at = datetime.datetime.fromisoformat(data["created_at"])
-        profile.last_active = datetime.datetime.fromisoformat(data["last_active"])
-        profile.session_count = data.get("session_count", 0)
-        profile.message_count = data.get("message_count", 0)
-        profile.child = data.get("child", {})
-        profile.treatment_phase = data.get("treatment_phase", 1)
-        profile.risk_level = data.get("risk_level", 0)
-        profile.tools = data.get("tools", [])
-        profile.goals = data.get("goals", [])
-        profile.measurements = data.get("measurements", [])
-        return profile
-    
-    def update_last_active(self):
-        """עדכון זמן הפעילות האחרון"""
-        self.last_active = datetime.datetime.now()
-        
-    def add_message(self):
-        """הוספת הודעה לספירה"""
-        self.message_count += 1
-        self.update_last_active()
-    
-    def add_session(self):
-        """הוספת שיחה לספירה"""
-        self.session_count += 1
-        self.update_last_active()
+db = SQLAlchemy()
 
-class AnalyticsManager:
-    """מנהל אנליטיקה ומעקב נתונים"""
-    
-    def __init__(self):
-        self.sessions_data = defaultdict(list)
-        self.daily_stats = defaultdict(int)
-        self.risk_assessments = []
-    
-    def log_session(self, session_id, parent_id, duration, message_count):
-        """תיעוד שיחה"""
-        session_data = {
-            "session_id": session_id,
-            "parent_id": parent_id,
-            "timestamp": datetime.datetime.now().isoformat(),
-            "duration": duration,
-            "message_count": message_count
-        }
-        self.sessions_data[parent_id].append(session_data)
-    
-    def generate_daily_report(self):
-        """יצירת דוח יומי"""
-        today = datetime.datetime.now().strftime("%Y-%m-%d")
-        return {
-            "date": today,
-            "total_sessions": len(self.sessions_data),
-            "total_messages": sum(self.daily_stats.values()),
-            "active_users": len([p for p in self.sessions_data if self.sessions_data[p]])
-        }
+class Parent(db.Model):
+    __tablename__ = 'parent'
+    id = db.Column(db.String, primary_key=True) # session_id
+    name = db.Column(db.String(100), nullable=False)
+    gender = db.Column(db.String(10), nullable=False)
+    children = db.relationship('Child', backref='parent', lazy=True, cascade="all, delete-orphan")
+    conversations = db.relationship('Conversation', backref='parent', lazy=True, cascade="all, delete-orphan")
+    practice_logs = db.relationship('PracticeLog', backref='parent', lazy=True, cascade="all, delete-orphan")
+    saved_articles = db.relationship('SavedArticle', backref='parent', lazy=True, cascade="all, delete-orphan")
 
-class SessionManager:
-    """מנהל שיחות ומעקב סשנים"""
-    
-    def __init__(self):
-        self.active_sessions = {}
-        self.parent_profiles = {}
-    
-    def create_session(self, parent_id):
-        """יצירת שיחה חדשה"""
-        session_id = str(uuid.uuid4())
-        session_data = {
-            "session_id": session_id,
-            "parent_id": parent_id,
-            "start_time": datetime.datetime.now(),
-            "messages": [],
-            "context": {}
-        }
-        self.active_sessions[session_id] = session_data
-        
-        if parent_id not in self.parent_profiles:
-            self.parent_profiles[parent_id] = ParentProfile(parent_id)
-        
-        self.parent_profiles[parent_id].add_session()
-        return session_id
-    
-    def add_message(self, session_id, role, content):
-        """הוספת הודעה לשיחה"""
-        if session_id in self.active_sessions:
-            message = {
-                "role": role,
-                "content": content,
-                "timestamp": datetime.datetime.now().isoformat()
-            }
-            self.active_sessions[session_id]["messages"].append(message)
-            
-            parent_id = self.active_sessions[session_id]["parent_id"]
-            if parent_id in self.parent_profiles:
-                self.parent_profiles[parent_id].add_message()
+class Child(db.Model):
+    __tablename__ = 'child'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    gender = db.Column(db.String(10), nullable=False)
+    age_range = db.Column(db.String(50), nullable=False)
+    parent_id = db.Column(db.String, db.ForeignKey('parent.id'), nullable=False)
+    conversations = db.relationship('Conversation', backref='child', lazy=True, cascade="all, delete-orphan")
+    practice_logs = db.relationship('PracticeLog', backref='child', lazy=True, cascade="all, delete-orphan")
+
+class Conversation(db.Model):
+    __tablename__ = 'conversation'
+    id = db.Column(db.Integer, primary_key=True)
+    parent_id = db.Column(db.String, db.ForeignKey('parent.id'), nullable=False)
+    child_id = db.Column(db.Integer, db.ForeignKey('child.id'), nullable=False)
+    start_time = db.Column(db.DateTime, default=datetime.utcnow)
+    main_topic = db.Column(db.String(200), nullable=True)
+    sentiment = db.Column(db.String(100), nullable=True)
+    is_open = db.Column(db.Boolean, default=True, nullable=False)
+    messages = db.relationship('Message', backref='conversation', lazy=True, cascade="all, delete-orphan")
+    reflection = db.relationship('Reflection', backref='conversation', uselist=False, cascade="all, delete-orphan")
+
+class Message(db.Model):
+    __tablename__ = 'message'
+    id = db.Column(db.Integer, primary_key=True)
+    conversation_id = db.Column(db.Integer, db.ForeignKey('conversation.id'), nullable=False)
+    role = db.Column(db.String(10), nullable=False) # 'user' or 'model'
+    content = db.Column(db.Text, nullable=False)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+class Reflection(db.Model):
+    __tablename__ = 'reflection'
+    id = db.Column(db.Integer, primary_key=True)
+    conversation_id = db.Column(db.Integer, db.ForeignKey('conversation.id'), nullable=False, unique=True)
+    summary = db.Column(db.Text, nullable=False)
+    recommendation = db.Column(db.Text, nullable=True)
+    suggested_tool = db.Column(db.String(200), nullable=True)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+class PracticeLog(db.Model):
+    """Represents a goal or technique the parent is practicing."""
+    __tablename__ = 'practice_log'
+    id = db.Column(db.Integer, primary_key=True)
+    parent_id = db.Column(db.String, db.ForeignKey('parent.id'), nullable=False)
+    child_id = db.Column(db.Integer, db.ForeignKey('child.id'), nullable=False)
+    conversation_id = db.Column(db.Integer, db.ForeignKey('conversation.id'), nullable=True)
+    technique_name = db.Column(db.String(200), nullable=False)
+    # Status can be 'suggested', 'in_progress', 'completed'
+    status = db.Column(db.String(50), default='suggested')
+    notes = db.Column(db.Text, nullable=True)
+    last_updated = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+class SavedArticle(db.Model):
+    """Represents an article saved by a parent for future reference."""
+    __tablename__ = 'saved_article'
+    id = db.Column(db.Integer, primary_key=True)
+    parent_id = db.Column(db.String, db.ForeignKey('parent.id'), nullable=False)
+    # The 'article_key' will correspond to a key in a client-side dictionary of articles.
+    article_key = db.Column(db.String(100), nullable=False)
+    saved_at = db.Column(db.DateTime, default=datetime.utcnow)
+

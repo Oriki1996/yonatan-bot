@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>יונתן הפסיכו-בוט | כלים להורות מודעת</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🧠%3C/text%3E%3C/svg%3E">
+    <!-- Animation & PDF Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        :root { 
+            --primary: #4f46e5; 
+            --primary-light: #e0e7ff; 
+            --text-dark: #1f2937; 
+            --text-light: #4b5563;
+            --transition-slow: 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            --transition-fast: 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        
+        html { 
+            scroll-behavior: smooth; 
+            scroll-padding-top: 5rem;
+        }
+        
+        body { 
+            font-family: 'Assistant', sans-serif; 
+            background-color: #f8fafc; 
+            color: var(--text-dark); 
+            overflow-x: hidden; 
+        }
+        
+        /* Modal Styling */
+        .modal-overlay {
+            display: none; position: fixed; inset: 0; background-color: rgba(17, 24, 39, 0.8);
+            -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+            z-index: 100; align-items: center; justify-content: center; animation: fadeIn 0.3s ease;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-content {
+            background: white; border-radius: 1.5rem; padding: 2.5rem; max-width: 550px;
+            width: 90%; text-align: center; animation: slideIn 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+        #page-wrapper { transition: filter 0.3s ease-in-out; }
+        #page-wrapper.blurred { filter: blur(5px); pointer-events: none; }
+
+        /* Hero Section */
+        .hero-section { background: linear-gradient(135deg, #eef2ff 0%, #dbeafe 100%); }
+        
+        /* Advanced Slider */
+        .slider { overflow: hidden; position: relative; width: 100%; height: 500px; border-radius: 1.5rem; box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
+        .slide { display: none; position: absolute; width: 100%; height: 100%; transition: opacity var(--transition-slow); opacity: 0; }
+        .slide.active { display: block; opacity: 1; }
+        .slide img { width: 100%; height: 100%; object-fit: cover; transition: transform 10s ease; }
+        .slide.active img { transform: scale(1.1); }
+        
+        /* Feature Cards */
+        .feature-card { transition: all var(--transition-slow); border: 1px solid #e5e7eb; }
+        .feature-card:hover { transform: translateY(-8px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05); border-color: var(--primary); }
+        .feature-icon { transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        .feature-card:hover .feature-icon { transform: scale(1.15) rotate(5deg); }
+        
+        /* Article Cards */
+        .article-card { transition: all var(--transition-slow); }
+        .article-card:hover { transform: translateY(-10px); box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04); }
+        .article-card img { transition: transform 1.5s cubic-bezier(0.19, 1, 0.22, 1); }
+        .article-card:hover img { transform: scale(1.1); }
+        .article-summary {
+            max-height: 7rem; /* Approx 50 words */
+            overflow: hidden;
+            position: relative;
+            transition: max-height var(--transition-slow);
+        }
+        .article-summary.expanded { max-height: 500px; /* Large enough for expanded content */ }
+
+        /* Animation Keyframes */
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideIn { from { transform: translateY(-30px) scale(0.95); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
+        
+        /* Scroll Animation */
+        .reveal { opacity: 0; transform: translateY(30px); transition: opacity 0.6s ease-out, transform 0.6s ease-out; }
+        .reveal.visible { opacity: 1; transform: translateY(0); }
+
+        /* Walking Character */
+        #walking-character-container {
+            position: fixed;
+            bottom: 10px;
+            right: -150px; /* Start off-screen */
+            width: 120px;
+            height: 150px;
+            z-index: 99;
+            pointer-events: auto;
+            cursor: pointer;
+            animation: walk-across 40s linear infinite;
+        }
+        #walking-character-container:hover { animation-play-state: paused; }
+        @keyframes walk-across {
+            0% { transform: translateX(0) scaleX(1); }
+            49.9% { transform: translateX(calc(-100vw - 100px)) scaleX(1); }
+            50% { transform: translateX(calc(-100vw - 100px)) scaleX(-1); }
+            99.9% { transform: translateX(0) scaleX(-1); }
+            100% { transform: translateX(0) scaleX(1); }
+        }
+
+        /* Accessibility Toggle */
+        .accessibility-toggle {
+            position: fixed; bottom: 20px; left: 20px; background: white; border-radius: 50%;
+            width: 50px; height: 50px; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); cursor: pointer; z-index: 101; transition: all 0.3s ease;
+        }
+        .accessibility-toggle:hover { transform: scale(1.1); }
+        .accessibility-menu {
+            position: fixed; bottom: 80px; left: 20px; background: white; border-radius: 12px;
+            padding: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); z-index: 99;
+            transform: translateY(20px); opacity: 0; pointer-events: none; transition: all 0.3s ease;
+        }
+        .accessibility-menu.active { transform: translateY(0); opacity: 1; pointer-events: all; }
+        
+        /* Reduced Motion Mode */
+        body.reduced-motion * {
+            animation: none !important;
+            transition: none !important;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Modals Container -->
+    <div id="disclaimer-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="flex justify-center mb-6"><div class="w-20 h-20 bg-indigo-100 rounded-full flex items-center justify-center"><span class="text-5xl">🧠</span></div></div>
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">ברוכים הבאים ליונתן הפסיכו-בוט</h2>
+            <p class="text-gray-600 mb-6"><strong>כתב ויתור חשוב:</strong> יונתן אינו מחליף ייעוץ פסיכולוגי מקצועי ואינו מתיימר להיות כזה. הוא מהווה כלי עזר בלבד, שמטרתו לספק מידע, כלים ומודעות בנושאי הורות והתפתחות ילדים.</p>
+            <div id="agree-container" class="flex items-center justify-center space-x-4 space-x-reverse mb-6 p-3 rounded-lg">
+                <input type="checkbox" id="agree-checkbox" class="h-5 w-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                <label for="agree-checkbox" class="text-gray-700 cursor-pointer">קראתי, הבנתי ואני מאשר/ת את התנאים.</label>
+            </div>
+            <button id="agree-button" class="w-full bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-indigo-700 transition disabled:bg-gray-400 disabled:cursor-not-allowed" disabled>כניסה לאתר</button>
+        </div>
+    </div>
+    <div id="tutorial-modal" class="modal-overlay"><div id="tutorial-content" class="modal-content relative"></div></div>
+    <div id="article-modal" class="modal-overlay p-4"><div id="article-content-wrapper" class="modal-content !max-w-3xl text-right max-h-[90vh] overflow-y-auto"></div></div>
+
+    <div id="page-wrapper">
+        <header class="bg-white/80 backdrop-blur-lg shadow-sm sticky top-0 z-40">
+            <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+                 <div class="flex items-center gap-3"><span class="text-3xl">🧠</span><span class="text-xl font-bold text-gray-800">יונתן הפסיכו-בוט</span></div>
+                <nav class="hidden md:flex items-center gap-8">
+                    <a href="#features" class="text-gray-600 hover:text-primary font-semibold">תכונות</a>
+                    <a href="#articles" class="text-gray-600 hover:text-primary font-semibold">מאמרים</a>
+                    <a href="/dashboard.html" class="text-gray-600 hover:text-primary font-semibold">אזור אישי</a>
+                    <button id="show-tutorial-btn" class="text-sm text-indigo-600 hover:underline">הצג הדרכה</button>
+                </nav>
+            </div>
+        </header>
+
+        <main>
+            <!-- Hero Section -->
+            <section class="hero-section py-20">
+                <div class="container mx-auto px-6 grid lg:grid-cols-2 gap-12 items-center">
+                    <div class="text-center lg:text-right">
+                        <h1 class="text-4xl md:text-5xl font-extrabold text-gray-900 mb-4 leading-tight">המסע להורות רגועה מתחיל כאן</h1>
+                        <p class="text-lg text-gray-700 max-w-xl mx-auto lg:mx-0 mb-8">יונתן הוא העוזר האישי שלכם, המשלב עקרונות מפסיכולוגיה וכלים מעשיים כדי לעזור לכם להבין את עולמם הרגשי של ילדיכם, להתמודד עם אתגרים, וליצור תקשורת משפחתית חיובית.</p>
+                        <button onclick="document.getElementById('yonatan-chat-button')?.click()" class="bg-indigo-600 text-white font-bold py-4 px-10 rounded-lg text-lg hover:bg-indigo-700 transition-transform transform hover:scale-105 shadow-lg">התחל שיחה עם יונתן</button>
+                    </div>
+                    <div class="slider">
+                        <div class="slide active"><img src="https://images.pexels.com/photos/769525/pexels-photo-769525.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" alt="הורה וילד משחקים בכדור"></div>
+                        <div class="slide"><img src="https://images.pexels.com/photos/1121796/pexels-photo-1121796.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" alt="ילד מחייך עם פרח"></div>
+                        <div class="slide"><img src="https://images.pexels.com/photos/8916931/pexels-photo-8916931.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" alt="ילד משחק בלגו"></div>
+                        <div class="slide"><img src="https://images.pexels.com/photos/3770308/pexels-photo-3770308.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" alt="אינטראקציה משפחתית חיובית"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Features Section -->
+            <section id="features" class="py-24 bg-white">
+                <div class="container mx-auto px-6">
+                    <h2 class="text-3xl font-bold text-center mb-4 reveal">ארגז כלים להורות מודעת</h2>
+                    <p class="text-lg text-center text-gray-600 mb-16 max-w-2xl mx-auto reveal">גלו כלים מעשיים המבוססים על גישות פסיכולוגיות מוכחות כדי לתמוך בכם ובילדיכם.</p>
+                    <div class="grid md:grid-cols-2 lg:grid-cols-5 gap-8">
+                        <div class="feature-card text-center p-6 rounded-2xl reveal"><div class="flex items-center justify-center h-20 w-20 rounded-full bg-red-100 text-red-600 mx-auto mb-4 text-4xl feature-icon">❤️</div><h3 class="text-xl font-bold mb-2">התפתחות רגשית</h3><p class="text-gray-600">כלים לזיהוי, הכלה וויסות רגשות אצל ילדים.</p></div>
+                        <div class="feature-card text-center p-6 rounded-2xl reveal"><div class="flex items-center justify-center h-20 w-20 rounded-full bg-blue-100 text-blue-600 mx-auto mb-4 text-4xl feature-icon">🧩</div><h3 class="text-xl font-bold mb-2">התנהגויות מאתגרות</h3><p class="text-gray-600">אסטרטגיות להתמודדות עם התקפי זעם וקשיים.</p></div>
+                        <div class="feature-card text-center p-6 rounded-2xl reveal"><div class="flex items-center justify-center h-20 w-20 rounded-full bg-green-100 text-green-600 mx-auto mb-4 text-4xl feature-icon">🗣️</div><h3 class="text-xl font-bold mb-2">תקשורת הורה-ילד</h3><p class="text-gray-600">למדו כיצד לנהל שיחות פתוחות וליצור הקשבה.</p></div>
+                        <div class="feature-card text-center p-6 rounded-2xl reveal"><div class="flex items-center justify-center h-20 w-20 rounded-full bg-yellow-100 text-yellow-600 mx-auto mb-4 text-4xl feature-icon">🌱</div><h3 class="text-xl font-bold mb-2">חינוך חיובי</h3><p class="text-gray-600">שיטות לחיזוק התנהגויות רצויות ובניית סביבה תומכת.</p></div>
+                        <div class="feature-card text-center p-6 rounded-2xl reveal"><div class="flex items-center justify-center h-20 w-20 rounded-full bg-purple-100 text-purple-600 mx-auto mb-4 text-4xl feature-icon">🌟</div><h3 class="text-xl font-bold mb-2">פיתוח עצמאות</h3><p class="text-gray-600">עודדו את ילדיכם לקחת אחריות ולפתח ביטחון עצמי.</p></div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Articles Section -->
+            <section id="articles" class="py-24 bg-gray-50">
+                <div class="container mx-auto px-6">
+                     <h2 class="text-3xl font-bold text-center mb-4 reveal">מגובה במדע: מאמרים וכלים</h2>
+                     <p class="text-lg text-center text-gray-600 mb-16 max-w-2xl mx-auto reveal">ידע מקצועי וטיפים מעשיים הכתובים בשפה ברורה, נגישה ולא שיפוטית, המבוססים על גישות פסיכולוגיות מוכחות.</p>
+                     <div id="articles-grid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
+                     <div id="show-all-articles-container" class="text-center mt-12">
+                        <button id="show-all-articles-btn" class="bg-white text-indigo-600 font-semibold py-3 px-8 border-2 border-indigo-200 rounded-lg hover:bg-indigo-50 transition">הצג את כל המאמרים</button>
+                    </div>
+                </div>
+            </section>
+        </main>
+        
+        <footer class="bg-gray-800 text-white">
+            <div class="container mx-auto px-6 py-12 text-center">
+                <p>&copy; 2025 יונתן הפסיכו-בוט. כל הזכויות שמורות.</p>
+                <p class="text-sm text-gray-400 mt-2">האתר מהווה כלי עזר בלבד ואינו תחליף לייעוץ פסיכולוגי מקצועי.</p>
+            </div>
+        </footer>
+    </div>
+    
+    <!-- Animated Character -->
+    <div id="walking-character-container">
+        <div id="character-animation"></div>
+    </div>
+
+    <!-- Accessibility Toggle -->
+    <div class="accessibility-toggle tooltip" id="accessibility-toggle">
+        <span class="tooltip-text">הגדרות נגישות</span>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12 6.477 2 12 2zm0 13a1 1 0 100 2 1 1 0 000-2zm0-7a1 1 0 00-1 1v4a1 1 0 002 0V9a1 1 0 00-1-1z"/></svg>
+    </div>
+    <div class="accessibility-menu" id="accessibility-menu">
+        <div class="text-lg font-bold mb-3">הגדרות נגישות</div>
+        <div class="flex items-center mb-2">
+            <input type="checkbox" id="reduce-motion" class="ml-2">
+            <label for="reduce-motion">הפחתת אנימציות</label>
+        </div>
+    </div>
+
+    <script src="/widget.js" defer></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // --- Full Article Data ---
+        const articlesData = {
+            'anger-management': { title: 'הבנת התקפי זעם', image: 'https://images.pexels.com/photos/1254736/pexels-photo-1254736.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1', summary: 'התקפי זעם הם חלק טבעי מההתפתחות, אך הבנת המקור שלהם והגדרת תגובה נכונה יכולים לשנות את הדינמיקה המשפחתית. מאמר זה מספק כלים מעשיים לזהות את הטריגרים, ללמד את הילד לווסת את רגשותיו העזים, ולהחזיר את הרוגע הביתה באמצעות טכניקות הרגעה פשוטות ושיקוף רגשי.', extraContent: 'הידעת שהתקפי זעם הם למעשה תגובה למוח שעדיין לא התפתח במלואו? האונה הקדמית-מצחית, האחראית על שליטה בדחפים וויסות רגשי, לא מתפתחת באופן מלא עד גיל 25. זה מסביר מדוע ילדים מתקשים לשלוט ברגשותיהם. הבנת המידע הזה עשויה לסייע להורים להגיב באמפתיה במקום בכעס.', content: '<h4>הכלי הטיפולי: שיקוף רגשי וויסות</h4><p>התקפי זעם נובעים לרוב מתסכול וחוסר יכולת לבטא צרכים. במקום לכעוס חזרה, נסו לשקף את רגש הילד: "אני רואה שאתה כועס מאוד כי רצית להמשיך לשחק". זה נותן לו תחושה שמבינים אותו. התגובה הרגועה שלכם היא העוגן שלו בסערה. חשוב לזכור שהמטרה אינה לדכא את הכעס, אלא ללמד דרכים בריאות לבטא אותו.</p><h4 class="font-bold text-lg mt-4 mb-2">תיבת טיפים:</h4><ul class="list-disc list-inside space-y-1 bg-indigo-50 p-4 rounded-lg"><li>הישארו רגועים בעצמכם.</li><li>הימנעו מוויכוחים או עונשים בזמן ההתקף.</li><li>הציעו "פינת רגיעה" עם כריות או ספרים.</li><li>לאחר שהילד נרגע, דברו על מה שקרה ומה אפשר לעשות אחרת.</li></ul>', source: 'https://www.apa.org/topics/parenting/managing-child-anger' },
+            'active-listening': { title: 'אומנות ההקשבה הפעילה', image: 'https://images.pexels.com/photos/4100667/pexels-photo-4100667.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1', summary: 'תקשורת היא הבסיס לכל מערכת יחסים בריאה. הקשבה פעילה היא יותר משמיעת המילים; היא הבנת הרגש שמאחוריהן. למדו כיצד להניח את הסחות הדעת בצד, לתת תוקף לרגשות ילדכם (גם אם אינכם מסכימים), ולבנות גשר של אמון שישרת אתכם לשנים הבאות.', extraContent: 'מחקרים מראים שילדים שהוריהם מקשיבים להם באופן פעיל ומתן תוקף לרגשותיהם מפתחים יכולות רגשיות וחברתיות טובות יותר. הקשבה אמיתית היא מתנה שמעניקה לילד תחושת ערך ובטחון. זה בונה אמון ומחזק את הקשר ביניכם לטווח הארוך.', content: '<h4>הכלי הטיפולי: מתן תוקף לרגשות</h4><p>כאשר ילד משתף בקושי, התגובה הראשונה שלנו היא לעיתים לנסות "לתקן" או לבטל את הרגש. הקשבה פעילה דורשת מאיתנו לעצור ולהגיד: "זה נשמע ממש מתסכל / מעליב / מפחיד". מתן תוקף לרגש אינו הסכמה עם ההתנהגות, אלא הכרה בחוויה של הילד. זה מאפשר לו להרגיש בטוח מספיק כדי לשתף עוד.</p><h4 class="font-bold text-lg mt-4 mb-2">תסריט שיחה:</h4><div class="border p-4 rounded-lg bg-gray-50"><p><strong>ילד:</strong> "אף אחד לא שיחק איתי בהפסקה!"</p><p><strong>הורה (במקום "אני בטוח שזה לא נכון"):</strong> "אוי, זה נשמע ממש מעליב ומעציב להרגיש לבד. אני מצטער שחווית את זה. ספר לי עוד על מה שקרה."</p></div>', source: 'https://www.psychologytoday.com/us/blog/the-couch/202105/the-power-active-listening' },
+            'play-development': { title: 'משחק ככלי להתפתחות', image: 'https://images.pexels.com/photos/4473870/pexels-photo-4473870.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1', summary: 'משחק הוא "העבודה" של הילדים והדרך המרכזית שלהם ללמוד על העולם. מאמר זה מסביר מדוע זמן משחק חופשי ולא מובנה חיוני לפיתוח יצירתיות, דמיון, כישורי פתרון בעיות, ויכולות חברתיות. גלו כיצד לעודד משחק משמעותי מבלי להוציא שקל.', extraContent: 'מומחי התפתחות ילדים מזהירים מפני עודף פעילויות מאורגנות על חשבון משחק חופשי. מחקרים הראו שמשחק לא מובנה מפתח את מיומנויות הפתרון בעיות ומעודד חשיבה יצירתית. כשילדים משחקים באופן חופשי, הם למעשה בונים את המוח שלהם!', content: '<h4>הכלי הטיפולי: משחק חופשי בהובלת הילד</h4><p>תפקיד ההורה במשחק הוא לא לנהל, אלא לאפשר. ספקו סביבה בטוחה וחומרים פשוטים, ושבו בצד. תנו לילד להוביל, להמציא חוקים ולפתור בעיות בעצמו. התערבו רק אם הוא מבקש או אם יש סכנה. זה בונה ביטחון עצמי ועצמאות. משחק כזה מאפשר לילד לחקור את העולם בתנאים שלו, מה שמחזק את תחושת המסוגלות שלו.</p><h4 class="font-bold text-lg mt-4 mb-2">הצעות לפעילות:</h4><ul class="list-disc list-inside space-y-1 bg-green-50 p-4 rounded-lg"><li>קופסת "המצאות" עם גלילי נייר טואלט, קופסאות קרטון ודבק.</li><li>משחקי תפקידים עם בובות או דמויות.</li><li>יציאה לטבע ואיסוף "אוצרות" כמו עלים, אבנים וזרדים.</li></ul>', source: 'https://www.healthychildren.org/English/ages-stages/toddler/fitness/Pages/Why-it-is-Important-to-Play.aspx' },
+            'positive-discipline': { title: 'עקרונות החינוך החיובי', image: 'https://images.pexels.com/photos/5905709/pexels-photo-5905709.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1', summary: 'חינוך חיובי מתמקד בבניית מערכת יחסים של כבוד הדדי, תוך הצבת גבולות ברורים ואוהבים. במקום עונשים, הגישה דוגלת בהבנת הסיבה להתנהגות ובהוראת כישורים חברתיים ורגשיים. מאמר זה יציג לכם את חמשת העקרונות המרכזיים של הגישה וכיצד ליישם אותם בבית.', extraContent: 'גישת החינוך החיובי מבוססת על עבודתה של הפסיכולוגית אלפרד אדלר, שהאמין שילדים מתנהגים טוב יותר כשהם מרגישים טוב יותר. מחקרים הראו שילדים שגדלים עם גישה זו מפתחים מוטיבציה פנימית חזקה יותר, מיומנויות חברתיות טובות יותר, ופחות בעיות התנהגות לטווח ארוך.', content: '<h4>הכלי הטיפולי: התמקדות בפתרונות, לא בבעיות</h4><p>במקום לשאול "למה עשית את זה?", נסו לשאול "איזו בעיה ניסית לפתור?". לדוגמה, אם ילד חטף צעצוע, הבעיה שהוא ניסה לפתור היא "אני רוצה לשחק בזה עכשיו". המטרה היא למצוא יחד פתרון שמכבד את כולם, כמו "בוא נשים טיימר של 5 דקות ואז יהיה תורך". גישה זו מלמדת פתרון בעיות במקום להנחית עונש.</p><h4 class="font-bold text-lg mt-4 mb-2">תיבת טיפים:</h4><ul class="list-disc list-inside space-y-1 bg-yellow-50 p-4 rounded-lg"><li>היו עקביים עם הגבולות שהצבתם.</li><li>הביעו אמון בילדכם וביכולתו ללמוד ולהשתפר.</li><li>זכרו: המטרה היא ללמד, לא להעניש.</li></ul>', source: 'https://www.positivediscipline.com/about-positive-discipline' },
+            'building-independence': { title: 'טיפוח עצמאות וביטחון עצמי', image: 'https://images.pexels.com/photos/4145354/pexels-photo-4145354.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1', summary: 'ילדים זקוקים להזדמנויות כדי להאמין בעצמם. פיתוח עצמאות הוא תהליך הדרגתי של מתן אחריות מותאמת גיל, המאפשר לילד לחוות הצלחות וללמוד מטעויות בסביבה בטוחה. המאמר מציע רעיונות פרקטיים לעידוד עצמאות, החל מפעולות יומיומיות ועד לקבלת החלטות קטנות.', extraContent: 'ילדים עם תחושת עצמאות גבוהה נוטים להיות בעלי ביטחון עצמי רב יותר ומוכנים טוב יותר להתמודד עם אתגרים. המפתח הוא מציאת האיזון בין מתן חופש לבין שמירה על גבולות בטוחים. זכרו שהצלחות קטנות בגיל צעיר בונות את הבסיס להתמודדות עם אתגרים גדולים יותר בעתיד.', content: '<h4>הכלי הטיפולי: "שאל, אל תגיד"</h4><p>במקום לתת הוראות, נסו לשאול שאלות שמעודדות חשיבה עצמאית. במקום "שים את המעיל שלך", שאלו "מה אנחנו צריכים לקחת לפני שיוצאים החוצה?". במקום "תסדר את החדר", שאלו "איפה המקום של הצעצועים האלה?". גישה זו מעבירה את האחריות לילד ומחזקת את תחושת המסוגלות שלו. זהו שינוי קטן בשפה עם השפעה גדולה.</p><h4 class="font-bold text-lg mt-4 mb-2">משימות מותאמות גיל:</h4><ul class="list-disc list-inside space-y-1 bg-purple-50 p-4 rounded-lg"><li><strong>גיל 3-4:</strong> לעזור לערוך שולחן, לשים כביסה מלוכלכת בסל.</li><li><strong>גיל 5-6:</strong> לבחור בגדים לבד, להאכיל חיית מחמד.</li><li><strong>גיל 7-8:</strong> להכין כריך פשוט, לעזור בקיפול כביסה.</li></ul>', source: 'https://childmind.org/article/how-to-build-self-esteem-in-kids/' },
+            'anxiety-in-children': { title: 'זיהוי והתמודדות עם חרדה', image: 'https://images.pexels.com/photos/4098154/pexels-photo-4098154.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1', summary: 'חרדה היא רגש טבעי, אך לעיתים היא עלולה להפוך למגבילה. למדו לזהות את הסימנים של חרדה אצל ילדים, אשר יכולים להיות פיזיים, רגשיים והתנהגותיים. המאמר מציע כלים מבוססי CBT להרגעה, לשינוי דפוסי חשיבה מדאיגים ולחשיפה הדרגתית למצבים מעוררי חרדה.', extraContent: 'לפי נתונים עדכניים, כ-30% מהילדים חווים חרדה בנקודה כלשהי בילדותם. מרבית הילדים יכולים להתמודד עם חרדה בעזרת תמיכה הורית נכונה וכלים פשוטים. ההתערבות המוקדמת חשובה ויכולה למנוע התפתחות של הפרעת חרדה מלאה.', content: '<h4>הכלי הטיפולי: "סולם הפחד"</h4><p>כדי להתמודד עם פחד ספציפי (למשל, פחד מכלבים), בונים יחד עם הילד "סולם" של צעדים קטנים. השלב הראשון יכול להיות "לראות תמונה של כלב", השני "לראות סרטון של כלב", השלישי "לראות כלב אמיתי מרחוק", וכן הלאה, עד לשלב הסופי של ליטוף כלב ידידותי. כל שלב מתורגל עד שהחרדה פוחתת. זהו עיקרון של חשיפה הדרגתית.</p><h4 class="font-bold text-lg mt-4 mb-2">תסריט שיחה:</h4><div class="border p-4 rounded-lg bg-gray-50"><p><strong>ילד:</strong> "אני לא רוצה ללכת למסיבה, הבטן שלי כואבת."</p><p><strong>הורה:</strong> "אני מבין שאתה דואג. דאגה לפעמים מרגישה כמו כאב בטן. בוא נחשוב על צעד אחד קטן שאפשר לעשות? אולי נלך רק לרבע שעה ונראה איך אתה מרגיש?"</p></div>', source: 'https://childmind.org/article/what-to-do-and-not-do-when-children-are-anxious/' },
+            'sibling-rivalry': { title: 'מריבות בין אחים', image: 'https://images.pexels.com/photos/561463/pexels-photo-561463.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1', summary: 'קונפליקטים בין אחים הם חלק בלתי נמנע מהחיים, אך הם גם הזדמנות מצוינת ללמד כישורי חיים חשובים. מאמר זה מציע אסטרטגיות להורים כיצד להתערב (ומתי לא), ללמד את הילדים לפתור בעיות בעצמם, ולהימנע מהשוואות שעלולות להחריף את היריבות.', extraContent: 'מחקרים מראים שילדים לומדים ממריבות עם אחיהם כישורים חברתיים חיוניים כמו משא ומתן, פתרון בעיות ואמפתיה - מיומנויות שישרתו אותם כל החיים. התפקיד שלנו כהורים הוא לא למנוע את המריבות, אלא ללמד כיצד להתמודד איתן בצורה בריאה ומכבדת.', content: '<h4>הכלי הטיפולי: תיווך במקום שיפוט</h4><p>כשהילדים רבים, נסו להימנע מלקבוע מי "אשם". במקום זאת, שמשו כמתווכים. שבו איתם, הקשיבו לכל צד ללא הפרעה, ושקפו את הצרכים שלהם: "אז נועה, את רצית לבנות מגדל גבוה, ודני, אתה רצית את הקובייה האדומה בשביל המכונית שלך. איך נוכל לפתור את זה כך ששניכם תהיו מרוצים?". זה מלמד אותם מיומנויות משא ומתן חיוניות לחיים.</p><h4 class="font-bold text-lg mt-4 mb-2">תיבת טיפים:</h4><ul class="list-disc list-inside space-y-1 bg-blue-50 p-4 rounded-lg"><li>הקדישו זמן איכות נפרד לכל ילד.</li><li>הימנעו מהשוואות כמו "למה אתה לא יכול להיות מסודר כמו אחיך?".</li><li>הכירו בכך שלכל ילד יש צרכים שונים.</li></ul>', source: 'https://www.alfiekohn.org/article/sibling-rivalry/' },
+            'screen-time': { title: 'ניהול זמן מסך בריא', image: 'https://images.pexels.com/photos/442574/pexels-photo-442574.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1', summary: 'מסכים הם חלק מחיינו, והמטרה היא לא לאסור אלא לנהל. מאמר זה מספק קווים מנחים לקביעת גבולות ברורים ועקביים לגבי זמן מסך, תוך התמקדות באיכות התוכן ולא רק בכמות. למדו כיצד ליצור "תוכנית מדיה משפחתית" ולעודד פעילויות חלופיות שאינן כוללות מסכים.', extraContent: 'האקדמיה האמריקאית לרפואת ילדים ממליצה על מגבלות זמן מסך לפי גיל: ללא מסכים לפני גיל שנתיים, שעה ביום לגילאי 2-5, וזמן מוגבל ועקבי לילדים בוגרים יותר. המחקר מראה שאיכות התוכן חשובה יותר מכמות הזמן, כך שבחירת תוכן חינוכי ומעשיר היא המפתח.', content: '<h4>הכלי הטיפולי: יצירת "אזורים ללא מסכים"</h4><p>הגדירו זמנים ומקומות בבית שבהם אין שימוש במסכים, ושהחוק יחול על כולם (גם על ההורים!). לדוגמה: אין מסכים בחדרי השינה, אין מסכים בזמן ארוחות משפחתיות, והשעה הראשונה והאחרונה של היום הן ללא מסך. זה יוצר מרחבים של תקשורת ורוגע. חשוב להסביר את ההיגיון מאחורי הכללים ולא רק להנחית אותם.</p><h4 class="font-bold text-lg mt-4 mb-2">תיבת טיפים:</h4><ul class="list-disc list-inside space-y-1 bg-red-50 p-4 rounded-lg"><li>היו מודל לחיקוי בשימוש שלכם במסכים.</li><li>שחקו יחד עם הילדים במשחקי וידאו כדי להבין את עולמם.</li><li>התמקדו באיזון - זמן מסך הוא רק חלק אחד מיום מלא בפעילויות.</li></ul>', source: 'https://www.aacap.org/AACAP/Families_and_Youth/Facts_for_Families/FFF-Guide/Screen-Time-and-Children-100.aspx' },
+             'self-esteem': { title: 'חיזוק הדימוי העצמי', image: 'https://images.pexels.com/photos/1556706/pexels-photo-1556706.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1', summary: 'דימוי עצמי בריא הוא המתנה הגדולה ביותר שאנו יכולים להעניק לילדינו. הוא אינו נבנה רק ממחמאות, אלא מתחושת מסוגלות, שייכות וחוסן. מאמר זה מסביר את ההבדל בין שבחים על מאמץ לשבחים על תוצאה, ומציע דרכים מעשיות לעזור לילדכם לפתח קול פנימי חיובי וחומל.', content: '<h4>הכלי הטיפולי: שבח על תהליך ומאמץ</h4><p>במקום לומר "איזה ציור יפה!" (שבח על תוצאה), התמקדו בתהליך: "וואו, אני רואה שהשתמשת בהמון צבעים שונים ועבדת על זה הרבה זמן!". שבח כזה מלמד את הילד שהערך טמון במאמץ ובהתמדה, ולא רק בהצלחה, מה שמגביר את נכונותו להתמודד עם אתגרים. זה בונה חוסן נפשי אמיתי.</p>', source: 'https://www.parentingscience.com/praise-and-intelligence.html' },
+             'social-skills': { title: 'פיתוח כישורים חברתיים', image: 'https://images.pexels.com/photos/708440/pexels-photo-708440.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1', summary: 'היכולת ליצור ולשמר חברויות היא מיומנות נרכשת. ילדים זקוקים להדרכה כיצד ליזום שיחה, לשתף פעולה, לקרוא סיטואציות חברתיות ולהתמודד עם דחייה. המאמר מציע משחקי תפקידים ופעילויות שניתן לעשות בבית כדי לתרגל את הכישורים החשובים הללו בסביבה בטוחה ותומכת.', content: '<h4>הכלי הטיפולי: משחקי תפקידים</h4><p>תרגלו סיטואציות חברתיות בבית. למשל, שחקו "איך מצטרפים למשחק?". ילד אחד יכול להיות זה שמשחק, והשני מתרגל איך לגשת ולהגיד "היי, אפשר גם לשחק?". אפשר לתרגל גם איך להפסיד בכבוד במשחק קופסה או איך להציע פשרה כשיש חילוקי דעות. זה נותן לילד "תסריטים" מוכנים לשימוש בעולם האמיתי.</p>', source: 'https://www.understood.org/en/articles/social-skills-what-they-are-and-how-to-build-them' },
+             'sleep-issues': { title: 'התמודדות עם קשיי שינה', image: 'https://images.pexels.com/photos/3771045/pexels-photo-3771045.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1', summary: 'שינה איכותית חיונית להתפתחות הפיזית והרגשית של ילדים. קשיי הירדמות או יקיצות מרובות יכולים לנבוע מסיבות שונות, החל מחרדות ועד להרגלי שינה לא יעילים. גלו כיצד לבנות "טקס שינה" מרגיע ועקבי, ומהם הכללים החשובים ליצירת סביבת שינה המקדמת מנוחה.', content: '<h4>הכלי הטיפולי: טקס שינה עקבי</h4><p>המוח אוהב רוטינות. טקס שינה קבוע מאותת לגוף ולנפש שהגיע הזמן להירגע. הטקס צריך להיות באורך 20-30 דקות, ולהתקיים באותו סדר בכל ערב. לדוגמה: אמבטיה, פיג\'מה, צחצוח שיניים, שני סיפורים, חיבוק ונשיקה. הימנעו ממסכים לפחות שעה לפני השינה. העקביות היא המפתח להצלחה כאן.</p>', source: 'https://www.sleepfoundation.org/children-and-sleep/bedtime-routines' },
+             'transitions': { title: 'התמודדות עם שינויים ומעברים', image: 'https://images.pexels.com/photos/1148820/pexels-photo-1148820.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1', summary: 'בין אם מדובר במעבר לגן חדש, הולדת אח או גירושין, שינויים יכולים לערער את תחושת הביטחון של ילדים. המפתח להתמודדות הוא הכנה מראש, שמירה על שגרה ככל האפשר, ומתן תוקף לכל הרגשות שעולים. מאמר זה מספק אסטרטגיות להפיכת תקופות מעבר לפחות מאיימות ויותר צפויות.', content: '<h4>הכלי הטיפולי: שימוש בספרים וסיפורים חברתיים</h4><p>השתמשו בספרים כדי להכין את הילד למעבר. קראו יחד סיפורים על ילדים שעוברים לגור בעיר אחרת או מתחילים גן חדש. אפשר גם ליצור "סיפור חברתי" אישי עם תמונות של הילד ושל המקום החדש, המתאר את סדר היום הצפוי. זה הופך את הלא-נודע למוכר וידידותי יותר. הכנה מוקדמת מפחיתה חרדה באופן משמעותי.</p>', source: 'https://www.zerotothree.org/resource/helping-young-children-and-families-transition-to-a-new-normal/' },
+             'mindfulness': { title: 'מיינדפולנס וקשיבות לילדים', image: 'https://images.pexels.com/photos/3621168/pexels-photo-3621168.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1', summary: 'בעולם מלא בגירויים, היכולת להיות נוכח ברגע הזה היא כלי רב עוצמה. מיינדפולנס לילדים אינו מדיטציה ארוכה, אלא תרגילים קצרים ומשחקיים המלמדים אותם לשים לב לנשימה, לתחושות הגוף ולקולות הסביבה. תרגול קשיבות הוכח כמפחית חרדה ומשפר ריכוז.', content: '<h4>הכלי הטיפולי: "נשימת בלון"</h4><p>שבו או שכבו בנוחות. הניחו ידיים על הבטן. דמיינו שיש לכם בלון קטן בבטן. כשאתם שואפים אוויר דרך האף, הרגישו איך הבלון מתמלא והבטן עולה. כשאתם נושפים לאט דרך הפה, הרגישו איך האוויר יוצא מהבלון והבטן יורדת. חזרו על כך 5 פעמים. זהו תרגיל הרגעה מיידי ופשוט שאפשר לעשות בכל מקום.</p>', source: 'https://www.mindful.org/mindfulness-for-kids/' },
+             'nutrition-mood': { title: 'הקשר בין תזונה למצב הרוח', image: 'https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1', summary: 'מה שהילדים שלנו אוכלים משפיע לא רק על הגוף, אלא גם על המוח ועל היכולת לווסת רגשות. מאמר זה סוקר את הקשר בין תזונה מאוזנת לבין יציבות רגשית וריכוז, ומציע טיפים פשוטים לשילוב מזונות מזינים בתפריט היומי, גם עבור הילדים הבררנים ביותר.', content: '<h4>הכלי הטיפולי: שיתוף הילדים בבחירות</h4><p>במקום להכריח, הציעו בחירה מוגבלת. לדוגמה: "לארוחת ערב נאכל ירקות. אתם רוצים גזר או מלפפון?". שיתוף הילדים בתהליך הקניות והבישול יכול גם הוא להגביר את נכונותם לנסות מאכלים חדשים. המטרה היא להימנע ממאבקי כוח סביב האוכל ולהפוך את האכילה לחוויה חיובית. זה מעניק להם תחושת שליטה.</p>', source: 'https://www.health.harvard.edu/blog/nutritional-strategies-to-ease-anxiety-201604139441' },
+             'chores-responsibility': { title: 'מטלות ופיתוח אחריות', image: 'https://images.pexels.com/photos/4246120/pexels-photo-4246120.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1', summary: 'מטלות בית אינן רק עזרה להורים, אלא דרך מהותית ללמד ילדים אחריות, תרומה למשפחה וכישורי חיים. המפתח הוא להתחיל מוקדם עם משימות פשוטות, להפוך את זה לחלק מהשגרה ולהתמקד במאמץ ולא בביצוע המושלם. גלו כיצד להפוך את המטלות לחוויה חיובית ומעצימה.', content: '<h4>הכלי הטיפולי: "טבלת מטלות" ויזואלית</h4><p>עבור ילדים צעירים, צרו טבלה שבועית עם ציורים או מדבקות במקום מילים. כל משימה שהושלמה מזכה במדבקה. בסוף השבוע, אפשר לציין את ההצלחה בפעילות משפחתית מהנה (לאו דווקא פרס חומרי). זה הופך את המשימות למשחק ועוזר להם לעקוב אחר ההתקדמות שלהם באופן ויזואלי. זה גם מלמד דחיית סיפוקים.</p>', source: 'https://www.psychologytoday.com/us/blog/the-thought-field/201803/why-children-need-chores' }
+        };
+
+        // --- Initialization ---
+        const init = () => {
+            const pageWrapper = document.getElementById('page-wrapper');
+            const modals = {
+                disclaimer: document.getElementById('disclaimer-modal'),
+                tutorial: document.getElementById('tutorial-modal'),
+                article: document.getElementById('article-modal'),
+            };
+            const agreeContainer = document.getElementById('agree-container');
+            const agreeCheckbox = document.getElementById('agree-checkbox');
+            const agreeButton = document.getElementById('agree-button');
+            const showTutorialBtn = document.getElementById('show-tutorial-btn');
+            const articlesGrid = document.getElementById('articles-grid');
+            const showAllArticlesContainer = document.getElementById('show-all-articles-container');
+            const showAllArticlesBtn = document.getElementById('show-all-articles-btn');
+            const accessibilityToggle = document.getElementById('accessibility-toggle');
+            const accessibilityMenu = document.getElementById('accessibility-menu');
+            const reduceMotionCheckbox = document.getElementById('reduce-motion');
+            const slides = document.querySelectorAll('.slider .slide');
+
+            // --- Centralized Modal Management ---
+            const openModal = (modal) => { modal.classList.add('active'); pageWrapper.classList.add('blurred'); };
+            const closeModal = (modal) => {
+                modal.classList.remove('active');
+                if (!document.querySelector('.modal-overlay.active')) { pageWrapper.classList.remove('blurred'); }
+            };
+
+            // --- Disclaimer Logic & Initial Setup ---
+            if (!localStorage.getItem('yonatan_disclaimer_agreed')) {
+                openModal(modals.disclaimer);
+                agreeContainer.classList.add('pulsate-attention');
+            }
+            
+            agreeCheckbox.addEventListener('change', () => { 
+                agreeButton.disabled = !agreeCheckbox.checked;
+                if(agreeCheckbox.checked) { agreeContainer.classList.remove('pulsate-attention'); }
+            });
+            
+            agreeButton.addEventListener('click', () => {
+                if (!agreeCheckbox.checked) return;
+                localStorage.setItem('yonatan_disclaimer_agreed', 'true');
+                closeModal(modals.disclaimer);
+                checkAndShowTutorial();
+            });
+
+            // --- Onboarding Tutorial Logic ---
+            const tutorialSteps = [
+                { title: "ברוכים הבאים ליונתן!", content: "אני כאן כדי ללוות אתכם, צעד אחר צעד, במסע להורות רגועה ומודעת יותר.", button: "כן, בואו נתחיל!" },
+                { title: "הצ'אט-בוט החכם 🧠", content: "בלחיצה על כפתור הבוט תוכלו להתחיל שיחה אישית. יונתן יציע כלים וטכניקות המותאמים לאתגרים שלכם.", button: "הבנתי, מה הלאה?" },
+                { title: "מעקב והתקדמות 📊", content: "ב'אזור האישי' תוכלו לראות סיכומי שיחות, לעקוב אחר ההתקדמות, לשמור מאמרים ולהגדיר מטרות.", button: "מעולה, מה עוד?" },
+                { title: "מאגר ידע ומאמרים 📚", content: "כל הכלים וההמלצות מגובים במחקר. כאן תמצאו מאמרים וסיכומים שיעזרו לכם להבין את השיטות.", button: "נהדר, אני מוכן!" }
+            ];
+            let currentStep = 0;
+
+            function showTutorialStep(stepIndex) {
+                const step = tutorialSteps[stepIndex];
+                modals.tutorial.querySelector('#tutorial-content').innerHTML = `
+                    <button class="tutorial-close-btn absolute top-4 left-4 text-gray-400 hover:text-gray-700 text-2xl">&times;</button>
+                    <h2 class="text-2xl font-bold text-center mb-4">${step.title}</h2>
+                    <p class="text-center text-gray-600 mb-8">${step.content}</p>
+                    <div class="flex items-center justify-center gap-2 mb-8">${tutorialSteps.map((_, i) => `<div class="w-3 h-3 rounded-full ${i === stepIndex ? 'bg-indigo-600' : 'bg-gray-300'}"></div>`).join('')}</div>
+                    <div class="flex justify-center"><button class="tutorial-next-btn bg-indigo-600 text-white font-bold py-2 px-8 rounded-lg">${step.button}</button></div>`;
+                
+                modals.tutorial.querySelector('.tutorial-next-btn').addEventListener('click', nextTutorialStep);
+                modals.tutorial.querySelector('.tutorial-close-btn').addEventListener('click', closeTutorial);
+            }
+
+            function nextTutorialStep() { 
+                currentStep++; 
+                (currentStep < tutorialSteps.length) ? showTutorialStep(currentStep) : closeTutorial(); 
+            }
+            
+            function closeTutorial() { 
+                closeModal(modals.tutorial); 
+                localStorage.setItem('yonatan_tutorial_seen', 'true'); 
+            }
+
+            function checkAndShowTutorial() {
+                if (!localStorage.getItem('yonatan_tutorial_seen')) {
+                    setTimeout(() => { 
+                        currentStep = 0; 
+                        showTutorialStep(0); 
+                        openModal(modals.tutorial); 
+                    }, 300);
+                }
+            }
+            
+            showTutorialBtn.addEventListener('click', () => { 
+                currentStep = 0; 
+                showTutorialStep(0); 
+                openModal(modals.tutorial); 
+            });
+
+            // --- Image Slider Logic ---
+            let currentSlideIdx = 0;
+            if (slides.length > 0) {
+                setInterval(() => {
+                    if (document.hasFocus() && !document.body.classList.contains('reduced-motion')) {
+                        slides[currentSlideIdx].classList.remove('active');
+                        currentSlideIdx = (currentSlideIdx + 1) % slides.length;
+                        slides[currentSlideIdx].classList.add('active');
+                    }
+                }, 5000);
+            }
+
+            // --- Article Rendering Logic ---
+            function createArticleCard(key, article) {
+                const card = document.createElement('div');
+                card.className = 'article-card bg-white rounded-2xl shadow-md overflow-hidden cursor-pointer reveal';
+                card.innerHTML = `
+                    <div class="img-container overflow-hidden">
+                        <img src="${article.image}" alt="${article.title}" class="w-full h-48 object-cover" loading="lazy">
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold mb-2">${article.title}</h3>
+                        <div class="article-summary text-gray-600 mb-4 text-sm leading-relaxed">
+                            <p>${article.summary}</p>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <button class="expand-btn text-gray-500 text-sm hover:text-gray-700">הרחב ↓</button>
+                            <button class="read-more-btn text-indigo-600 font-semibold hover:underline border border-indigo-200 px-4 py-1 rounded-full relative overflow-hidden">קרא מאמר</button>
+                        </div>
+                    </div>`;
+                
+                card.querySelector('.expand-btn').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const summaryDiv = card.querySelector('.article-summary');
+                    const isExpanded = summaryDiv.classList.toggle('expanded');
+                    e.target.textContent = isExpanded ? 'צמצם ↑' : 'הרחב ↓';
+                    
+                    const extraContentP = summaryDiv.querySelector('.extra-content-p');
+                    if (isExpanded && article.extraContent && !extraContentP) {
+                        const p = document.createElement('p');
+                        p.className = 'extra-content-p mt-2 text-indigo-800 bg-indigo-50 p-2 rounded-md';
+                        p.innerHTML = `<strong>למה זה חשוב?</strong> ${article.extraContent}`;
+                        summaryDiv.appendChild(p);
+                    } else if (!isExpanded && extraContentP) {
+                        extraContentP.remove();
+                    }
+                });
+                
+                card.querySelector('.read-more-btn').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    openArticleModal(article);
+                });
+                
+                return card;
+            }
+
+            function openArticleModal(article) {
+                const articleWrapper = modals.article.querySelector('#article-content-wrapper');
+                articleWrapper.innerHTML = `
+                    <div class="flex justify-between items-center border-b pb-4 mb-4">
+                        <h2 class="text-3xl font-bold">${article.title}</h2>
+                        <span class="close-article-btn text-4xl cursor-pointer text-gray-400 hover:text-gray-700">&times;</span>
+                    </div>
+                    <div class="prose max-w-none text-right">${article.content}</div>
+                    <div class="mt-8 pt-4 border-t flex justify-between items-center">
+                        <a href="${article.source}" target="_blank" rel="noopener noreferrer" class="text-sm text-indigo-600 hover:underline flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                            </svg>
+                            למאמר האקדמי המלא
+                        </a>
+                        <div class="flex gap-3">
+                            <button class="print-btn bg-gray-200 text-gray-800 font-semibold py-2 px-4 rounded-lg hover:bg-gray-300 flex items-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                                </svg>
+                                הדפסה
+                            </button>
+                            <button class="save-pdf-btn bg-indigo-100 text-indigo-700 font-semibold py-2 px-4 rounded-lg hover:bg-indigo-200 flex items-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                </svg>
+                                שמירה
+                            </button>
+                        </div>
+                    </div>`;
+                articleWrapper.querySelector('.close-article-btn').addEventListener('click', () => closeModal(modals.article));
+                
+                // Add event listeners for print and save
+                articleWrapper.querySelector('.print-btn').addEventListener('click', () => window.print());
+                
+                const saveBtn = articleWrapper.querySelector('.save-pdf-btn');
+                saveBtn.addEventListener('click', () => {
+                    const originalText = saveBtn.innerHTML;
+                    saveBtn.innerHTML = 'מעבד...';
+                    saveBtn.disabled = true;
+
+                    const { jsPDF } = window.jspdf;
+                    const contentToSave = articleWrapper.querySelector('.prose');
+                    
+                    html2canvas(contentToSave, { scale: 2, useCORS: true }).then(canvas => {
+                        const imgData = canvas.toDataURL('image/png');
+                        const pdf = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
+                        const pdfWidth = pdf.internal.pageSize.getWidth();
+                        const canvasWidth = canvas.width;
+                        const canvasHeight = canvas.height;
+                        const ratio = canvasWidth / canvasHeight;
+                        const imgHeight = (pdfWidth - 20) / ratio;
+
+                        pdf.addImage(imgData, 'PNG', 10, 10, pdfWidth - 20, imgHeight);
+                        pdf.save(`${article.title}.pdf`);
+
+                        saveBtn.innerHTML = originalText;
+                        saveBtn.disabled = false;
+                    }).catch(err => {
+                        console.error("Error generating PDF:", err);
+                        saveBtn.innerHTML = originalText;
+                        saveBtn.disabled = false;
+                    });
+                });
+
+                openModal(modals.article);
+            }
+
+            modals.article.addEventListener('click', (e) => { if (e.target === modals.article) closeModal(modals.article); });
+            
+            const articleKeys = Object.keys(articlesData);
+            
+            function renderArticles(count) {
+                articlesGrid.innerHTML = '';
+                articleKeys.slice(0, count).forEach(key => {
+                    articlesGrid.appendChild(createArticleCard(key, articlesData[key]));
+                });
+                observeElements();
+            }
+
+            showAllArticlesBtn.addEventListener('click', () => {
+                renderArticles(articleKeys.length);
+                showAllArticlesContainer.style.display = 'none';
+            });
+
+            // --- Scroll Animation Observer ---
+            let observer;
+            function observeElements() {
+                const reveals = document.querySelectorAll('.reveal:not(.visible)');
+                const options = { root: null, rootMargin: '0px', threshold: 0.1 };
+                if (observer) observer.disconnect();
+                observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add('visible');
+                            observer.unobserve(entry.target);
+                        }
+                    });
+                }, options);
+                reveals.forEach(el => observer.observe(el));
+            }
+
+            // --- Walking Character ---
+            function setupWalkingCharacter() {
+                const container = document.getElementById('character-animation');
+                if (!container) return;
+                lottie.loadAnimation({
+                    container: container,
+                    renderer: 'svg',
+                    loop: true,
+                    autoplay: true,
+                    path: 'https://assets2.lottiefiles.com/packages/lf20_yMpiqT.json'
+                });
+            }
+
+            // --- Accessibility ---
+            accessibilityToggle.addEventListener('click', (e) => {
+                e.stopPropagation();
+                accessibilityMenu.classList.toggle('active');
+            });
+            document.addEventListener('click', () => accessibilityMenu.classList.remove('active'));
+            
+            reduceMotionCheckbox.addEventListener('change', () => {
+                document.body.classList.toggle('reduced-motion', reduceMotionCheckbox.checked);
+                localStorage.setItem('reduced_motion', reduceMotionCheckbox.checked);
+            });
+            
+            if (localStorage.getItem('reduced_motion') === 'true') {
+                reduceMotionCheckbox.checked = true;
+                document.body.classList.add('reduced-motion');
+            }
+
+            // --- Initial page load ---
+            renderArticles(6);
+            observeElements();
+            setupWalkingCharacter();
+        }
+
+        init();
+    });
+    </script>
+</body>
+</html>

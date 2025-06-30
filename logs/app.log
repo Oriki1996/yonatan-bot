@@ -1,0 +1,361 @@
+2025-06-30 09:31:51,797 - INFO - __main__ - ✅ Google Generative AI model configured successfully.
+2025-06-30 09:31:51,812 - INFO - __main__ - Database initialized.
+2025-06-30 09:31:51,846 - INFO - werkzeug - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://10.100.102.10:5000
+2025-06-30 09:31:51,846 - INFO - werkzeug - [33mPress CTRL+C to quit[0m
+2025-06-30 09:31:51,848 - INFO - werkzeug -  * Restarting with stat
+2025-06-30 09:31:52,990 - INFO - __main__ - ✅ Google Generative AI model configured successfully.
+2025-06-30 09:31:52,995 - INFO - __main__ - Database initialized.
+2025-06-30 09:31:53,003 - WARNING - werkzeug -  * Debugger is active!
+2025-06-30 09:31:53,008 - INFO - werkzeug -  * Debugger PIN: 867-280-254
+2025-06-30 09:32:02,675 - INFO - __main__ - Request: GET / | Status: 200 | Duration: 0.102s
+2025-06-30 09:32:02,677 - INFO - werkzeug - 127.0.0.1 - - [30/Jun/2025 09:32:02] "GET / HTTP/1.1" 200 -
+2025-06-30 09:32:02,877 - INFO - __main__ - Request: GET /widget.js | Status: 200 | Duration: 0.138s
+2025-06-30 09:32:02,878 - INFO - werkzeug - 127.0.0.1 - - [30/Jun/2025 09:32:02] "GET /widget.js?v=2.0 HTTP/1.1" 200 -
+2025-06-30 09:32:05,249 - INFO - __main__ - Request: GET /dashboard | Status: 200 | Duration: 0.088s
+2025-06-30 09:32:05,252 - INFO - werkzeug - 127.0.0.1 - - [30/Jun/2025 09:32:05] "GET /dashboard HTTP/1.1" 200 -
+2025-06-30 09:32:05,294 - INFO - __main__ - Request: GET /widget.js | Status: 304 | Duration: 0.001s
+2025-06-30 09:32:05,295 - INFO - werkzeug - 127.0.0.1 - - [30/Jun/2025 09:32:05] "[36mGET /widget.js?v=2.0 HTTP/1.1[0m" 304 -
+2025-06-30 09:32:05,499 - INFO - __main__ - Request: GET /sw.js | Status: 404 | Duration: 0.000s
+2025-06-30 09:32:05,504 - INFO - werkzeug - 127.0.0.1 - - [30/Jun/2025 09:32:05] "[33mGET /sw.js HTTP/1.1[0m" 404 -
+2025-06-30 09:32:25,153 - INFO - __main__ - Parent updated: משה (session_1751262146318_0.0913023862299992)
+2025-06-30 09:32:25,190 - INFO - __main__ - Request: POST /api/session | Status: 200 | Duration: 0.097s
+2025-06-30 09:32:25,193 - INFO - werkzeug - 127.0.0.1 - - [30/Jun/2025 09:32:25] "POST /api/session HTTP/1.1" 200 -
+2025-06-30 09:32:25,223 - INFO - __main__ - Request: GET /api/children | Status: 200 | Duration: 0.013s
+2025-06-30 09:32:25,226 - INFO - werkzeug - 127.0.0.1 - - [30/Jun/2025 09:32:25] "GET /api/children?session_id=session_1751262146318_0.0913023862299992 HTTP/1.1" 200 -
+2025-06-30 09:32:37,070 - INFO - __main__ - Request: GET /api/children | Status: 200 | Duration: 0.003s
+2025-06-30 09:32:37,072 - INFO - werkzeug - 127.0.0.1 - - [30/Jun/2025 09:32:37] "GET /api/children?session_id=session_1751262146318_0.0913023862299992 HTTP/1.1" 200 -
+2025-06-30 09:33:44,035 - INFO - __main__ - Request: GET /api/children | Status: 200 | Duration: 0.005s
+2025-06-30 09:33:44,038 - INFO - werkzeug - 127.0.0.1 - - [30/Jun/2025 09:33:44] "GET /api/children?session_id=session_1751262146318_0.0913023862299992 HTTP/1.1" 200 -
+2025-06-30 09:34:25,814 - INFO - __main__ - Request: GET /.well-known/appspecific/com.chrome.devtools.json | Status: 404 | Duration: 0.000s
+2025-06-30 09:34:25,814 - INFO - werkzeug - 127.0.0.1 - - [30/Jun/2025 09:34:25] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
+2025-06-30 09:42:19,527 - INFO - __main__ - ✅ Google Generative AI model configured successfully.
+2025-06-30 09:42:19,548 - INFO - __main__ - Database initialized.
+2025-06-30 09:42:19,582 - INFO - werkzeug - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://10.100.102.10:5000
+2025-06-30 09:42:19,582 - INFO - werkzeug - [33mPress CTRL+C to quit[0m
+2025-06-30 09:42:19,584 - INFO - werkzeug -  * Restarting with stat
+2025-06-30 09:42:20,712 - INFO - __main__ - ✅ Google Generative AI model configured successfully.
+2025-06-30 09:42:20,717 - INFO - __main__ - Database initialized.
+2025-06-30 09:42:20,723 - WARNING - werkzeug -  * Debugger is active!
+2025-06-30 09:42:20,728 - INFO - werkzeug -  * Debugger PIN: 867-280-254
+2025-06-30 09:42:29,622 - INFO - __main__ - Request: GET / | Status: 200 | Duration: 0.024s
+2025-06-30 09:42:29,623 - INFO - werkzeug - 127.0.0.1 - - [30/Jun/2025 09:42:29] "GET / HTTP/1.1" 200 -
+2025-06-30 09:42:29,749 - INFO - __main__ - Request: GET /widget.js | Status: 200 | Duration: 0.068s
+2025-06-30 09:42:29,751 - INFO - werkzeug - 127.0.0.1 - - [30/Jun/2025 09:42:29] "GET /widget.js?v=2.0 HTTP/1.1" 200 -
+2025-06-30 09:42:35,661 - INFO - __main__ - Request: GET /dashboard | Status: 200 | Duration: 0.141s
+2025-06-30 09:42:35,662 - INFO - werkzeug - 127.0.0.1 - - [30/Jun/2025 09:42:35] "GET /dashboard HTTP/1.1" 200 -
+2025-06-30 09:42:35,700 - INFO - __main__ - Request: GET /widget.js | Status: 200 | Duration: 0.001s
+2025-06-30 09:42:35,701 - INFO - werkzeug - 127.0.0.1 - - [30/Jun/2025 09:42:35] "GET /widget.js?v=2.2 HTTP/1.1" 200 -
+2025-06-30 09:45:18,757 - INFO - __main__ - Request: GET /.well-known/appspecific/com.chrome.devtools.json | Status: 404 | Duration: 0.002s
+2025-06-30 09:45:18,759 - INFO - werkzeug - 127.0.0.1 - - [30/Jun/2025 09:45:18] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
+2025-06-30 09:46:04,023 - INFO - __main__ - Request: GET /api/children | Status: 200 | Duration: 0.132s
+2025-06-30 09:46:04,029 - INFO - werkzeug - 127.0.0.1 - - [30/Jun/2025 09:46:04] "GET /api/children?session_id=session_1751262146318_0.0913023862299992 HTTP/1.1" 200 -
+2025-06-30 09:46:15,803 - INFO - __main__ - New child 'דוד' added for parent session_1751262146318_0.0913023862299992
+2025-06-30 09:46:15,804 - INFO - __main__ - Request: POST /api/children | Status: 201 | Duration: 0.040s
+2025-06-30 09:46:15,805 - INFO - werkzeug - 127.0.0.1 - - [30/Jun/2025 09:46:15] "[35m[1mPOST /api/children HTTP/1.1[0m" 201 -
+2025-06-30 09:46:15,830 - INFO - __main__ - Request: GET /api/children | Status: 200 | Duration: 0.011s
+2025-06-30 09:46:15,831 - INFO - werkzeug - 127.0.0.1 - - [30/Jun/2025 09:46:15] "GET /api/children?session_id=session_1751262146318_0.0913023862299992 HTTP/1.1" 200 -
+2025-06-30 09:46:31,914 - INFO - __main__ - Request: POST /api/chat | Status: 200 | Duration: 1.477s
+2025-06-30 09:46:31,916 - INFO - werkzeug - 127.0.0.1 - - [30/Jun/2025 09:46:31] "POST /api/chat HTTP/1.1" 200 -
+2025-06-30 09:46:47,193 - INFO - __main__ - Request: POST /api/chat | Status: 200 | Duration: 1.475s
+2025-06-30 09:46:47,194 - INFO - werkzeug - 127.0.0.1 - - [30/Jun/2025 09:46:47] "POST /api/chat HTTP/1.1" 200 -
+2025-06-30 09:49:01,860 - INFO - __main__ - Request: GET /dashboard | Status: 200 | Duration: 0.003s
+2025-06-30 09:49:01,861 - INFO - werkzeug - 127.0.0.1 - - [30/Jun/2025 09:49:01] "GET /dashboard HTTP/1.1" 200 -
+2025-06-30 09:49:01,928 - INFO - __main__ - Request: GET /.well-known/appspecific/com.chrome.devtools.json | Status: 404 | Duration: 0.000s
+2025-06-30 09:49:01,929 - INFO - werkzeug - 127.0.0.1 - - [30/Jun/2025 09:49:01] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
+2025-06-30 09:49:02,024 - INFO - __main__ - Request: GET /widget.js | Status: 304 | Duration: 0.068s
+2025-06-30 09:49:02,025 - INFO - werkzeug - 127.0.0.1 - - [30/Jun/2025 09:49:02] "[36mGET /widget.js?v=2.2 HTTP/1.1[0m" 304 -
+2025-06-30 09:49:08,161 - INFO - __main__ - Request: GET /.well-known/appspecific/com.chrome.devtools.json | Status: 404 | Duration: 0.000s
+2025-06-30 09:49:08,161 - INFO - werkzeug - 127.0.0.1 - - [30/Jun/2025 09:49:08] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
+2025-06-30 09:49:08,190 - INFO - __main__ - Request: GET /.well-known/appspecific/com.chrome.devtools.json | Status: 404 | Duration: 0.000s
+2025-06-30 09:49:08,191 - INFO - werkzeug - 127.0.0.1 - - [30/Jun/2025 09:49:08] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
+2025-06-30 09:49:47,193 - INFO - __main__ - Request: GET /dashboard | Status: 200 | Duration: 0.001s
+2025-06-30 09:49:47,194 - INFO - werkzeug - 127.0.0.1 - - [30/Jun/2025 09:49:47] "GET /dashboard HTTP/1.1" 200 -
+2025-06-30 09:49:47,260 - INFO - __main__ - Request: GET /.well-known/appspecific/com.chrome.devtools.json | Status: 404 | Duration: 0.000s
+2025-06-30 09:49:47,261 - INFO - werkzeug - 127.0.0.1 - - [30/Jun/2025 09:49:47] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
+2025-06-30 09:49:47,284 - INFO - __main__ - Request: GET /widget.js | Status: 304 | Duration: 0.001s
+2025-06-30 09:49:47,285 - INFO - werkzeug - 127.0.0.1 - - [30/Jun/2025 09:49:47] "[36mGET /widget.js?v=2.2 HTTP/1.1[0m" 304 -
+2025-06-30 09:49:55,160 - INFO - __main__ - Request: GET /.well-known/appspecific/com.chrome.devtools.json | Status: 404 | Duration: 0.000s
+2025-06-30 09:49:55,161 - INFO - werkzeug - 127.0.0.1 - - [30/Jun/2025 09:49:55] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
+2025-06-30 09:49:55,194 - INFO - __main__ - Request: GET /.well-known/appspecific/com.chrome.devtools.json | Status: 404 | Duration: 0.000s
+2025-06-30 09:49:55,194 - INFO - werkzeug - 127.0.0.1 - - [30/Jun/2025 09:49:55] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
+2025-06-30 09:50:17,870 - INFO - __main__ - Request: GET /dashboard | Status: 200 | Duration: 0.001s
+2025-06-30 09:50:17,871 - INFO - werkzeug - 127.0.0.1 - - [30/Jun/2025 09:50:17] "GET /dashboard HTTP/1.1" 200 -
+2025-06-30 09:50:17,917 - INFO - __main__ - Request: GET /.well-known/appspecific/com.chrome.devtools.json | Status: 404 | Duration: 0.000s
+2025-06-30 09:50:17,921 - INFO - werkzeug - 127.0.0.1 - - [30/Jun/2025 09:50:17] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
+2025-06-30 09:50:17,937 - INFO - __main__ - Request: GET /widget.js | Status: 304 | Duration: 0.002s
+2025-06-30 09:50:17,938 - INFO - werkzeug - 127.0.0.1 - - [30/Jun/2025 09:50:17] "[36mGET /widget.js?v=2.2 HTTP/1.1[0m" 304 -
+2025-06-30 09:50:21,021 - INFO - __main__ - Request: GET /.well-known/appspecific/com.chrome.devtools.json | Status: 404 | Duration: 0.000s
+2025-06-30 09:50:21,022 - INFO - werkzeug - 127.0.0.1 - - [30/Jun/2025 09:50:21] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
+2025-06-30 09:50:21,061 - INFO - __main__ - Request: GET /.well-known/appspecific/com.chrome.devtools.json | Status: 404 | Duration: 0.000s
+2025-06-30 09:50:21,061 - INFO - werkzeug - 127.0.0.1 - - [30/Jun/2025 09:50:21] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
+2025-06-30 10:08:06,950 - INFO - __main__ - ✅ Google Generative AI model configured.
+2025-06-30 10:08:07,042 - INFO - werkzeug - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://10.100.102.10:5000
+2025-06-30 10:08:07,042 - INFO - werkzeug - [33mPress CTRL+C to quit[0m
+2025-06-30 10:08:16,474 - ERROR - app - Exception on / [GET]
+Traceback (most recent call last):
+  File "C:\Users\ori\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\app.py", line 2190, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Users\ori\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\app.py", line 1486, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Users\ori\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask_cors\extension.py", line 176, in wrapped_function
+    return cors_after_request(app.make_response(f(*args, **kwargs)))
+                                                ~^^^^^^^^^^^^^^^^^
+  File "C:\Users\ori\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\app.py", line 1484, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Users\ori\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\app.py", line 1469, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\ori\Desktop\yonatan-bot\app.py", line 143, in serve_index
+    return render_template('index.html')
+  File "C:\Users\ori\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\templating.py", line 150, in render_template
+    template = app.jinja_env.get_or_select_template(template_name_or_list)
+  File "C:\Users\ori\AppData\Local\Programs\Python\Python313\Lib\site-packages\jinja2\environment.py", line 1087, in get_or_select_template
+    return self.get_template(template_name_or_list, parent, globals)
+           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ori\AppData\Local\Programs\Python\Python313\Lib\site-packages\jinja2\environment.py", line 1016, in get_template
+    return self._load_template(name, globals)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\ori\AppData\Local\Programs\Python\Python313\Lib\site-packages\jinja2\environment.py", line 975, in _load_template
+    template = self.loader.load(self, name, self.make_globals(globals))
+  File "C:\Users\ori\AppData\Local\Programs\Python\Python313\Lib\site-packages\jinja2\loaders.py", line 126, in load
+    source, filename, uptodate = self.get_source(environment, name)
+                                 ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ori\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\templating.py", line 64, in get_source
+    return self._get_source_fast(environment, template)
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ori\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\templating.py", line 98, in _get_source_fast
+    raise TemplateNotFound(template)
+jinja2.exceptions.TemplateNotFound: index.html
+2025-06-30 10:08:16,640 - INFO - werkzeug - 127.0.0.1 - - [30/Jun/2025 10:08:16] "[35m[1mGET / HTTP/1.1[0m" 500 -
+2025-06-30 10:09:06,849 - ERROR - app - Exception on / [GET]
+Traceback (most recent call last):
+  File "C:\Users\ori\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\app.py", line 2190, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Users\ori\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\app.py", line 1486, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Users\ori\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask_cors\extension.py", line 176, in wrapped_function
+    return cors_after_request(app.make_response(f(*args, **kwargs)))
+                                                ~^^^^^^^^^^^^^^^^^
+  File "C:\Users\ori\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\app.py", line 1484, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Users\ori\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\app.py", line 1469, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\ori\Desktop\yonatan-bot\app.py", line 143, in serve_index
+    return render_template('index.html')
+  File "C:\Users\ori\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\templating.py", line 150, in render_template
+    template = app.jinja_env.get_or_select_template(template_name_or_list)
+  File "C:\Users\ori\AppData\Local\Programs\Python\Python313\Lib\site-packages\jinja2\environment.py", line 1087, in get_or_select_template
+    return self.get_template(template_name_or_list, parent, globals)
+           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ori\AppData\Local\Programs\Python\Python313\Lib\site-packages\jinja2\environment.py", line 1016, in get_template
+    return self._load_template(name, globals)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\ori\AppData\Local\Programs\Python\Python313\Lib\site-packages\jinja2\environment.py", line 975, in _load_template
+    template = self.loader.load(self, name, self.make_globals(globals))
+  File "C:\Users\ori\AppData\Local\Programs\Python\Python313\Lib\site-packages\jinja2\loaders.py", line 126, in load
+    source, filename, uptodate = self.get_source(environment, name)
+                                 ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ori\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\templating.py", line 64, in get_source
+    return self._get_source_fast(environment, template)
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ori\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\templating.py", line 98, in _get_source_fast
+    raise TemplateNotFound(template)
+jinja2.exceptions.TemplateNotFound: index.html
+2025-06-30 10:09:06,851 - INFO - werkzeug - 127.0.0.1 - - [30/Jun/2025 10:09:06] "[35m[1mGET / HTTP/1.1[0m" 500 -
+2025-06-30 10:09:08,596 - ERROR - app - Exception on / [GET]
+Traceback (most recent call last):
+  File "C:\Users\ori\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\app.py", line 2190, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Users\ori\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\app.py", line 1486, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Users\ori\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask_cors\extension.py", line 176, in wrapped_function
+    return cors_after_request(app.make_response(f(*args, **kwargs)))
+                                                ~^^^^^^^^^^^^^^^^^
+  File "C:\Users\ori\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\app.py", line 1484, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Users\ori\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\app.py", line 1469, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\ori\Desktop\yonatan-bot\app.py", line 143, in serve_index
+    return render_template('index.html')
+  File "C:\Users\ori\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\templating.py", line 150, in render_template
+    template = app.jinja_env.get_or_select_template(template_name_or_list)
+  File "C:\Users\ori\AppData\Local\Programs\Python\Python313\Lib\site-packages\jinja2\environment.py", line 1087, in get_or_select_template
+    return self.get_template(template_name_or_list, parent, globals)
+           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ori\AppData\Local\Programs\Python\Python313\Lib\site-packages\jinja2\environment.py", line 1016, in get_template
+    return self._load_template(name, globals)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\ori\AppData\Local\Programs\Python\Python313\Lib\site-packages\jinja2\environment.py", line 975, in _load_template
+    template = self.loader.load(self, name, self.make_globals(globals))
+  File "C:\Users\ori\AppData\Local\Programs\Python\Python313\Lib\site-packages\jinja2\loaders.py", line 126, in load
+    source, filename, uptodate = self.get_source(environment, name)
+                                 ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ori\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\templating.py", line 64, in get_source
+    return self._get_source_fast(environment, template)
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ori\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\templating.py", line 98, in _get_source_fast
+    raise TemplateNotFound(template)
+jinja2.exceptions.TemplateNotFound: index.html
+2025-06-30 10:09:08,598 - INFO - werkzeug - 127.0.0.1 - - [30/Jun/2025 10:09:08] "[35m[1mGET / HTTP/1.1[0m" 500 -
+2025-06-30 10:09:09,004 - ERROR - app - Exception on / [GET]
+Traceback (most recent call last):
+  File "C:\Users\ori\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\app.py", line 2190, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Users\ori\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\app.py", line 1486, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Users\ori\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask_cors\extension.py", line 176, in wrapped_function
+    return cors_after_request(app.make_response(f(*args, **kwargs)))
+                                                ~^^^^^^^^^^^^^^^^^
+  File "C:\Users\ori\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\app.py", line 1484, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Users\ori\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\app.py", line 1469, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\ori\Desktop\yonatan-bot\app.py", line 143, in serve_index
+    return render_template('index.html')
+  File "C:\Users\ori\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\templating.py", line 150, in render_template
+    template = app.jinja_env.get_or_select_template(template_name_or_list)
+  File "C:\Users\ori\AppData\Local\Programs\Python\Python313\Lib\site-packages\jinja2\environment.py", line 1087, in get_or_select_template
+    return self.get_template(template_name_or_list, parent, globals)
+           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ori\AppData\Local\Programs\Python\Python313\Lib\site-packages\jinja2\environment.py", line 1016, in get_template
+    return self._load_template(name, globals)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\ori\AppData\Local\Programs\Python\Python313\Lib\site-packages\jinja2\environment.py", line 975, in _load_template
+    template = self.loader.load(self, name, self.make_globals(globals))
+  File "C:\Users\ori\AppData\Local\Programs\Python\Python313\Lib\site-packages\jinja2\loaders.py", line 126, in load
+    source, filename, uptodate = self.get_source(environment, name)
+                                 ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ori\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\templating.py", line 64, in get_source
+    return self._get_source_fast(environment, template)
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ori\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\templating.py", line 98, in _get_source_fast
+    raise TemplateNotFound(template)
+jinja2.exceptions.TemplateNotFound: index.html
+2025-06-30 10:09:09,007 - INFO - werkzeug - 127.0.0.1 - - [30/Jun/2025 10:09:09] "[35m[1mGET / HTTP/1.1[0m" 500 -
+2025-06-30 10:09:09,180 - ERROR - app - Exception on / [GET]
+Traceback (most recent call last):
+  File "C:\Users\ori\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\app.py", line 2190, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Users\ori\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\app.py", line 1486, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Users\ori\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask_cors\extension.py", line 176, in wrapped_function
+    return cors_after_request(app.make_response(f(*args, **kwargs)))
+                                                ~^^^^^^^^^^^^^^^^^
+  File "C:\Users\ori\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\app.py", line 1484, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Users\ori\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\app.py", line 1469, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\ori\Desktop\yonatan-bot\app.py", line 143, in serve_index
+    return render_template('index.html')
+  File "C:\Users\ori\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\templating.py", line 150, in render_template
+    template = app.jinja_env.get_or_select_template(template_name_or_list)
+  File "C:\Users\ori\AppData\Local\Programs\Python\Python313\Lib\site-packages\jinja2\environment.py", line 1087, in get_or_select_template
+    return self.get_template(template_name_or_list, parent, globals)
+           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ori\AppData\Local\Programs\Python\Python313\Lib\site-packages\jinja2\environment.py", line 1016, in get_template
+    return self._load_template(name, globals)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\ori\AppData\Local\Programs\Python\Python313\Lib\site-packages\jinja2\environment.py", line 975, in _load_template
+    template = self.loader.load(self, name, self.make_globals(globals))
+  File "C:\Users\ori\AppData\Local\Programs\Python\Python313\Lib\site-packages\jinja2\loaders.py", line 126, in load
+    source, filename, uptodate = self.get_source(environment, name)
+                                 ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ori\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\templating.py", line 64, in get_source
+    return self._get_source_fast(environment, template)
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ori\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\templating.py", line 98, in _get_source_fast
+    raise TemplateNotFound(template)
+jinja2.exceptions.TemplateNotFound: index.html
+2025-06-30 10:09:09,182 - INFO - werkzeug - 127.0.0.1 - - [30/Jun/2025 10:09:09] "[35m[1mGET / HTTP/1.1[0m" 500 -
+2025-06-30 10:09:09,318 - ERROR - app - Exception on / [GET]
+Traceback (most recent call last):
+  File "C:\Users\ori\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\app.py", line 2190, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Users\ori\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\app.py", line 1486, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Users\ori\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask_cors\extension.py", line 176, in wrapped_function
+    return cors_after_request(app.make_response(f(*args, **kwargs)))
+                                                ~^^^^^^^^^^^^^^^^^
+  File "C:\Users\ori\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\app.py", line 1484, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Users\ori\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\app.py", line 1469, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\ori\Desktop\yonatan-bot\app.py", line 143, in serve_index
+    return render_template('index.html')
+  File "C:\Users\ori\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\templating.py", line 150, in render_template
+    template = app.jinja_env.get_or_select_template(template_name_or_list)
+  File "C:\Users\ori\AppData\Local\Programs\Python\Python313\Lib\site-packages\jinja2\environment.py", line 1087, in get_or_select_template
+    return self.get_template(template_name_or_list, parent, globals)
+           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ori\AppData\Local\Programs\Python\Python313\Lib\site-packages\jinja2\environment.py", line 1016, in get_template
+    return self._load_template(name, globals)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\ori\AppData\Local\Programs\Python\Python313\Lib\site-packages\jinja2\environment.py", line 975, in _load_template
+    template = self.loader.load(self, name, self.make_globals(globals))
+  File "C:\Users\ori\AppData\Local\Programs\Python\Python313\Lib\site-packages\jinja2\loaders.py", line 126, in load
+    source, filename, uptodate = self.get_source(environment, name)
+                                 ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ori\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\templating.py", line 64, in get_source
+    return self._get_source_fast(environment, template)
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ori\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\templating.py", line 98, in _get_source_fast
+    raise TemplateNotFound(template)
+jinja2.exceptions.TemplateNotFound: index.html
+2025-06-30 10:09:09,323 - INFO - werkzeug - 127.0.0.1 - - [30/Jun/2025 10:09:09] "[35m[1mGET / HTTP/1.1[0m" 500 -
+2025-06-30 12:16:42,079 - INFO - __main__ - ✅ Google Generative AI model configured.
+2025-06-30 12:16:42,129 - INFO - werkzeug - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://10.100.102.10:5000
+2025-06-30 12:16:42,130 - INFO - werkzeug - [33mPress CTRL+C to quit[0m
+2025-06-30 12:16:56,021 - ERROR - app - Exception on / [GET]
+Traceback (most recent call last):
+  File "C:\Users\ori\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\app.py", line 2190, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Users\ori\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\app.py", line 1486, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Users\ori\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask_cors\extension.py", line 176, in wrapped_function
+    return cors_after_request(app.make_response(f(*args, **kwargs)))
+                                                ~^^^^^^^^^^^^^^^^^
+  File "C:\Users\ori\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\app.py", line 1484, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Users\ori\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\app.py", line 1469, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\ori\Desktop\yonatan-bot\app.py", line 143, in serve_index
+    return render_template('index.html')
+  File "C:\Users\ori\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\templating.py", line 150, in render_template
+    template = app.jinja_env.get_or_select_template(template_name_or_list)
+  File "C:\Users\ori\AppData\Local\Programs\Python\Python313\Lib\site-packages\jinja2\environment.py", line 1087, in get_or_select_template
+    return self.get_template(template_name_or_list, parent, globals)
+           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ori\AppData\Local\Programs\Python\Python313\Lib\site-packages\jinja2\environment.py", line 1016, in get_template
+    return self._load_template(name, globals)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\ori\AppData\Local\Programs\Python\Python313\Lib\site-packages\jinja2\environment.py", line 975, in _load_template
+    template = self.loader.load(self, name, self.make_globals(globals))
+  File "C:\Users\ori\AppData\Local\Programs\Python\Python313\Lib\site-packages\jinja2\loaders.py", line 126, in load
+    source, filename, uptodate = self.get_source(environment, name)
+                                 ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ori\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\templating.py", line 64, in get_source
+    return self._get_source_fast(environment, template)
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ori\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\templating.py", line 98, in _get_source_fast
+    raise TemplateNotFound(template)
+jinja2.exceptions.TemplateNotFound: index.html
+2025-06-30 12:16:56,047 - INFO - werkzeug - 127.0.0.1 - - [30/Jun/2025 12:16:56] "[35m[1mGET / HTTP/1.1[0m" 500 -
+2025-06-30 12:17:04,824 - INFO - werkzeug - 127.0.0.1 - - [30/Jun/2025 12:17:04] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
