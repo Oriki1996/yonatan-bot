@@ -184,7 +184,7 @@
                     <h2 class="text-3xl font-bold text-center mb-4 reveal">ארגז כלים להורות מודעת</h2>
                     <p class="text-lg text-center text-gray-600 mb-16 max-w-2xl mx-auto reveal">גלו כלים מעשיים המבוססים על גישות פסיכולוגיות מוכחות כדי לתמוך בכם ובילדיכם.</p>
                     <div class="grid md:grid-cols-2 lg:grid-cols-5 gap-8">
-                        <div class="feature-card text-center p-6 rounded-2xl reveal"><div class="flex items-center justify-center h-20 w-20 rounded-full bg-red-100 text-red-600 mx-auto mb-4 text-4xl feature-icon">❤️</div><h3 class="text-xl font-bold mb-2">התפתחות רגשית</h3><p class="text-gray-600">כלים לזיהוי, הכלה וויסות רגשות אצל ילדים.</p></div>
+                        <div class="feature-card text-center p-6 rounded-2xl reveal"><div class="flex items-center justify-center h-20 w-20 rounded-full bg-red-100 text-red-600 mx-auto mb-4 text-4xl feature-icon"❤️</div><h3 class="text-xl font-bold mb-2">התפתחות רגשית</h3><p class="text-gray-600">כלים לזיהוי, הכלה וויסות רגשות אצל ילדים.</p></div>
                         <div class="feature-card text-center p-6 rounded-2xl reveal"><div class="flex items-center justify-center h-20 w-20 rounded-full bg-blue-100 text-blue-600 mx-auto mb-4 text-4xl feature-icon">🧩</div><h3 class="text-xl font-bold mb-2">התנהגויות מאתגרות</h3><p class="text-gray-600">אסטרטגיות להתמודדות עם התקפי זעם וקשיים.</p></div>
                         <div class="feature-card text-center p-6 rounded-2xl reveal"><div class="flex items-center justify-center h-20 w-20 rounded-full bg-green-100 text-green-600 mx-auto mb-4 text-4xl feature-icon">🗣️</div><h3 class="text-xl font-bold mb-2">תקשורת הורה-ילד</h3><p class="text-gray-600">למדו כיצד לנהל שיחות פתוחות וליצור הקשבה.</p></div>
                         <div class="feature-card text-center p-6 rounded-2xl reveal"><div class="flex items-center justify-center h-20 w-20 rounded-full bg-yellow-100 text-yellow-600 mx-auto mb-4 text-4xl feature-icon">🌱</div><h3 class="text-xl font-bold mb-2">חינוך חיובי</h3><p class="text-gray-600">שיטות לחיזוק התנהגויות רצויות ובניית סביבה תומכת.</p></div>
@@ -405,20 +405,28 @@
 
             function openArticleModal(article) {
                 const articleWrapper = modals.article.querySelector('#article-content-wrapper');
+                // *** MODIFIED ARTICLE MODAL CONTENT ***
                 articleWrapper.innerHTML = `
                     <div class="flex justify-between items-center border-b pb-4 mb-4">
                         <h2 class="text-3xl font-bold">${article.title}</h2>
                         <span class="close-article-btn text-4xl cursor-pointer text-gray-400 hover:text-gray-700">&times;</span>
                     </div>
                     <div class="prose max-w-none text-right">${article.content}</div>
-                    <div class="mt-8 pt-4 border-t flex justify-between items-center">
-                        <a href="${article.source}" target="_blank" rel="noopener noreferrer" class="text-sm text-indigo-600 hover:underline flex items-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                            </svg>
-                            למאמר האקדמי המלא
-                        </a>
-                        <div class="flex gap-3">
+                    <div class="mt-8 pt-4 border-t space-y-4">
+                        <div class="text-sm">
+                            <p class="font-semibold text-gray-700 mb-2">מקור המאמר (מומלץ להעתיק ולהדביק בדפדפן):</p>
+                            <div class="flex items-center gap-2">
+                                <input type="text" readonly value="${article.source}" class="link-input w-full p-2 border rounded-md bg-gray-100 text-gray-600 text-xs" dir="ltr">
+                                <button class="copy-link-btn bg-gray-200 text-gray-800 font-semibold py-2 px-4 rounded-lg hover:bg-gray-300 flex items-center gap-2 shrink-0">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                        <path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/>
+                                        <path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zM-1 2.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5z"/>
+                                    </svg>
+                                    <span class="copy-text">העתק</span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="flex justify-end gap-3">
                             <button class="print-btn bg-gray-200 text-gray-800 font-semibold py-2 px-4 rounded-lg hover:bg-gray-300 flex items-center gap-2">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
@@ -433,8 +441,33 @@
                             </button>
                         </div>
                     </div>`;
+
                 articleWrapper.querySelector('.close-article-btn').addEventListener('click', () => closeModal(modals.article));
                 
+                // *** NEW EVENT LISTENER FOR COPY BUTTON ***
+                articleWrapper.querySelector('.copy-link-btn').addEventListener('click', (e) => {
+                    const button = e.currentTarget;
+                    const linkInput = articleWrapper.querySelector('.link-input');
+                    const copyTextSpan = button.querySelector('.copy-text');
+                    
+                    linkInput.select();
+                    linkInput.setSelectionRange(0, 99999); // For mobile devices
+
+                    try {
+                        document.execCommand('copy');
+                        copyTextSpan.textContent = 'הועתק!';
+                        button.classList.add('bg-green-200');
+
+                        setTimeout(() => {
+                            copyTextSpan.textContent = 'העתק';
+                            button.classList.remove('bg-green-200');
+                        }, 2000);
+                    } catch (err) {
+                        console.error('Fallback: Oops, unable to copy', err);
+                        copyTextSpan.textContent = 'שגיאה';
+                    }
+                });
+
                 // Add event listeners for print and save
                 articleWrapper.querySelector('.print-btn').addEventListener('click', () => window.print());
                 
@@ -514,8 +547,6 @@
                     renderer: 'svg',
                     loop: true,
                     autoplay: true,
-                    // *** MODIFIED LINE ***
-                    // Load the animation from a local file instead of a URL
                     path: 'character-animation.json' 
                 });
             }
