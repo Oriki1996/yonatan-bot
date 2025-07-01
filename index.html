@@ -84,10 +84,10 @@
                         <button onclick="document.getElementById('yonatan-chat-button')?.click()" class="bg-indigo-600 text-white font-bold py-4 px-10 rounded-lg text-lg hover:bg-indigo-700 transition-transform transform hover:scale-105 shadow-lg">התחל שיחה עם יונתן</button>
                     </div>
                     <div class="slider">
-                        <div class="slide active"><img src="https://storage.googleapis.com/gemini-prod/images/42013b5a-1941-4796-85d1-7581552a410b" alt="משפחה בסגנון סטודיו ג'יבלי יושבת יחד בסלון נעים ומואר"></div>
-                        <div class="slide"><img src="https://storage.googleapis.com/gemini-prod/images/55307a7e-1a0e-4a6c-9467-3d14620f419b" alt="ילד מלטף בעדינות כלב וחתול בסגנון סטודיו ג'יבלי"></div>
-                        <div class="slide"><img src="https://storage.googleapis.com/gemini-prod/images/e76e5d77-3367-4b13-91c6-4d372e379410" alt="ילד מרכיב מבנה מורכב מלגו בסגנון סטודיו ג'יבלי"></div>
-                        <div class="slide"><img src="https://storage.googleapis.com/gemini-prod/images/560d5b4e-8d99-4d64-8857-e685f4b50c5b" alt="ילד מושיט ידיים לשמיים זרועי כוכבים בסגנון סטודיו ג'יבלי"></div>
+                        <div class="slide active"><img src="https://images.pexels.com/photos/1001914/pexels-photo-1001914.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" alt="תמונה של משפחה בסלון נעים"></div>
+                        <div class="slide"><img src="https://images.pexels.com/photos/460823/pexels-photo-460823.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" alt="תמונה של ילד מלטף כלב בעדינות"></div>
+                        <div class="slide"><img src="https://images.pexels.com/photos/163065/mobile-phone-lego-build-construction-163065.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" alt="תמונה של ילד משחק בלגו"></div>
+                        <div class="slide"><img src="https://images.pexels.com/photos/1671325/pexels-photo-1671325.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" alt="תמונה של ילד מביט לשמיים זרועי כוכבים"></div>
                     </div>
                 </div>
             </section>
@@ -268,8 +268,6 @@
             },
         };
 
-        // All other JavaScript logic from previous versions...
-        // init(), openModal(), createArticleCard(), etc.
         const init = () => {
             const pageWrapper = document.getElementById('page-wrapper');
             const modals = {
@@ -451,6 +449,7 @@
             const articleKeys = Object.keys(articlesData);
             
             function renderArticles(count) {
+                if (!articlesGrid) return;
                 articlesGrid.innerHTML = '';
                 articleKeys.slice(0, count).forEach(key => {
                     articlesGrid.appendChild(createArticleCard(key, articlesData[key]));
