@@ -8,519 +8,244 @@
     <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🧠%3C/text%3E%3C/svg%3E">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         :root { 
             --primary: #4f46e5; 
+            --secondary: #7c3aed;
             --font-size: 1rem;
         }
-        html { scroll-behavior: smooth; scroll-padding-top: 5rem; }
-        body { font-family: 'Assistant', sans-serif; background-color: #f8fafc; color: #1f2937; overflow-x: hidden; font-size: var(--font-size); }
-        .modal-overlay { display: none; position: fixed; inset: 0; background-color: rgba(17, 24, 39, 0.8); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); z-index: 100; align-items: center; justify-content: center; animation: fadeIn 0.3s ease; }
-        .modal-overlay.active { display: flex; }
-        .modal-content { background: white; border-radius: 1.5rem; padding: 2.5rem; max-width: 550px; width: 90%; text-align: center; animation: slideIn 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); }
-        #page-wrapper { transition: filter 0.3s ease-in-out; }
-        #page-wrapper.blurred { filter: blur(5px); pointer-events: none; }
-        .hero-section { background: linear-gradient(135deg, #eef2ff 0%, #dbeafe 100%); }
-        .feature-card { transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94); border: 1px solid #e5e7eb; display: flex; flex-direction: column; }
-        .feature-card:hover { transform: translateY(-8px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05); border-color: var(--primary); }
-        .feature-icon { transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); }
-        .feature-card:hover .feature-icon { transform: scale(1.15) rotate(5deg); }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes slideIn { from { transform: translateY(-30px) scale(0.95); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
-        .reveal { opacity: 0; transform: translateY(30px); transition: opacity 0.6s ease-out, transform 0.6s ease-out; }
-        .reveal.visible { opacity: 1; transform: translateY(0); }
-        .accessibility-toggle { position: fixed; bottom: 20px; left: 20px; background: white; border-radius: 50%; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); cursor: pointer; z-index: 101; transition: all 0.3s ease; }
-        .accessibility-toggle:hover { transform: scale(1.1); }
-        .accessibility-menu { position: fixed; bottom: 80px; left: 20px; background: white; border-radius: 12px; padding: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); z-index: 101; transform: translateY(20px) scale(0.95); opacity: 0; pointer-events: none; transition: all 0.3s ease; width: 220px; }
-        .accessibility-menu.active { transform: translateY(0) scale(1); opacity: 1; pointer-events: all; }
-        .accessibility-menu button { width: 100%; text-align: right; padding: 8px; border-radius: 6px; }
-        .accessibility-menu button:hover { background-color: #f3f4f6; }
-        body.reduced-motion * { animation: none !important; transition: none !important; }
-        body.accessibility-contrast { --primary: #60a5fa; background-color: #000 !important; color: #fff !important; }
-        body.accessibility-contrast .hero-section, body.accessibility-contrast .feature-card, body.accessibility-contrast .article-card, body.accessibility-contrast .modal-content, body.accessibility-contrast .accessibility-menu, body.accessibility-contrast header, body.accessibility-contrast footer { background: #111 !important; color: #fff !important; border-color: #fff !important; }
-        body.accessibility-contrast p, body.accessibility-contrast span, body.accessibility-contrast label, body.accessibility-contrast h1, body.accessibility-contrast h2, body.accessibility-contrast h3 { color: #fff !important; }
-        body.accessibility-contrast a, body.accessibility-contrast button { color: #93c5fd !important; }
-        body.accessibility-highlight-links a { text-decoration: underline !important; background-color: yellow; color: black !important; padding: 2px; }
+        html { scroll-behavior: smooth; }
+        body { font-family: 'Assistant', sans-serif; font-size: var(--font-size); }
+        .hero-gradient { background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%); }
+        .feature-card { transition: transform 0.3s ease, box-shadow 0.3s ease; }
+        .feature-card:hover { transform: translateY(-8px); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1); }
+        .article-card { transition: transform 0.3s ease, box-shadow 0.3s ease; }
+        .article-card:hover { transform: translateY(-5px); box-shadow: 0 8px 20px -4px rgba(0,0,0,0.08); }
+        .fade-in { animation: fadeIn 1s ease-in-out forwards; opacity: 0; }
+        @keyframes fadeIn { to { opacity: 1; } }
+        .slide-up { animation: slideUp 0.8s ease-out forwards; opacity: 0; transform: translateY(30px); }
+        @keyframes slideUp { to { opacity: 1; transform: translateY(0); } }
+        .expand-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-in-out, margin-top 0.5s ease-in-out;
+        }
+        .expand-content.expanded {
+            max-height: 500px; /* Adjust as needed */
+            margin-top: 1rem;
+        }
     </style>
 </head>
-<body class="antialiased">
+<body class="bg-gray-50 text-gray-800">
 
-    <div id="disclaimer-modal" class="modal-overlay">
-        <div class="modal-content">
-            <div class="flex justify-center mb-6"><div class="w-20 h-20 bg-indigo-100 rounded-full flex items-center justify-center"><span class="text-5xl">🧠</span></div></div>
-            <h2 class="text-2xl font-bold text-gray-800 mb-4">ברוכים הבאים ליונתן הפסיכו-בוט</h2>
-            <p class="text-gray-600 mb-6"><strong>כתב ויתור חשוב:</strong> יונתן אינו מחליף ייעוץ פסיכולוגי מקצועי ואינו מתיימר להיות כזה. הוא מהווה כלי עזר בלבד, שמטרתו לספק מידע, כלים ומודעות בנושאי הורות והתפתחות ילדים.</p>
-            <div id="agree-container" class="flex items-center justify-center space-x-4 space-x-reverse mb-6 p-3 rounded-lg">
-                <input type="checkbox" id="agree-checkbox" class="h-5 w-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
-                <label for="agree-checkbox" class="text-gray-700 cursor-pointer">קראתי, הבנתי ואני מאשר/ת את התנאים.</label>
+    <!-- Header -->
+    <header class="bg-white/80 backdrop-blur-lg sticky top-0 z-40 shadow-sm">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-4">
+                <svg class="w-8 h-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.657 7.343A8 8 0 0117.657 18.657z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.879 16.121A3 3 0 1014.12 11.88l-4.242 4.242z"></path></svg>
+                <span class="text-2xl font-bold text-gray-800">יונתן הפסיכו-בוט</span>
             </div>
-            <button id="agree-button" class="w-full bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-indigo-700 transition disabled:bg-gray-400 disabled:cursor-not-allowed" disabled>כניסה לאתר</button>
+            <div class="hidden md:flex items-center space-x-8 text-lg">
+                <a href="#features" class="text-gray-600 hover:text-indigo-600 transition">מה תקבלו?</a>
+                <a href="#articles" class="text-gray-600 hover:text-indigo-600 transition">מאמרים וכלים</a>
+                <a href="#about" class="text-gray-600 hover:text-indigo-600 transition">על הגישה</a>
+                <a href="/dashboard.html" class="text-gray-600 hover:text-indigo-600 transition">אזור אישי</a>
+            </div>
+            <a href="/accessibility.html" class="text-sm text-gray-500 hover:text-indigo-600">הצהרת נגישות</a>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <main>
+        <section class="hero-gradient text-white pt-20 pb-28 text-center">
+            <div class="container mx-auto px-6">
+                <h1 class="text-4xl md:text-6xl font-extrabold mb-4 fade-in" style="animation-delay: 0.2s;">כלים להורות רגועה ומודעת יותר</h1>
+                <p class="text-xl md:text-2xl mb-8 max-w-3xl mx-auto fade-in" style="animation-delay: 0.4s;">יונתן, פסיכו-בוט חינוכי, מעניק לכם, הורים למתבגרים, תמיכה וכלים מבוססי-CBT להתמודדות עם אתגרי היומיום. התחילו שיחה וגלו דרכים חדשות לתקשר, להבין ולהתחבר.</p>
+                <button id="start-chat-hero" class="bg-white text-indigo-600 font-bold py-3 px-8 rounded-full text-lg shadow-lg hover:bg-gray-100 transition transform hover:scale-105 fade-in" style="animation-delay: 0.6s;">
+                    התחילו שיחה עם יונתן
+                </button>
+            </div>
+        </section>
+
+        <!-- Walking Character Animation -->
+        <div id="walking-character-container" class="w-full h-20 -mt-10" style="direction: ltr;"></div>
+
+        <!-- Features Section -->
+        <section id="features" class="py-20 bg-white">
+            <div class="container mx-auto px-6 text-center">
+                <h2 class="text-3xl md:text-4xl font-bold mb-3 slide-up">ליווי אישי וחכם, זמין 24/7</h2>
+                <p class="text-lg text-gray-600 mb-12 max-w-2xl mx-auto slide-up" style="animation-delay: 0.2s;">יונתן כאן כדי להקשיב, לנתח ולהציע פתרונות מעשיים, בכל זמן שנוח לכם.</p>
+                <div class="grid md:grid-cols-3 gap-8">
+                    <!-- Feature 1 -->
+                    <div class="feature-card bg-gray-50 p-8 rounded-2xl shadow-sm slide-up" style="animation-delay: 0.4s;">
+                        <div class="bg-indigo-100 text-indigo-600 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-3">שיחות מבוססות CBT</h3>
+                        <p class="text-gray-600">קבלו הכוונה לפי גישה טיפולית מוכחת, המסייעת לזהות דפוסי חשיבה והתנהגות ולשנות אותם.</p>
+                    </div>
+                    <!-- Feature 2 -->
+                    <div class="feature-card bg-gray-50 p-8 rounded-2xl shadow-sm slide-up" style="animation-delay: 0.6s;">
+                        <div class="bg-purple-100 text-purple-600 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-3">כלים ופתרונות פרקטיים</h3>
+                        <p class="text-gray-600">במקום תיאוריות, תקבלו טכניקות פשוטות וברורות ליישום מיידי בבית עם המתבגר/ת שלכם.</p>
+                    </div>
+                    <!-- Feature 3 -->
+                    <div class="feature-card bg-gray-50 p-8 rounded-2xl shadow-sm slide-up" style="animation-delay: 0.8s;">
+                        <div class="bg-indigo-100 text-indigo-600 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-3">דיסקרטיות ובטיחות</h3>
+                        <p class="text-gray-600">מרחב בטוח ופרטי עבורכם לשתף, להתייעץ ולקבל תמיכה, מבלי לצאת מהבית.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Articles Section -->
+        <section id="articles" class="py-20 bg-gray-50">
+            <div class="container mx-auto px-6">
+                <h2 class="text-3xl md:text-4xl font-bold text-center mb-3 slide-up">מאמרים וכלים להתמודדות</h2>
+                <p class="text-lg text-gray-600 text-center mb-12 max-w-2xl mx-auto slide-up" style="animation-delay: 0.2s;">ידע הוא כוח. אספנו עבורכם מאמרים מבוססי מחקר שיעניקו לכם הבנה וכלים נוספים.</p>
+                <div id="articles-grid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <!-- Articles will be injected here by JavaScript -->
+                </div>
+            </div>
+        </section>
+
+        <!-- About Section -->
+        <section id="about" class="py-20 bg-white">
+            <div class="container mx-auto px-6 flex flex-col md:flex-row items-center gap-12">
+                <div class="md:w-1/2 slide-up">
+                    <h2 class="text-3xl md:text-4xl font-bold mb-4">מה זה בעצם CBT?</h2>
+                    <p class="text-lg text-gray-600 mb-4 leading-relaxed">
+                        טיפול קוגניטיבי-התנהגותי (CBT) היא גישה פסיכולוגית ממוקדת וקצרת-מועד, שזכתה לביסוס מחקרי נרחב. היא מבוססת על הרעיון שהרגשות וההתנהגויות שלנו לא מושפעים ישירות מאירועים, אלא מהפרשנות והמחשבות שלנו על אותם אירועים.
+                    </p>
+                    <p class="text-lg text-gray-600 leading-relaxed">
+                        במילים פשוטות, אם נלמד לזהות את המחשבות הלא-מועילות שלנו ולאתגר אותן, נוכל לשנות את הרגשתנו ואת דרך פעולתנו. יונתן משתמש בעקרונות אלו כדי לעזור לכם לראות את הסיטואציות עם המתבגרים שלכם באור חדש ולמצוא פתרונות יעילים.
+                    </p>
+                </div>
+                <div class="md:w-1/2 slide-up" style="animation-delay: 0.3s;">
+                    <img src="https://placehold.co/600x400/e9d5ff/4c1d95?text=%D7%9E%D7%95%D7%93%D7%9C+%D7%90%D7%A4%D7%A8%22%D7%AA" alt="איור של מודל אפרת - אירוע, פרשנות, רגש, תגובה" class="rounded-2xl shadow-lg w-full">
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-12">
+        <div class="container mx-auto px-6 text-center">
+            <p>&copy; 2025 יונתן הפסיכו-בוט. כל הזכויות שמורות.</p>
+            <div class="mt-4">
+                <a href="/accessibility.html" class="text-gray-400 hover:text-white transition">הצהרת נגישות</a>
+            </div>
         </div>
-    </div>
-    <div id="tutorial-modal" class="modal-overlay"><div id="tutorial-content" class="modal-content relative"></div></div>
-    <div id="article-modal" class="modal-overlay p-4"><div id="article-content-wrapper" class="modal-content !max-w-3xl text-right max-h-[90vh] overflow-y-auto"></div></div>
+    </footer>
 
-    <div id="page-wrapper">
-        <header class="bg-white/80 backdrop-blur-lg shadow-sm sticky top-0 z-40">
-            <div class="container mx-auto px-6 py-4 flex justify-between items-center">
-                 <div class="flex items-center gap-3"><span class="text-3xl">🧠</span><span class="text-xl font-bold text-gray-800">יונתן הפסיכו-בוט</span></div>
-                <nav class="hidden md:flex items-center gap-8">
-                    <a href="#features" class="text-gray-600 hover:text-primary font-semibold">תכונות</a>
-                    <a href="#articles" class="text-gray-600 hover:text-primary font-semibold">מאמרים</a>
-                    <a href="/dashboard.html" class="text-gray-600 hover:text-primary font-semibold">אזור אישי</a>
-                    <button id="show-tutorial-btn" class="text-sm text-indigo-600 hover:underline">הצג הדרכה</button>
-                </nav>
-            </div>
-        </header>
-
-        <main>
-            <section class="hero-section py-20">
-                <div class="container mx-auto px-6 grid lg:grid-cols-2 gap-12 items-center">
-                    <div class="text-center lg:text-right">
-                        <h1 class="text-4xl md:text-5xl font-extrabold text-gray-900 mb-4 leading-tight">המסע להורות רגועה מתחיל כאן</h1>
-                        <p class="text-lg text-gray-700 max-w-xl mx-auto lg:mx-0 mb-8">יונתן הוא העוזר האישי שלכם, המשלב עקרונות מפסיכולוגיה וכלים מעשיים כדי לעזור לכם להבין את עולמם הרגשי של ילדיכם, להתמודד עם אתגרים, וליצור תקשורת משפחתית חיובית.</p>
-                        <button onclick="document.getElementById('yonatan-chat-button')?.click()" class="bg-indigo-600 text-white font-bold py-4 px-10 rounded-lg text-lg hover:bg-indigo-700 transition-transform transform hover:scale-105 shadow-lg">התחל שיחה עם יונתן</button>
-                    </div>
-                    <div class="slider">
-                        <div class="slide active"><img src="https://images.pexels.com/photos/1001914/pexels-photo-1001914.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" alt="תמונה של משפחה בסלון נעים"></div>
-                        <div class="slide"><img src="https://images.pexels.com/photos/460823/pexels-photo-460823.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" alt="תמונה של ילד מלטף כלב בעדינות"></div>
-                        <div class="slide"><img src="https://images.pexels.com/photos/163065/mobile-phone-lego-build-construction-163065.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" alt="תמונה של ילד משחק בלגו"></div>
-                        <div class="slide"><img src="https://images.pexels.com/photos/1671325/pexels-photo-1671325.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" alt="תמונה של ילד מביט לשמיים זרועי כוכבים"></div>
-                    </div>
-                </div>
-            </section>
-
-            <section id="features" class="py-24 bg-white">
-                <div class="container mx-auto px-6">
-                    <h2 class="text-3xl font-bold text-center mb-4 reveal">ארגז כלים להורות מודעת</h2>
-                    <p class="text-lg text-center text-gray-600 mb-16 max-w-2xl mx-auto reveal">גלו כלים מעשיים המבוססים על גישות פסיכולוגיות מוכחות כדי לתמוך בכם ובילדיכם.</p>
-                    <div class="grid md:grid-cols-2 lg:grid-cols-5 gap-8">
-                        <div class="feature-card text-center p-6 rounded-2xl reveal"><div class="flex items-center justify-center h-20 w-20 rounded-full bg-red-100 text-red-600 mx-auto mb-4 text-4xl feature-icon">❤️</div><h3 class="text-xl font-bold mb-2">התפתחות רגשית</h3><p class="text-gray-600 mt-auto">כלים לזיהוי, הכלה וויסות רגשות אצל ילדים.</p></div>
-                        <div class="feature-card text-center p-6 rounded-2xl reveal"><div class="flex items-center justify-center h-20 w-20 rounded-full bg-blue-100 text-blue-600 mx-auto mb-4 text-4xl feature-icon">🧩</div><h3 class="text-xl font-bold mb-2">התנהגויות מאתגרות</h3><p class="text-gray-600 mt-auto">אסטרטגיות להתמודדות עם התקפי זעם וקשיים.</p></div>
-                        <div class="feature-card text-center p-6 rounded-2xl reveal"><div class="flex items-center justify-center h-20 w-20 rounded-full bg-green-100 text-green-600 mx-auto mb-4 text-4xl feature-icon">🗣️</div><h3 class="text-xl font-bold mb-2">תקשורת הורה-ילד</h3><p class="text-gray-600 mt-auto">למדו כיצד לנהל שיחות פתוחות וליצור הקשבה.</p></div>
-                        <div class="feature-card text-center p-6 rounded-2xl reveal"><div class="flex items-center justify-center h-20 w-20 rounded-full bg-yellow-100 text-yellow-600 mx-auto mb-4 text-4xl feature-icon">🌱</div><h3 class="text-xl font-bold mb-2">חינוך חיובי</h3><p class="text-gray-600 mt-auto">שיטות לחיזוק התנהגויות רצויות ובניית סביבה תומכת.</p></div>
-                        <div class="feature-card text-center p-6 rounded-2xl reveal"><div class="flex items-center justify-center h-20 w-20 rounded-full bg-purple-100 text-purple-600 mx-auto mb-4 text-4xl feature-icon">🌟</div><h3 class="text-xl font-bold mb-2">פיתוח עצמאות</h3><p class="text-gray-600 mt-auto">עודדו את ילדיכם לקחת אחריות ולפתח ביטחון עצמי.</p></div>
-                        <div class="feature-card text-center p-6 rounded-2xl reveal"><div class="flex items-center justify-center h-20 w-20 rounded-full bg-teal-100 text-teal-600 mx-auto mb-4 text-4xl feature-icon">😴</div><h3 class="text-xl font-bold mb-2">שינה רגועה</h3><p class="text-gray-600 mt-auto">כלים ליצירת הרגלי שינה בריאים והתמודדות עם קשיי הירדמות.</p></div>
-                        <div class="feature-card text-center p-6 rounded-2xl reveal"><div class="flex items-center justify-center h-20 w-20 rounded-full bg-pink-100 text-pink-600 mx-auto mb-4 text-4xl feature-icon">👨‍👩‍👧‍👦</div><h3 class="text-xl font-bold mb-2">יחסי אחים</h3><p class="text-gray-600 mt-auto">אסטרטגיות להפחתת מריבות וטיפוח קשר חיובי בין אחים.</p></div>
-                        <div class="feature-card text-center p-6 rounded-2xl reveal"><div class="flex items-center justify-center h-20 w-20 rounded-full bg-orange-100 text-orange-600 mx-auto mb-4 text-4xl feature-icon">📱</div><h3 class="text-xl font-bold mb-2">ניהול מסכים</h3><p class="text-gray-600 mt-auto">קביעת גבולות בריאים ואיזון נכון בין העולם הדיגיטלי למציאות.</p></div>
-                        <div class="feature-card text-center p-6 rounded-2xl reveal"><div class="flex items-center justify-center h-20 w-20 rounded-full bg-cyan-100 text-cyan-600 mx-auto mb-4 text-4xl feature-icon">😟</div><h3 class="text-xl font-bold mb-2">התמודדות עם חרדה</h3><p class="text-gray-600 mt-auto">זיהוי סימני חרדה אצל ילדים ומתן כלים להרגעה וביטחון.</p></div>
-                        <div class="feature-card text-center p-6 rounded-2xl reveal"><div class="flex items-center justify-center h-20 w-20 rounded-full bg-lime-100 text-lime-600 mx-auto mb-4 text-4xl feature-icon">🤝</div><h3 class="text-xl font-bold mb-2">כישורים חברתיים</h3><p class="text-gray-600 mt-auto">עידוד אמפתיה, שיתוף פעולה ויצירת חברויות בריאות.</p></div>
-                    </div>
-                </div>
-            </section>
-            
-            <section id="articles" class="py-24 bg-gray-50">
-                <div class="container mx-auto px-6">
-                     <h2 class="text-3xl font-bold text-center mb-4 reveal">מאגר ידע אקדמי להורים</h2>
-                     <p class="text-lg text-center text-gray-600 mb-16 max-w-2xl mx-auto reveal">כלים ומידע המבוססים על מחקרי CBT עדכניים, שנבחרו בקפידה כדי לספק לכם תמיכה אמינה ומעשית.</p>
-                     <div id="articles-grid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
-                     <div id="show-all-articles-container" class="text-center mt-12">
-                        <button id="show-all-articles-btn" class="bg-white text-indigo-600 font-semibold py-3 px-8 border-2 border-indigo-200 rounded-lg hover:bg-indigo-50 transition">הצג את כל המאמרים</button>
-                    </div>
-                </div>
-            </section>
-        </main>
-        
-        <footer class="bg-gray-800 text-white">
-            <div class="container mx-auto px-6 py-8 text-center">
-                <p>&copy; 2025 יונתן הפסיכו-בוט. כל הזכויות שמורות.</p>
-                <p class="text-sm text-gray-400 mt-2">האתר מהווה כלי עזר בלבד ואינו תחליף לייעוץ פסיכולוגי מקצועי.</p>
-                <a href="/accessibility.html" class="text-sm text-gray-400 hover:text-white underline mt-4 inline-block">הצהרת נגישות</a>
-            </div>
-        </footer>
-    </div>
-    
-    <div id="walking-character-container">
-        <div id="character-animation"></div>
-    </div>
-
-    <div class="accessibility-toggle" id="accessibility-toggle" aria-label="פתח תפריט נגישות" role="button" tabindex="0">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 256 256"><path d="M224,128a96,96,0,1,1-96-96A96,96,0,0,1,224,128ZM128,72a16,16,0,1,0-16-16A16,16,0,0,0,128,72Zm-8,32v64a8,8,0,0,0,16,0V104a8,8,0,0,0-16,0Z"></path></svg>
-    </div>
-    <div class="accessibility-menu" id="accessibility-menu">
-        <div class="text-lg font-bold mb-3 text-right">הגדרות נגישות</div>
-        <div class="space-y-2">
-            <button id="increase-font">הגדל גופן</button>
-            <button id="decrease-font">הקטן גופן</button>
-            <button id="toggle-contrast">ניגודיות גבוהה</button>
-            <button id="toggle-links">הדגש קישורים</button>
-            <button id="toggle-motion">הפחת תנועה</button>
-        </div>
-    </div>
-
-    <script src="/widget.js" defer></script>
     <script>
     document.addEventListener('DOMContentLoaded', () => {
-        const articlesData = {
-            'anxiety-panic-1': { 
-                title: 'חרדה כללית: דה-קטסטרופיזציה',
-                summary: 'כלי CBT קלאסי להפחתת חרדה על ידי בחינה רציונלית של מחשבות מאיימות והערכת הסבירות הגרועה ביותר.',
-                content: '<h4>הכלי הטיפולי: דה-קטסטרופיזציה</h4><p>כאשר עולה מחשבה הגורמת לחרדה (למשל, "מה אם הילד שלי ייפול?"), במקום להיסחף איתה, אנו בוחנים אותה באופן רציונלי. שאל את עצמך: 1. מה הדבר הגרוע ביותר שיכול לקרות? 2. מה הסבירות שזה יקרה? 3. מה הדבר הסביר ביותר שיקרה? 4. איך אתמודד אם התרחיש הגרוע ביותר יתממש? תהליך זה "מפרק" את המחשבה המאיימת ומפחית את עוצמתה.</p>', 
-                source: 'https://www.ncbi.nlm.nih.gov/books/NBK279250/',
-                source_type: 'פרסום של המכון לאיכות ויעילות בבריאות (IQWiG), גרמניה'
-            },
-            'anxiety-panic-2': { 
-                title: 'התקפי פאניקה: נשימה סרעפתית',
-                summary: 'טכניקת הרגעה פיזיולוגית המפעילה את מערכת העצבים הפאראסימפתטית ומסייעת להפחית תסמיני פאניקה בזמן אמת.',
-                content: '<h4>הכלי הטיפולי: נשימה סרעפתית (נשימת בטן)</h4><p>שב או שכב בנוחות. הנח יד אחת על החזה ויד שנייה על הבטן. שאף אוויר לאט דרך האף במשך 4 שניות, וודא שהיד על הבטן עולה והיד על החזה כמעט לא זזה. החזק את האוויר לספירה של 2. נשוף לאט דרך הפה במשך 6 שניות, והרגיש את הבטן יורדת. תרגול של 5-10 דקות יכול להרגיע את המערכת באופן משמעותי.</p>', 
-                source: 'https://www.health.harvard.edu/mind-and-mood/relaxation-techniques-breath-control-helps-quell-errant-stress-response',
-                source_type: 'מאמר מבית הספר לרפואה של הרווארד'
-            },
-            'depression-mood-1': {
-                title: 'דיכאון: הפעלה התנהגותית',
-                summary: 'כלי CBT יעיל המעודד ביצוע פעילויות מהנות או משמעותיות, גם כשאין חשק, כדי לשבור את מעגל החוסר-מעש והדיכאון.',
-                content: '<h4>הכלי הטיפולי: הפעלה התנהגותית (Behavioral Activation)</h4><p>התחל בקטן. בחר פעילות אחת, פשוטה וקצרה, שבעבר גרמה לך הנאה (למשל, האזנה לשיר, הליכה של 5 דקות). קבע זמן לביצוע הפעילות והתחייב אליו. המטרה אינה לחוש הנאה מיידית, אלא עצם הביצוע. הפעולה עצמה היא הניצחון, והיא מתחילה לבנות מומנטום חיובי שיכול לשפר את מצב הרוח בהדרגה.</p>',
-                source: 'https://www.apa.org/ptsd-guideline/patients-and-families/behavioral-activation',
-                source_type: 'מדריך למטופלים של האגודה האמריקנית לפסיכולוגיה (APA)'
-            },
-            'depression-mood-2': {
-                title: 'מצב רוח נמוך: זיהוי מחשבות אוטומטיות',
-                summary: 'למידה לזהות "מחשבות אוטומטיות שליליות" (ANTs) היא הצעד הראשון בשינוי דפוסי חשיבה המנציחים מצב רוח ירוד.',
-                content: '<h4>הכלי הטיפולי: יומן מחשבות</h4><p>במשך יום אחד, נסה לתעד ביומן כל פעם שאתה מרגיש שמצב הרוח שלך צונח. רשום שלושה דברים: 1. **המצב:** מה קרה בדיוק? (למשל, "הילד לא הקשיב לי"). 2. **הרגש:** מה הרגשתי? (למשל, "תסכול, עצב"). 3. **המחשבה:** מה עבר לי בראש שנייה לפני? (למשל, "אני הורה גרוע"). עצם המודעות למחשבות אלו היא השלב הראשון והחיוני ביותר בדרך לשינוי.</p>',
-                source: 'https://www.ncbi.nlm.nih.gov/books/NBK549819/',
-                source_type: 'מאמר מ-PubMed על טיפול קוגניטיבי התנהגותי'
-            },
-            'stress-performance-1': {
-                title: 'ניהול לחץ: הרפיית שרירים מתקדמת',
-                summary: 'טכניקה פיזית להפחתת מתח על ידי כיווץ והרפיה שיטתית של קבוצות שרירים שונות בגוף.',
-                content: '<h4>הכלי הטיפולי: הרפיית שרירים (PMR)</h4><p>שב בנוחות ועצום עיניים. התחל מכפות הרגליים: כווץ אותן חזק למשך 5 שניות, והרפה. שים לב להבדל בין המתח לרגיעה. המשך במעלה הגוף: כווץ והרפה את שרירי השוקיים, הירכיים, הישבן, הבטן, החזה, הזרועות, הכתפיים, ולבסוף את שרירי הפנים. תרגול זה מלמד את הגוף לזהות מתח ולשחרר אותו באופן יזום.</p>',
-                source: 'https://www.uofmhealth.org/health-library/uf9908',
-                source_type: 'מדריך מאוניברסיטת מישיגן לרפואה'
-            },
-            'stress-performance-2': {
-                title: 'חרדת ביצועים: שינוי מוקד הקשב',
-                summary: 'הסטת המיקוד ממחשבות פנימיות על כישלון אפשרי (קשב פנימי) אל עבר המשימה עצמה (קשב חיצוני).',
-                content: '<h4>הכלי הטיפולי: מיקוד במשימה</h4><p>לפני סיטואציה המעוררת חרדת ביצועים (למשל, שיחה חשובה), הגדר לעצמך מטרה קונקרטית וחיצונית. במקום לחשוב "אני חייב לא לגמגם", חשוב "אני רוצה להקשיב היטב לצד השני ולהבין את צרכיו". הסטת המיקוד מהביצוע העצמי אל המשימה החיצונית מפחיתה את הלחץ ומאפשרת תפקוד טבעי וטוב יותר.</p>',
-                source: 'https://journals.humankinetics.com/view/journals/jcsp/23/1/article-p1.xml',
-                source_type: 'מחקר מ-Journal of Clinical Sport Psychology'
-            },
-            'sleep-1': {
-                title: 'בעיות שינה: היגיינת שינה',
-                summary: 'בניית סביבה והרגלים המעודדים שינה איכותית, המהווה את הבסיס לטיפול CBT באינסומניה (CBT-I).',
-                content: '<h4>הכלי הטיפולי: בניית "מקדש שינה"</h4><p>המיטה מיועדת לשני דברים בלבד: שינה ויחסי אישות. הימנע מעבודה, אכילה או צפייה בטלוויזיה במיטה. ודא שחדר השינה חשוך, שקט וקריר. הימנע מקפאין ואלכוהול בשעות שלפני השינה. קבע שעת שינה ושעת יקיצה קבועות, גם בסופי שבוע. הרגלים אלו יוצרים התניה חזקה במוח בין המיטה לבין שינה.</p>',
-                source: 'https://www.sleepfoundation.org/sleep-hygiene',
-                source_type: 'פרסום מ-The Sleep Foundation'
-            },
-            'sleep-2': {
-                title: 'נדודי שינה: הגבלת שינה',
-                summary: 'טכניקת CBT-I פרדוקסלית שבה מגבילים את זמן השהות במיטה כדי להגביר את יעילות השינה ולהפחית יקיצות.',
-                content: '<h4>הכלי הטיפולי: הגבלת זמן במיטה</h4><p>אם אתה מתעורר באמצע הלילה ולא נרדם חזרה תוך 20 דקות, קום מהמיטה. לך לחדר אחר ועסוק בפעילות מרגיעה בתאורה חלשה (כמו קריאת ספר). חזור למיטה רק כשאתה מרגיש עייף שוב. המטרה היא לשבור את הקישור בין המיטה לבין תסכול ועצבנות, ולחזק את הקישור בין המיטה לשינה מהירה.</p>',
-                source: 'https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5044662/',
-                source_type: 'סקירת מחקרים על CBT-I מ-PubMed'
-            },
-            'self-esteem-1': {
-                title: 'ביקורת עצמית: חמלה עצמית',
-                summary: 'פיתוח גישה תומכת וידידותית כלפי עצמך, במיוחד בזמני קושי וכישלון, במקום ביקורת נוקשה.',
-                content: '<h4>הכלי הטיפולי: "איך היית מדבר לחבר?"</h4><p>בפעם הבאה שאתה מוצא את עצמך שופט את עצמך בחומרה (למשל, "איך צעקתי על הילד, אני איום ונורא"), עצור לרגע. שאל את עצמך: "מה הייתי אומר לחבר טוב שהיה מספר לי שזה קרה לו?". סביר להניח שהיית מציע לו תמיכה והבנה ("זה קורה לכולם, היית עייף ולחוץ"). נסה להפנות את אותה חמלה כלפי עצמך.</p>',
-                source: 'https://psycnet.apa.org/record/2011-05684-001',
-                source_type: 'תקציר מחקר מ-Journal of Personality and Social Psychology'
-            },
-            'self-esteem-2': {
-                title: 'הערכה עצמית: תיקון עיוותי חשיבה',
-                summary: 'זיהוי ותיקון של הטיות חשיבה נפוצות, כמו "הכל או כלום" ו"פילטר מנטלי", המחלישות את ההערכה העצמית.',
-                content: '<h4>הכלי הטיפולי: איתור "פילטר מנטלי"</h4><p>עיוות חשיבה זה גורם לנו להתמקד בשלילי ולהתעלם מהחיובי. לדוגמה, אחרי יום שלם של אינטראקציות חיוביות עם הילד, אנו מתמקדים בחמש הדקות שבהן איבדנו את הסבלנות. נסה באופן פעיל לאסוף "ראיות" חיוביות. בסוף כל יום, רשום שלושה דברים חיוביים שעשית כהורה. זה מאמן את המוח לראות את התמונה המלאה והמאוזנת יותר.</p>',
-                source: 'https://beckinstitute.org/get-informed/tools-for-wellness/',
-                source_type: 'כלים ומשאבים ממכון בק (מייסד ה-CBT)'
-            },
-            'grief-trauma-1': {
-                title: 'צער ואבל: מתן תוקף לרגשות',
-                summary: 'הבנה שאבל אינו תהליך לינארי ואין דרך "נכונה" להרגיש. CBT מעודד קבלה ומתן תוקף לכל קשת הרגשות שעולים.',
-                content: '<h4>הכלי הטיפולי: הרשאה להרגיש</h4><p>במקום לנסות "להתגבר" או להדחיק רגשות קשים, תן לעצמך רשות להרגיש אותם. אמור לעצמך: "זה בסדר להרגיש כעס עכשיו", או "מותר לי לבכות". אפשר להקדיש זמן מוגדר ביום (למשל, 15 דקות) כדי "לשבת עם הרגש" ללא שיפוט. מתן לגיטימציה לרגשות מפחית את המאבק הפנימי ומאפשר עיבוד בריא יותר.</p>',
-                source: 'https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2882859/',
-                source_type: 'מחקר על טיפול CBT באבל מורכב מ-PubMed'
-            },
-            'grief-trauma-2': {
-                title: 'טראומה: יצירת תחושת ביטחון',
-                summary: 'השלב הראשון בטיפול CBT ממוקד טראומה (TF-CBT) הוא ביסוס תחושת ביטחון פיזי ורגשי בהווה.',
-                content: '<h4>הכלי הטיפולי: תרגיל קרקוע 5-4-3-2-1</h4><p>כאשר זיכרון טראומטי או תחושת הצפה עולים, השתמש בחושים כדי להתחבר להווה. עצור וזהה: **5** דברים שאתה יכול לראות סביבך. **4** דברים שאתה יכול לחוש במגע (למשל, הבגד על גופך, הכיסא). **3** דברים שאתה יכול לשמוע. **2** דברים שאתה יכול להריח. **1** דבר שאתה יכול לטעום. תרגיל זה "מעגן" אותך במציאות ומפחית את עוצמת הזיכרון החודרני.</p>',
-                source: 'https://www.nctsn.org/treatments-and-practices/trauma-focused-cognitive-behavioral-therapy',
-                source_type: 'מידע על TF-CBT מהרשת הלאומית לסטרס טראומטי בילדים (NCTSN)'
-            },
-            'eating-disorders-1': {
-                title: 'הפרעות אכילה: ניטור עצמי',
-                summary: 'הצעד הראשון ב-CBT-E (CBT משופר להפרעות אכילה) הוא ניטור ותיעוד של אכילה, מחשבות ורגשות קשורים.',
-                content: '<h4>הכלי הטיפולי: יומן אכילה מודע</h4><p>במשך מספר ימים, תעד בזמן אמת כל ארוחה או חטיף. רשום לא רק מה אכלת, אלא גם היכן, עם מי, ומה היו המחשבות והרגשות שלך לפני, במהלך ואחרי האכילה. המטרה אינה שיפוט, אלא איסוף מידע. היומן חושף דפוסים וטריגרים שלא היינו מודעים אליהם, ומספק את הבסיס לשינוי.</p>',
-                source: 'https://www.credo-oxford.com/7.1.html',
-                source_type: 'מידע על CBT-E מהמרכז למחקר על הפרעות אכילה באוקספורד'
-            },
-            'eating-disorders-2': {
-                title: 'דימוי גוף: חשיפה הדרגתית',
-                summary: 'התמודדות עם הימנעות מבחינת הגוף במראה, שהיא התנהגות נפוצה המשמרת דימוי גוף שלילי.',
-                content: '<h4>הכלי הטיפולי: חשיפה למראה</h4><p>במקום להימנע מהמראה, התחל בחשיפה קצרה וממוקדת. עמוד מול המראה ותאר באופן אובייקטיבי (ללא שיפוט) חלק ניטרלי בגוף, למשל, "אני רואה את הידיים שלי". עשה זאת למשך 30 שניות בלבד. בהדרגה, ניתן להאריך את הזמן ולהתמקד באזורים נוספים. המטרה היא להפחית את החרדה הקשורה למראה ולהתחיל לראות את הגוף בצורה מאוזנת יותר.</p>',
-                source: 'https://www.cci.health.wa.gov.au/Resources/Looking-After-Yourself/Body-Dysmorphia',
-                source_type: 'מדריך טיפול עצמי מהמרכז להתערבויות קליניות (CCI), אוסטרליה'
-            },
-            'parenting-family-1': {
-                title: 'הורות ומשפחה: טיפול באינטראקציית הורה-ילד (PCIT)',
-                summary: 'גישה מבוססת-ראיות המתמקדת בשיפור איכות הקשר על ידי חיזוק התנהגויות חיוביות של הילד באמצעות שבחים ותשומת לב.',
-                content: '<h4>הכלי הטיפולי: זמן משחק מיוחד (PRIDE)</h4><p>הקדש 5 דקות ביום למשחק עם הילד שבו אתה עוקב אחר כללי PRIDE: **P**raise (שבח) על התנהגות חיובית. **R**eflect (שקף) את דברי הילד. **I**mitate (חקה) את המשחק שלו. **D**escribe (תאר) את מה שהוא עושה. **E**njoy (התלהב). בזמן זה, הימנע משאלות, פקודות או ביקורת. 5 דקות כאלו ביום יכולות לחולל פלאים בקשר.</p>',
-                source: 'http://www.pcit.org/what-is-pcit.html',
-                source_type: 'מידע מהאתר הרשמי של PCIT International'
-            },
-            'parenting-family-2': {
-                title: 'קונפליקטים משפחתיים: פתרון בעיות משותף',
-                summary: 'מודל CBT לפתרון בעיות העוזר למשפחות לעבור מוויכוחים והאשמות לדיון מובנה ולמציאת פתרונות יצירתיים.',
-                content: '<h4>הכלי הטיפולי: מודל 5 השלבים</h4><p>כאשר עולה קונפליקט, קבעו "פגישת פתרון בעיות". 1. **הגדרת הבעיה:** הגדירו את הבעיה במונחים ניטרליים וספציפיים. 2. **סיעור מוחות:** העלו כמה שיותר פתרונות אפשריים, גם אם נראים מוזרים (בלי שיפוט!). 3. **הערכת פתרונות:** עברו על הרשימה ודונו ביתרונות ובחסרונות של כל פתרון. 4. **בחירת פתרון:** בחרו את הפתרון שנראה הטוב ביותר לכולם. 5. **תכנון וביצוע:** החליטו מי עושה מה ומתי, וקבעו מועד לבדוק אם הפתרון עובד.</p>',
-                source: 'https://www.veterans.gc.ca/eng/health-support/mental-health-and-wellness/understanding-mental-health/problem-solving',
-                source_type: 'מדריך לפתרון בעיות ממשרד ותיקי המלחמה, קנדה'
-            },
-        };
+        
+        // --- Article Rendering ---
+        const articlesGrid = document.getElementById('articles-grid');
 
-        const init = () => {
-            const pageWrapper = document.getElementById('page-wrapper');
-            const modals = {
-                disclaimer: document.getElementById('disclaimer-modal'),
-                tutorial: document.getElementById('tutorial-modal'),
-                article: document.getElementById('article-modal'),
-            };
-            const agreeCheckbox = document.getElementById('agree-checkbox');
-            const agreeButton = document.getElementById('agree-button');
-            const showTutorialBtn = document.getElementById('show-tutorial-btn');
-            const articlesGrid = document.getElementById('articles-grid');
-            const showAllArticlesContainer = document.getElementById('show-all-articles-container');
-            const showAllArticlesBtn = document.getElementById('show-all-articles-btn');
-            const slides = document.querySelectorAll('.slider .slide');
-            const accessibilityToggle = document.getElementById('accessibility-toggle');
-            const accessibilityMenu = document.getElementById('accessibility-menu');
-
-            const openModal = (modal) => { 
-                if (modal) {
-                    modal.classList.add('active'); 
-                    pageWrapper.classList.add('blurred'); 
-                }
-            };
-            const closeModal = (modal) => {
-                if (modal) {
-                    modal.classList.remove('active');
-                    if (!document.querySelector('.modal-overlay.active')) { 
-                        pageWrapper.classList.remove('blurred'); 
-                    }
-                }
-            };
-
-            if (!localStorage.getItem('yonatan_disclaimer_agreed')) {
-                openModal(modals.disclaimer);
-            }
-            
-            agreeCheckbox.addEventListener('change', () => { 
-                agreeButton.disabled = !agreeCheckbox.checked;
-            });
-            
-            agreeButton.addEventListener('click', () => {
-                if (!agreeCheckbox.checked) return;
-                localStorage.setItem('yonatan_disclaimer_agreed', 'true');
-                closeModal(modals.disclaimer);
-                checkAndShowTutorial();
-            });
-
-            let currentStep = 0;
-            const tutorialSteps = [
-                { title: "ברוכים הבאים ליונתן!", content: "אני כאן כדי ללוות אתכם, צעד אחר צעד, במסע להורות רגועה ומודעת יותר.", button: "כן, בואו נתחיל!" },
-                { title: "הצ'אט-בוט החכם 🧠", content: "בלחיצה על כפתור הבוט תוכלו להתחיל שיחה אישית. יונתן יציע כלים וטכניקות המותאמים לאתגרים שלכם.", button: "הבנתי, מה הלאה?" },
-                { title: "מעקב והתקדמות 📊", content: "ב'אזור האישי' תוכלו לראות סיכומי שיחות, לעקוב אחר ההתקדמות, לשמור מאמרים ולהגדיר מטרות.", button: "מעולה, מה עוד?" },
-                { title: "מאגר ידע ומאמרים 📚", content: "כל הכלים וההמלצות מגובים במחקר. כאן תמצאו מאמרים וסיכומים שיעזרו לכם להבין את השיטות.", button: "נהדר, אני מוכן!" }
-            ];
-
-            function showTutorialStep(stepIndex) {
-                const step = tutorialSteps[stepIndex];
-                const tutorialContent = modals.tutorial.querySelector('#tutorial-content');
-                if (tutorialContent) {
-                    tutorialContent.innerHTML = `
-                        <button class="tutorial-close-btn absolute top-4 left-4 text-gray-400 hover:text-gray-700 text-2xl">&times;</button>
-                        <h2 class="text-2xl font-bold text-center mb-4">${step.title}</h2>
-                        <p class="text-center text-gray-600 mb-8">${step.content}</p>
-                        <div class="flex items-center justify-center gap-2 mb-8">${tutorialSteps.map((_, i) => `<div class="w-3 h-3 rounded-full ${i === stepIndex ? 'bg-indigo-600' : 'bg-gray-300'}"></div>`).join('')}</div>
-                        <div class="flex justify-center"><button class="tutorial-next-btn bg-indigo-600 text-white font-bold py-2 px-8 rounded-lg">${step.button}</button></div>`;
-                    
-                    tutorialContent.querySelector('.tutorial-next-btn').addEventListener('click', nextTutorialStep);
-                    tutorialContent.querySelector('.tutorial-close-btn').addEventListener('click', closeTutorial);
-                }
-            }
-
-            function nextTutorialStep() { 
-                currentStep++; 
-                (currentStep < tutorialSteps.length) ? showTutorialStep(currentStep) : closeTutorial(); 
-            }
-            
-            function closeTutorial() { 
-                closeModal(modals.tutorial); 
-                localStorage.setItem('yonatan_tutorial_seen', 'true'); 
-            }
-
-            function checkAndShowTutorial() {
-                if (!localStorage.getItem('yonatan_tutorial_seen')) {
-                    setTimeout(() => { 
-                        currentStep = 0; 
-                        showTutorialStep(0); 
-                        openModal(modals.tutorial); 
-                    }, 300);
-                }
-            }
-            
-            showTutorialBtn.addEventListener('click', () => { 
-                currentStep = 0; 
-                showTutorialStep(0); 
-                openModal(modals.tutorial); 
-            });
-
-            let currentSlideIdx = 0;
-            if (slides.length > 0) {
-                setInterval(() => {
-                    if (document.hasFocus() && !document.body.classList.contains('reduced-motion')) {
-                        slides[currentSlideIdx].classList.remove('active');
-                        currentSlideIdx = (currentSlideIdx + 1) % slides.length;
-                        slides[currentSlideIdx].classList.add('active');
-                    }
-                }, 5000);
-            }
-
-            function createArticleCard(key, article) {
-                const card = document.createElement('div');
-                card.className = 'article-card bg-white rounded-2xl shadow-md overflow-hidden cursor-pointer reveal';
-                card.innerHTML = `
-                    <div class="p-6 flex flex-col h-full">
-                        <h3 class="text-xl font-bold mb-2">${article.title}</h3>
-                        <p class="text-gray-600 mb-4 text-sm leading-relaxed flex-grow">${article.summary}</p>
-                        <div class="mt-auto">
-                           <button class="read-more-btn text-indigo-600 font-semibold hover:underline border border-indigo-200 px-4 py-1 rounded-full relative overflow-hidden w-full">קרא עוד</button>
-                        </div>
-                    </div>`;
+        async function fetchAndRenderArticles() {
+            try {
+                const response = await fetch('/api/articles');
+                if (!response.ok) throw new Error('Network response was not ok');
+                const articles = await response.json();
                 
-                card.querySelector('.read-more-btn').addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    openArticleModal(article);
-                });
-                
-                return card;
-            }
-
-            function openArticleModal(article) {
-                const articleWrapper = modals.article.querySelector('#article-content-wrapper');
-                if (articleWrapper) {
-                    articleWrapper.innerHTML = `
-                        <div class="flex justify-between items-center border-b pb-4 mb-4">
-                            <h2 class="text-3xl font-bold">${article.title}</h2>
-                            <span class="close-article-btn text-4xl cursor-pointer text-gray-400 hover:text-gray-700">&times;</span>
-                        </div>
-                        <div class="prose max-w-none text-right">${article.content}</div>
-                        <div class="mt-8 pt-4 border-t space-y-4">
-                            <div class="text-sm">
-                                <p class="font-semibold text-gray-700 mb-2">מקור: <span class="font-normal text-gray-600">${article.source_type}</span></p>
-                                <div class="flex items-center gap-2">
-                                    <input type="text" readonly value="${article.source}" class="link-input w-full p-2 border rounded-md bg-gray-100 text-gray-600 text-xs" dir="ltr">
-                                    <button class="copy-link-btn bg-gray-200 text-gray-800 font-semibold py-2 px-4 rounded-lg hover:bg-gray-300 flex items-center gap-2 shrink-0">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" class="w-4 h-4"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zM-1 2.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5z"/></svg>
-                                        <span class="copy-text">העתק קישור</span>
-                                    </button>
-                                </div>
+                articlesGrid.innerHTML = ''; // Clear existing
+                articles.forEach(article => {
+                    const articleEl = document.createElement('div');
+                    articleEl.className = 'article-card bg-white p-6 rounded-2xl shadow-sm flex flex-col slide-up';
+                    articleEl.innerHTML = `
+                        <div>
+                            <h3 class="text-xl font-bold mb-2 text-gray-900">${article.title}</h3>
+                            <p class="text-sm text-gray-500 mb-3">מאת: ${article.author}</p>
+                            <p class="text-gray-600 mb-4">${article.short_desc}</p>
+                            <div class="expand-content">
+                                <p class="text-gray-600">${article.long_desc}</p>
                             </div>
-                        </div>`;
-
-                    articleWrapper.querySelector('.close-article-btn').addEventListener('click', () => closeModal(modals.article));
-                    
-                    articleWrapper.querySelector('.copy-link-btn').addEventListener('click', (e) => {
-                        const button = e.currentTarget;
-                        const linkInput = articleWrapper.querySelector('.link-input');
-                        const copyTextSpan = button.querySelector('.copy-text');
-                        
-                        linkInput.select();
-                        linkInput.setSelectionRange(0, 99999); 
-
-                        try {
-                            document.execCommand('copy');
-                            copyTextSpan.textContent = 'הועתק!';
-                            button.classList.add('bg-green-200');
-                            setTimeout(() => {
-                                copyTextSpan.textContent = 'העתק קישור';
-                                button.classList.remove('bg-green-200');
-                            }, 2000);
-                        } catch (err) {
-                            copyTextSpan.textContent = 'שגיאה';
-                        }
-                    });
-                    openModal(modals.article);
-                }
-            }
-
-            modals.article.addEventListener('click', (e) => { if (e.target === modals.article) closeModal(modals.article); });
-            
-            const articleKeys = Object.keys(articlesData);
-            
-            function renderArticles(count) {
-                if (!articlesGrid) return;
-                articlesGrid.innerHTML = '';
-                articleKeys.slice(0, count).forEach(key => {
-                    articlesGrid.appendChild(createArticleCard(key, articlesData[key]));
+                        </div>
+                        <div class="mt-auto pt-4">
+                            <button class="toggle-expand text-sm font-semibold text-indigo-600 hover:text-indigo-800">קרא/י עוד</button>
+                            <a href="${article.link}" target="_blank" rel="noopener noreferrer" class="float-left bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-semibold py-2 px-4 rounded-lg text-sm transition">
+                                למאמר המלא &rarr;
+                            </a>
+                        </div>
+                    `;
+                    articlesGrid.appendChild(articleEl);
                 });
-                observeElements();
-            }
 
-            showAllArticlesBtn.addEventListener('click', () => {
-                renderArticles(articleKeys.length);
-                showAllArticlesContainer.style.display = 'none';
-            });
-
-            let observer;
-            function observeElements() {
-                const reveals = document.querySelectorAll('.reveal:not(.visible)');
-                if (observer) observer.disconnect();
-                observer = new IntersectionObserver((entries) => {
-                    entries.forEach(entry => {
-                        if (entry.isIntersecting) {
-                            entry.target.classList.add('visible');
-                            observer.unobserve(entry.target);
-                        }
+                // Add event listeners after elements are in the DOM
+                document.querySelectorAll('.toggle-expand').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        const content = e.target.closest('.article-card').querySelector('.expand-content');
+                        content.classList.toggle('expanded');
+                        e.target.textContent = content.classList.contains('expanded') ? 'הצג פחות' : 'קרא/י עוד';
                     });
-                }, { rootMargin: '0px', threshold: 0.1 });
-                reveals.forEach(el => observer.observe(el));
+                });
+
+            } catch (error) {
+                console.error('Failed to fetch articles:', error);
+                articlesGrid.innerHTML = '<p>אירעה שגיאה בטעינת המאמרים. נסו לרענן את הדף.</p>';
             }
+        }
 
-            function setupWalkingCharacter() {
-                const container = document.getElementById('character-animation');
-                if (!container) return;
-                try {
-                    lottie.loadAnimation({
-                        container: container, renderer: 'svg', loop: true, autoplay: true,
-                        path: 'character-animation.json' 
-                    });
-                } catch(e) { console.error("Could not load Lottie animation", e); }
+        // --- Animations ---
+        function observeElements() {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            document.querySelectorAll('.slide-up').forEach(el => observer.observe(el));
+        }
+        
+        function setupWalkingCharacter() {
+            const container = document.getElementById('walking-character-container');
+            if (container) {
+                lottie.loadAnimation({
+                    container: container,
+                    renderer: 'svg',
+                    loop: true,
+                    autoplay: true,
+                    path: '/character-animation.json' 
+                });
             }
+        }
 
-            const FONT_STEP = 0.1;
-            const applyFontSize = (size) => {
-                document.documentElement.style.setProperty('--font-size', `${size}rem`);
-            };
-
-            accessibilityToggle.addEventListener('click', (e) => {
-                e.stopPropagation();
-                accessibilityMenu.classList.toggle('active');
+        // --- Event Listeners ---
+        const startChatButton = document.getElementById('start-chat-hero');
+        if (startChatButton) {
+            startChatButton.addEventListener('click', () => {
+                // This assumes the widget is loaded and has a global function to open it
+                if (window.yonatanWidget && typeof window.yonatanWidget.open === 'function') {
+                    window.yonatanWidget.open();
+                } else {
+                    // Fallback for when the widget isn't ready yet
+                    const widgetButton = document.getElementById('yonatan-widget-button');
+                    if(widgetButton) widgetButton.click();
+                }
             });
-            document.addEventListener('click', () => accessibilityMenu.classList.remove('active'));
-            accessibilityMenu.addEventListener('click', e => e.stopPropagation());
+        }
 
-            document.getElementById('increase-font').addEventListener('click', () => {
-                let currentSize = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--font-size'));
-                applyFontSize(currentSize + FONT_STEP);
-            });
-
-            document.getElementById('decrease-font').addEventListener('click', () => {
-                let currentSize = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--font-size'));
-                applyFontSize(Math.max(0.8, currentSize - FONT_STEP));
-            });
-
-            document.getElementById('toggle-contrast').addEventListener('click', () => document.body.classList.toggle('accessibility-contrast'));
-            document.getElementById('toggle-links').addEventListener('click', () => document.body.classList.toggle('accessibility-highlight-links'));
-            document.getElementById('toggle-motion').addEventListener('click', () => document.body.classList.toggle('reduced-motion'));
-
-            renderArticles(6);
+        // --- Init ---
+        function init() {
+            fetchAndRenderArticles();
             observeElements();
             setupWalkingCharacter();
-        };
+        }
 
         init();
     });
     </script>
+    <!-- The widget script will be loaded here -->
+    <script src="/widget.js"></script>
 </body>
 </html>
