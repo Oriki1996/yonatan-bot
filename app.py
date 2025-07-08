@@ -1,4 +1,4 @@
-# app.py - v9.0 - More dynamic conversation and interactive prompts
+# app.py - v12.0 - Standard Flask project structure
 import os
 import logging
 import json
@@ -12,7 +12,8 @@ from uuid import uuid4
 
 # --- App Initialization & Config ---
 load_dotenv()
-app = Flask(__name__, template_folder='.')
+# Flask will now automatically look for 'templates' and 'static' folders
+app = Flask(__name__)
 
 instance_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'instance')
 os.makedirs(instance_path, exist_ok=True)
@@ -43,25 +44,19 @@ try:
 except Exception as e:
     logger.error(f"Error configuring Google AI model: {e}")
 
-# --- CBT System Prompt (Revised) ---
+# --- CBT System Prompt ---
 CBT_SYSTEM_PROMPT = """
 אתה "יונתן", פסיכו-בוט חינוכי דיגיטלי, המבוסס על עקרונות טיפול קוגניטיבי-התנהגותי (CBT).
 תפקידך הוא לסייע להורים למתבגרים. אתה אמפתי, מקצועי, ופרקטי.
 המשתמש הוא הורה. פרטיו, פרטי ילדו, ותשובותיו לשאלון ראשוני יסופקו לך.
 
 הנחיות הפעולה שלך:
-1.  **פתיחה ואימות:** התחל כל שיחה חדשה בפנייה אישית להורה בשמו, והתייחס בקצרה לבעיה המרכזית שהגדיר.
-2.  **מסגור CBT:** הסבר בקצרה את מודל אפר"ת (אירוע, פרשנות, רגש, תגובה). עזור להורה להבין את הקשר בין מחשבות (פרשנות), רגשות, והתנהגות (תגובה).
+1.  **הודעת פתיחה חכמה:** אם הודעת המשתמש היא "START_CONVERSATION", תפקידך הוא להתחיל את השיחה. פנה להורה בשמו, ציין את האתגר המרכזי מהשאלון, והצע לו מיד שתי דרכים להתחיל. למשל: "שלום אורי, אני מבין שהאתגר הוא **תקשורת וריבים**. בוא נתחיל. [ספר לי על מקרה ספציפי] או [שנבין קודם מושג מפתח]?".
+2.  **מסגור CBT:** הסבר בקצרה את מודל אפר"ת. כשאתה מסביר מושג מפתח, השתמש בתחביר מיוחד כדי ליצור כרטיס ויזואלי: `CARD[כותרת הכרטיס|גוף ההסבר. אפשר להשתמש ב-**הדגשות**.]`.
 3.  **חקירה סוקרטית:** השתמש בשאלות פתוחות כדי לעזור להורה לחקור את המחשבות האוטומטיות שלו.
-4.  **הצעת כלים אינטראקטיביים:** הצע כלים פרקטיים והפוך אותם לבחירות. כדי להציע בחירה, השתמש בסוגריים מרובעים. למשל: "מה דעתך שננסה את [טבלת המחשבות] או שנעדיף [ניסוי התנהגותי]?". אל תציע יותר מ-2-3 אפשרויות בכל פעם.
-5.  **שמירה על מיקוד:** שמור על השיחה ממוקדת. אם ההורה גולש לנושאים אחרים או מגיב בתגובה לא קשורה (למשל 'פיצה'), הכר בכך בעדינות והחזר אותו למסלול. למשל: "אני מבין, בוא נחזור רגע להתמודדות עם...".
+4.  **הצעת כלים אינטראקטיביים:** הצע כלים פרקטיים והפוך אותם לבחירות באמצעות סוגריים מרובעים. למשל: "מה דעתך שננסה את [טבלת המחשבות] או שנעדיף [ניסוי התנהגותי]?". אל תציע יותר מ-2-3 אפשרויות בכל פעם.
+5.  **שמירה על מיקוד:** אם ההורה גולש לנושאים אחרים, הכר בכך בעדינות והחזר אותו למסלול.
 6.  **שפה דינמית:** גוון את תגובותיך. אל תפתח כל הודעה באותה הדרך. היה תמציתי והשתמש בפסקאות קצרות.
-7.  **סיכום וחיזוק:** בסיום השיחה, סכם את הנקודות המרכזיות, חזור על הכלי שהוצע, ועודד את ההורה לנסות אותו.
-
-**מבנה התגובה שלך:**
-* היה תמציתי וברור.
-* השתמש בהדגשות (bold) כדי להבליט מושגי מפתח (כמו **מחשבה אוטומטית**).
-* הצע הצעות כבחירה באמצעות סוגריים מרובעים: [זו הצעה אחת] [וזו הצעה שנייה]
 """
 
 # --- API Endpoints ---
@@ -77,7 +72,7 @@ def init_session():
         return jsonify({"session_id": session_id, "status": "new_user"})
     except SQLAlchemyError as e:
         db.session.rollback()
-        logger.error(f"Database error during session initialization: {e}")
+        logger.error(f"Database error on init: {e}")
         return jsonify({"error": "Failed to initialize session"}), 500
 
 @app.route('/api/questionnaire', methods=['POST'])
@@ -93,14 +88,14 @@ def handle_questionnaire():
         child = Child(name=data.get('child_name'), age=int(data.get('child_age')), gender=data.get('child_gender'), parent_id=session_id)
         db.session.add(child)
         db.session.flush()
-        response = QuestionnaireResponse(parent_id=session_id, child_id=child.id, response_data=json.dumps(data))
+        response = QuestionnaireResponse(parent_id=session_id, child_id=child.id, response_data=json.dumps(data, ensure_ascii=False))
         db.session.add(response)
         db.session.commit()
         logger.info(f"Questionnaire data saved for session: {session_id}")
-        return jsonify({"status": "success", "child_id": child.id})
+        return jsonify({"status": "success"})
     except (SQLAlchemyError, KeyError, ValueError) as e:
         db.session.rollback()
-        logger.error(f"Error saving questionnaire data: {e}")
+        logger.error(f"Error saving questionnaire: {e}")
         return jsonify({"error": "Failed to save questionnaire data"}), 500
 
 @app.route('/api/chat', methods=['POST'])
@@ -116,21 +111,19 @@ def chat():
         parent = db.session.get(Parent, session_id)
         if not parent: return jsonify({"error": "User not found"}), 404
 
-        # --- CONTEXT ENHANCEMENT ---
         child = Child.query.filter_by(parent_id=session_id).first()
         questionnaire = QuestionnaireResponse.query.filter_by(parent_id=session_id).first()
         
-        # Find the conversation
         conversation = Conversation.query.filter_by(parent_id=session_id).first()
         if not conversation:
             conversation = Conversation(parent_id=session_id, child_id=child.id if child else None, topic="General")
             db.session.add(conversation)
-            db.session.commit() # Commit to get conversation ID
+            db.session.commit()
             db.session.refresh(conversation)
 
-        # Build conversation history
-        history_records = Message.query.filter_by(conversation_id=conversation.id).order_by(Message.timestamp.asc()).limit(10).all()
-        history_str = "\n".join([f"{msg.sender_type.capitalize()}: {msg.content}" for msg in history_records])
+        history_records = Message.query.filter_by(conversation_id=conversation.id).order_by(Message.timestamp.desc()).limit(10).all()
+        history_records.reverse()
+        history_str = "\n".join([f"{'User' if msg.sender_type == 'user' else 'Bot'}: {msg.content}" for msg in history_records])
 
         context = f"""
         --- CONTEXT ---
@@ -148,10 +141,12 @@ def chat():
         response = model.generate_content(full_prompt)
         ai_response = response.text
 
-        # Save new messages to DB
-        user_msg_db = Message(conversation_id=conversation.id, sender_type='user', content=user_message)
+        if user_message != "START_CONVERSATION":
+            user_msg_db = Message(conversation_id=conversation.id, sender_type='user', content=user_message)
+            db.session.add(user_msg_db)
+            
         ai_msg_db = Message(conversation_id=conversation.id, sender_type='bot', content=ai_response)
-        db.session.add_all([user_msg_db, ai_msg_db])
+        db.session.add(ai_msg_db)
         db.session.commit()
 
         return jsonify({"reply": ai_response})
@@ -161,23 +156,23 @@ def chat():
         logger.error(f"Error in chat endpoint: {e}")
         return jsonify({"error": "An internal error occurred."}), 500
 
-@app.route('/api/articles', methods=['GET'])
-def get_articles():
-    try:
-        return send_from_directory('.', 'articles.json')
-    except FileNotFoundError:
-        return jsonify({"error": "Articles file not found."}), 404
-
 # --- Frontend Serving ---
 @app.route('/')
 def serve_main_landing():
+    # Looks for index.html in the 'templates' folder
     return render_template('index.html')
 
-@app.route('/<path:filename>')
-def serve_static_files(filename):
-    if filename.endswith('.html'):
-        return render_template(filename)
-    return send_from_directory('.', filename)
+@app.route('/<page_name>.html')
+def serve_other_html(page_name):
+    # For accessibility.html, dashboard.html etc.
+    try:
+        return render_template(f'{page_name}.html')
+    except Exception:
+        return "Page not found", 404
+
+# Note: The /api/articles route is no longer needed.
+# The frontend will fetch '/static/articles.json' directly,
+# and Flask serves the 'static' folder automatically.
 
 if __name__ == '__main__':
     app.run(debug=True)

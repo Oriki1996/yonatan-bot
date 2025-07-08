@@ -1,21 +1,18 @@
-// Yonatan Psycho-Bot Widget v9.0 - Enhanced UX and Interactivity
+// Yonatan Psycho-Bot Widget v10.0 - Visual & UX Overhaul
 (function() {
     if (window.yonatanWidgetLoaded) return;
     window.yonatanWidgetLoaded = true;
 
     const API_URL = window.location.origin;
 
-    // --- State Management ---
     let state = {
-        uiState: 'closed', // closed, loading, questionnaire, chat
+        uiState: 'closed',
         sessionId: localStorage.getItem('yonatan_session_id'),
         conversationHistory: [],
-        isTyping: false,
         questionnaireStep: 0,
         questionnaireData: {},
     };
 
-    // --- DOM Elements ---
     const elements = {
         chatButton: null,
         widgetContainer: null,
@@ -23,7 +20,6 @@
         chatInput: null,
     };
 
-    // --- Questionnaire Definition (same as before) ---
     const questionnaire = [
         { id: 'parent_name', question: "נעים מאוד, אני יונתן. איך קוראים לך?", type: 'text', placeholder: "השם שלך" },
         { id: 'parent_gender', question: "באיזה מגדר לפנות אליך?", type: 'radio', options: ['זכר', 'נקבה', 'אחר'] },
@@ -37,13 +33,11 @@
         { id: 'goal', question: "ומה המטרה העיקרית שלך מהשיחה שלנו?", type: 'choice', options: ['לקבל כלים פרקטיים', 'להבין טוב יותר את הילד/ה', 'להרגיש יותר ביטחון בהורות', 'לפרוק ולשתף'] },
     ];
 
-    // --- Core Functions ---
     function injectStyles() {
         const style = document.createElement('style');
         style.textContent = `
             :root { --primary: #4f46e5; --secondary: #7c3aed; --user-bubble: #eef2ff; --bot-bubble: #f3f4f6; }
             #yonatan-widget-button { position: fixed; bottom: 20px; right: 20px; background: var(--primary); color: white; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.2); cursor: pointer; transition: all 0.3s ease; z-index: 9998; border: none; }
-            #yonatan-widget-button:hover { transform: scale(1.1); }
             #yonatan-widget-container { position: fixed; bottom: 20px; right: 20px; width: 400px; height: 600px; max-height: calc(100vh - 40px); background: white; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); display: flex; flex-direction: column; overflow: hidden; transform: scale(0.5) translateY(100px); opacity: 0; transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); pointer-events: none; z-index: 9999; }
             #yonatan-widget-container.open { transform: scale(1) translateY(0); opacity: 1; pointer-events: auto; }
             .yonatan-header { background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%); color: white; padding: 16px; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
@@ -59,9 +53,7 @@
             .yonatan-input-area { display: flex; align-items: center; }
             .yonatan-input { flex-grow: 1; border: 1px solid #d1d5db; border-radius: 20px; padding: 10px 16px; font-size: 16px; outline: none; transition: border-color 0.2s; }
             .yonatan-input:focus { border-color: var(--primary); }
-            .yonatan-send-btn { background: var(--primary); color: white; border: none; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 10px; cursor: pointer; transition: background-color 0.2s; }
-            .yonatan-send-btn:hover { background-color: var(--secondary); }
-            .yonatan-typing-indicator { display: flex; align-items: center; padding: 10px 0; }
+            .yonatan-send-btn { background: var(--primary); color: white; border: none; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-left: 10px; cursor: pointer; transition: background-color 0.2s; }
             .yonatan-typing-indicator span { height: 8px; width: 8px; border-radius: 50%; background-color: #9ca3af; margin: 0 2px; animation: typing-bounce 1.4s infinite ease-in-out both; }
             .yonatan-typing-indicator span:nth-child(1) { animation-delay: -0.32s; } .yonatan-typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
             .yonatan-loader { border: 4px solid #f3f3f3; border-top: 4px solid var(--primary); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: auto; }
@@ -70,6 +62,9 @@
             .question-btn:hover, .question-btn.selected { background-color: #eef2ff; border-color: var(--primary); color: var(--primary); }
             .suggestion-btn { background-color: white; border: 1px solid var(--primary); color: var(--primary); padding: 8px 12px; border-radius: 20px; cursor: pointer; transition: all 0.2s; margin: 4px; font-family: 'Assistant', sans-serif; font-size: 14px; }
             .suggestion-btn:hover { background-color: #eef2ff; }
+            .yonatan-card { background-color: white; border-radius: 12px; border: 1px solid #e5e7eb; margin-top: 8px; overflow: hidden; }
+            .yonatan-card-header { background-color: #f9fafb; padding: 10px 15px; font-weight: bold; border-bottom: 1px solid #e5e7eb; }
+            .yonatan-card-body { padding: 15px; }
             @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
             @keyframes spin { to { transform: rotate(360deg); } }
             @keyframes typing-bounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1.0); } }
@@ -88,7 +83,7 @@
         elements.widgetContainer.id = 'yonatan-widget-container';
         elements.widgetContainer.innerHTML = `
             <div class="yonatan-header">
-                <div class="flex items-center">
+                <div class="flex items-center space-x-2 space-x-reverse">
                     <div class="yonatan-avatar text-base">י</div>
                     <h3 class="font-bold text-lg">יונתן</h3>
                 </div>
@@ -121,7 +116,6 @@
         }
     }
 
-    // --- Questionnaire Logic (largely unchanged) ---
     function renderQuestionnaire(container) {
         const step = state.questionnaireStep;
         const q = questionnaire[step];
@@ -133,8 +127,6 @@
                 inputHtml = `<input type="${q.type}" id="q-input" class="yonatan-input w-full max-w-sm mx-auto mt-4" placeholder="${q.placeholder}">`;
                 break;
             case 'radio':
-                inputHtml = `<div class="flex justify-center gap-4 mt-4">${q.options.map(o => `<button class="question-btn" data-value="${o}">${o}</button>`).join('')}</div>`;
-                break;
             case 'choice':
                 inputHtml = `<div class="flex flex-wrap justify-center gap-3 mt-4">${q.options.map(o => `<button class="question-btn" data-value="${o}">${o}</button>`).join('')}</div>`;
                 break;
@@ -147,9 +139,8 @@
             <div class="questionnaire-view">
                 <p class="text-xl font-semibold text-gray-700">${q.question}</p>
                 <div class="mt-6">${inputHtml}</div>
-                ${(q.type === 'text' || q.type === 'number' || q.type === 'scale') ? '<button id="q-next-btn" class="yonatan-send-btn mx-auto mt-6">&rarr;</button>' : ''}
-            </div>
-        `;
+                ${(q.type === 'text' || q.type === 'number' || q.type === 'scale') ? `<button id="q-next-btn" class="yonatan-send-btn mx-auto mt-6"><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm.707-10.293a1 1 0 00-1.414-1.414l-3 3a1 1 0 001.414 1.414L9 9.414V13a1 1 0 102 0V9.414l1.293 1.293a1 1 0 001.414-1.414l-3-3z" clip-rule="evenodd"></path></svg></button>` : ''}
+            </div>`;
 
         if (q.type === 'radio' || q.type === 'choice') {
             container.querySelectorAll('.question-btn').forEach(btn => btn.addEventListener('click', () => handleQuestionnaireAnswer(btn.dataset.value)));
@@ -163,9 +154,7 @@
     
     function handleQuestionnaireAnswer(answer) {
         if (!answer) return;
-        const q = questionnaire[state.questionnaireStep];
-        state.questionnaireData[q.id] = answer;
-
+        state.questionnaireData[questionnaire[state.questionnaireStep].id] = answer;
         if (state.questionnaireStep < questionnaire.length - 1) {
             state.questionnaireStep++;
             renderView();
@@ -185,7 +174,7 @@
             });
             state.uiState = 'chat';
             renderView();
-            addMessageToChat('bot', `תודה שמילאת את השאלון, ${state.questionnaireData.parent_name}. אני מבין שהאתגר המרכזי הוא ${state.questionnaireData.main_challenge}. אני כאן כדי לעזור. איך תרצה/י שנתחיל?`);
+            sendMessage("START_CONVERSATION"); // Trigger the smart opening message
         } catch (error) {
             console.error(error);
             state.uiState = 'chat';
@@ -194,7 +183,6 @@
         }
     }
 
-    // --- Chat Logic (HEAVILY REVISED) ---
     function renderChat(container) {
         container.innerHTML = `
             <div class="yonatan-chat-window">
@@ -202,7 +190,7 @@
             </div>
             <div class="yonatan-footer">
                 <div class="yonatan-input-area">
-                     <input id="yonatan-input" type="text" class="yonatan-input" placeholder="כתוב/י הודעה...">
+                    <input id="yonatan-input" type="text" class="yonatan-input" placeholder="כתוב/י הודעה...">
                     <button id="yonatan-send-btn" class="yonatan-send-btn">
                         <svg class="w-6 h-6 transform -rotate-90" fill="currentColor" viewBox="0 0 20 20"><path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.428A1 1 0 009.17 15.57l-1.722-7.224a1 1 0 01.224-.97l4.573-5.336z"></path></svg>
                     </button>
@@ -218,6 +206,20 @@
         state.conversationHistory.forEach(msg => addMessageToChat(msg.sender, msg.text, false));
     }
 
+    function parseAndRenderContent(text) {
+        // Regex to find CARD[...] syntax
+        const cardRegex = /CARD\[([^|]+)\|([^\]]+)\]/g;
+        return text.replace(cardRegex, (match, title, body) => {
+            return `
+                <div class="yonatan-card">
+                    <div class="yonatan-card-header">${title}</div>
+                    <div class="yonatan-card-body">${body.replace(/\n/g, '<br>')}</div>
+                </div>
+            `;
+        }).replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+          .replace(/\[(.*?)\]/g, `<button class="suggestion-btn" data-text="$1">$1</button>`);
+    }
+
     function addMessageToChat(sender, text, animate = true) {
         if (!elements.messagesContainer) return;
         
@@ -228,33 +230,24 @@
         wrapper.className = `yonatan-message-wrapper ${sender}`;
         if (!animate) wrapper.style.animation = 'none';
 
-        let contentHTML = text
-            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-            .replace(/\[(.*?)\]/g, `<button class="suggestion-btn" data-text="$1">$1</button>`);
+        const contentHTML = parseAndRenderContent(text);
 
-        let messageHTML = `
+        wrapper.innerHTML = `
+            ${sender === 'bot' ? '<div class="yonatan-avatar">י</div>' : ''}
             <div class="yonatan-message ${sender}">
                 ${contentHTML}
             </div>
         `;
-
-        if (sender === 'bot') {
-            messageHTML = `<div class="yonatan-avatar">י</div>` + messageHTML;
-        }
-
-        wrapper.innerHTML = messageHTML;
+        
         elements.messagesContainer.appendChild(wrapper);
 
-        // Add event listeners to newly created suggestion buttons
         wrapper.querySelectorAll('.suggestion-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 sendMessage(btn.dataset.text);
-                // Visually disable buttons after one is clicked
-                wrapper.querySelectorAll('.suggestion-btn').forEach(b => { b.disabled = true; b.style.cursor = 'not-allowed'; b.style.opacity = '0.6'; });
+                wrapper.querySelectorAll('.suggestion-btn').forEach(b => { b.disabled = true; b.style.cssText = 'cursor: not-allowed; opacity: 0.6;'; });
             });
         });
         
-        // ** SCROLLING FIX **
         const chatWindow = elements.messagesContainer.parentElement;
         chatWindow.scrollTop = chatWindow.scrollHeight;
     }
@@ -263,11 +256,18 @@
         const messageText = messageTextOverride || elements.chatInput.value.trim();
         if (!messageText) return;
 
-        addMessageToChat('user', messageText);
-        state.conversationHistory.push({ sender: 'user', text: messageText });
+        // Don't show the "START_CONVERSATION" message to the user
+        if (messageText !== "START_CONVERSATION") {
+            addMessageToChat('user', messageText);
+            state.conversationHistory.push({ sender: 'user', text: messageText });
+        }
+        
         if (!messageTextOverride) elements.chatInput.value = '';
         
-        toggleTyping(true);
+        // "Thinking time" delay
+        setTimeout(() => {
+            toggleTyping(true);
+        }, 700);
 
         try {
             const response = await fetch(`${API_URL}/api/chat`, {
@@ -291,20 +291,11 @@
     }
 
     function toggleTyping(isTyping) {
-        state.isTyping = isTyping;
         const typingIndicator = elements.messagesContainer.querySelector('.yonatan-typing-indicator');
         if (isTyping && !typingIndicator) {
             const wrapper = document.createElement('div');
             wrapper.className = 'yonatan-message-wrapper bot yonatan-typing-indicator';
-            wrapper.innerHTML = `
-                <div class="yonatan-avatar">י</div>
-                <div class="yonatan-message bot">
-                    <div class="flex items-center justify-center h-full">
-                        <span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span>
-                    </div>
-                </div>`;
-            // Simplified typing indicator for better integration
-            wrapper.querySelector('.bot').innerHTML = `<div class="yonatan-typing-indicator"><span></span><span></span><span></span></div>`;
+            wrapper.innerHTML = `<div class="yonatan-avatar">י</div><div class="yonatan-message bot"><div class="yonatan-typing-indicator"><span></span><span></span><span></span></div></div>`;
             elements.messagesContainer.appendChild(wrapper);
             const chatWindow = elements.messagesContainer.parentElement;
             chatWindow.scrollTop = chatWindow.scrollHeight;
@@ -351,7 +342,6 @@
         }
     }
 
-    // --- Initialization ---
     function initialize() {
         injectStyles();
         createWidget();

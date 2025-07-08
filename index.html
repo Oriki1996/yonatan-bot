@@ -12,28 +12,21 @@
         :root { 
             --primary: #4f46e5; 
             --secondary: #7c3aed;
-            --font-size: 1rem;
+            --light-bg: #f9fafb;
         }
         html { scroll-behavior: smooth; }
-        body { font-family: 'Assistant', sans-serif; font-size: var(--font-size); }
+        body { font-family: 'Assistant', sans-serif; }
         .hero-gradient { background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%); }
-        .feature-card { transition: transform 0.3s ease, box-shadow 0.3s ease; }
+        .feature-card, .article-card, .gallery-card { transition: transform 0.3s ease, box-shadow 0.3s ease; }
         .feature-card:hover { transform: translateY(-8px); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1); }
-        .article-card { transition: transform 0.3s ease, box-shadow 0.3s ease; }
         .article-card:hover { transform: translateY(-5px); box-shadow: 0 8px 20px -4px rgba(0,0,0,0.08); }
+        .gallery-card:hover { transform: scale(1.05); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); }
         .fade-in { animation: fadeIn 1s ease-in-out forwards; opacity: 0; }
         @keyframes fadeIn { to { opacity: 1; } }
         .slide-up { animation: slideUp 0.8s ease-out forwards; opacity: 0; transform: translateY(30px); }
         @keyframes slideUp { to { opacity: 1; transform: translateY(0); } }
-        .expand-content {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.5s ease-in-out, margin-top 0.5s ease-in-out;
-        }
-        .expand-content.expanded {
-            max-height: 500px; /* Adjust as needed */
-            margin-top: 1rem;
-        }
+        .expand-content { max-height: 0; overflow: hidden; transition: max-height 0.5s ease-in-out, margin-top 0.5s ease-in-out; }
+        .expand-content.expanded { max-height: 500px; margin-top: 1rem; }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800">
@@ -41,95 +34,85 @@
     <!-- Header -->
     <header class="bg-white/80 backdrop-blur-lg sticky top-0 z-40 shadow-sm">
         <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
-            <div class="flex items-center space-x-4">
+            <div class="flex items-center space-x-4 space-x-reverse">
                 <svg class="w-8 h-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.657 7.343A8 8 0 0117.657 18.657z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.879 16.121A3 3 0 1014.12 11.88l-4.242 4.242z"></path></svg>
                 <span class="text-2xl font-bold text-gray-800">יונתן הפסיכו-בוט</span>
             </div>
-            <div class="hidden md:flex items-center space-x-8 text-lg">
+            <div class="hidden md:flex items-center space-x-8 space-x-reverse text-lg">
                 <a href="#features" class="text-gray-600 hover:text-indigo-600 transition">מה תקבלו?</a>
-                <a href="#articles" class="text-gray-600 hover:text-indigo-600 transition">מאמרים וכלים</a>
+                <a href="#gallery" class="text-gray-600 hover:text-indigo-600 transition">גלריה</a>
+                <a href="#articles" class="text-gray-600 hover:text-indigo-600 transition">מאמרים</a>
                 <a href="#about" class="text-gray-600 hover:text-indigo-600 transition">על הגישה</a>
-                <a href="/dashboard.html" class="text-gray-600 hover:text-indigo-600 transition">אזור אישי</a>
             </div>
             <a href="/accessibility.html" class="text-sm text-gray-500 hover:text-indigo-600">הצהרת נגישות</a>
         </nav>
     </header>
 
-    <!-- Hero Section -->
+    <!-- Main Content -->
     <main>
         <section class="hero-gradient text-white pt-20 pb-28 text-center">
             <div class="container mx-auto px-6">
-                <h1 class="text-4xl md:text-6xl font-extrabold mb-4 fade-in" style="animation-delay: 0.2s;">כלים להורות רגועה ומודעת יותר</h1>
-                <p class="text-xl md:text-2xl mb-8 max-w-3xl mx-auto fade-in" style="animation-delay: 0.4s;">יונתן, פסיכו-בוט חינוכי, מעניק לכם, הורים למתבגרים, תמיכה וכלים מבוססי-CBT להתמודדות עם אתגרי היומיום. התחילו שיחה וגלו דרכים חדשות לתקשר, להבין ולהתחבר.</p>
-                <button id="start-chat-hero" class="bg-white text-indigo-600 font-bold py-3 px-8 rounded-full text-lg shadow-lg hover:bg-gray-100 transition transform hover:scale-105 fade-in" style="animation-delay: 0.6s;">
+                <h1 class="text-4xl md:text-6xl font-extrabold mb-4 fade-in">כלים להורות רגועה ומודעת יותר</h1>
+                <p class="text-xl md:text-2xl mb-8 max-w-3xl mx-auto fade-in" style="animation-delay: 0.2s;">יונתן, פסיכו-בוט חינוכי, מעניק לכם, הורים למתבגרים, תמיכה וכלים מבוססי-CBT להתמודדות עם אתגרי היומיום. התחילו שיחה וגלו דרכים חדשות לתקשר, להבין ולהתחבר.</p>
+                <button id="start-chat-hero" class="bg-white text-indigo-600 font-bold py-3 px-8 rounded-full text-lg shadow-lg hover:bg-gray-100 transition transform hover:scale-105 fade-in" style="animation-delay: 0.4s;">
                     התחילו שיחה עם יונתן
                 </button>
             </div>
         </section>
 
-        <!-- Walking Character Animation -->
         <div id="walking-character-container" class="w-full h-20 -mt-10" style="direction: ltr;"></div>
 
-        <!-- Features Section -->
+        <!-- Features, Gallery, Articles, About sections... (Content is the same) -->
         <section id="features" class="py-20 bg-white">
             <div class="container mx-auto px-6 text-center">
                 <h2 class="text-3xl md:text-4xl font-bold mb-3 slide-up">ליווי אישי וחכם, זמין 24/7</h2>
                 <p class="text-lg text-gray-600 mb-12 max-w-2xl mx-auto slide-up" style="animation-delay: 0.2s;">יונתן כאן כדי להקשיב, לנתח ולהציע פתרונות מעשיים, בכל זמן שנוח לכם.</p>
                 <div class="grid md:grid-cols-3 gap-8">
-                    <!-- Feature 1 -->
                     <div class="feature-card bg-gray-50 p-8 rounded-2xl shadow-sm slide-up" style="animation-delay: 0.4s;">
-                        <div class="bg-indigo-100 text-indigo-600 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
-                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
-                        </div>
+                        <div class="bg-indigo-100 text-indigo-600 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6"><svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg></div>
                         <h3 class="text-2xl font-bold mb-3">שיחות מבוססות CBT</h3>
                         <p class="text-gray-600">קבלו הכוונה לפי גישה טיפולית מוכחת, המסייעת לזהות דפוסי חשיבה והתנהגות ולשנות אותם.</p>
                     </div>
-                    <!-- Feature 2 -->
                     <div class="feature-card bg-gray-50 p-8 rounded-2xl shadow-sm slide-up" style="animation-delay: 0.6s;">
-                        <div class="bg-purple-100 text-purple-600 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
-                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                        </div>
+                        <div class="bg-purple-100 text-purple-600 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6"><svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></div>
                         <h3 class="text-2xl font-bold mb-3">כלים ופתרונות פרקטיים</h3>
                         <p class="text-gray-600">במקום תיאוריות, תקבלו טכניקות פשוטות וברורות ליישום מיידי בבית עם המתבגר/ת שלכם.</p>
                     </div>
-                    <!-- Feature 3 -->
                     <div class="feature-card bg-gray-50 p-8 rounded-2xl shadow-sm slide-up" style="animation-delay: 0.8s;">
-                        <div class="bg-indigo-100 text-indigo-600 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
-                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
-                        </div>
+                        <div class="bg-indigo-100 text-indigo-600 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6"><svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg></div>
                         <h3 class="text-2xl font-bold mb-3">דיסקרטיות ובטיחות</h3>
                         <p class="text-gray-600">מרחב בטוח ופרטי עבורכם לשתף, להתייעץ ולקבל תמיכה, מבלי לצאת מהבית.</p>
                     </div>
                 </div>
             </div>
         </section>
-
-        <!-- Articles Section -->
-        <section id="articles" class="py-20 bg-gray-50">
+        <section id="gallery" class="py-20 bg-gray-50">
             <div class="container mx-auto px-6">
-                <h2 class="text-3xl md:text-4xl font-bold text-center mb-3 slide-up">מאמרים וכלים להתמודדות</h2>
-                <p class="text-lg text-gray-600 text-center mb-12 max-w-2xl mx-auto slide-up" style="animation-delay: 0.2s;">ידע הוא כוח. אספנו עבורכם מאמרים מבוססי מחקר שיעניקו לכם הבנה וכלים נוספים.</p>
-                <div id="articles-grid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    <!-- Articles will be injected here by JavaScript -->
+                <h2 class="text-3xl md:text-4xl font-bold text-center mb-12 slide-up">עולם שלם של הורות</h2>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="gallery-card rounded-xl overflow-hidden shadow-lg slide-up"><img src="https://placehold.co/400x500/a5b4fc/312e81?text=%D7%AA%D7%A7%D7%A9%D7%95%D7%A8%D7%AA+%D7%97%D7%99%D7%95%D7%91%D7%99%D7%AA" alt="איור של ילד והורה מדברים" class="w-full h-full object-cover"></div>
+                    <div class="gallery-card rounded-xl overflow-hidden shadow-lg slide-up md:row-span-2" style="animation-delay: 0.2s;"><img src="https://placehold.co/400x800/c4b5fd/4c1d95?text=%D7%94%D7%A6%D7%91%D7%AA+%D7%92%D7%91%D7%95%D7%9C%D7%95%D7%AA" alt="איור של ילדה קוראת ספר" class="w-full h-full object-cover"></div>
+                    <div class="gallery-card rounded-xl overflow-hidden shadow-lg slide-up md:col-span-2" style="animation-delay: 0.3s;"><img src="https://placehold.co/800x400/a78bfa/f5f3ff?text=%D7%96%D7%9E%D7%9F+%D7%90%D7%99%D7%9B%D7%95%D7%AA+%D7%9E%D7%A9%D7%A4%D7%97%D7%AA%D7%99" alt="איור של משפחה משחקת יחד" class="w-full h-full object-cover"></div>
+                    <div class="gallery-card rounded-xl overflow-hidden shadow-lg slide-up" style="animation-delay: 0.1s;"><img src="https://placehold.co/400x500/d8b4fe/581c87?text=%D7%94%D7%91%D7%A0%D7%AA+%D7%94%D7%A8%D7%92%D7%A9" alt="איור של ילד חושב" class="w-full h-full object-cover"></div>
+                    <div class="gallery-card rounded-xl overflow-hidden shadow-lg slide-up md:col-span-2" style="animation-delay: 0.4s;"><img src="https://placehold.co/800x400/818cf8/e0e7ff?text=%D7%A6%D7%9E%D7%99%D7%97%D7%94+%D7%95%D7%94%D7%AA%D7%A4%D7%AA%D7%97%D7%95%D7%AA" alt="איור של ילד צומח מתוך עציץ" class="w-full h-full object-cover"></div>
                 </div>
             </div>
         </section>
-
-        <!-- About Section -->
-        <section id="about" class="py-20 bg-white">
+        <section id="articles" class="py-20 bg-white">
+            <div class="container mx-auto px-6">
+                <h2 class="text-3xl md:text-4xl font-bold text-center mb-3 slide-up">מאמרים וכלים להתמודדות</h2>
+                <p class="text-lg text-gray-600 text-center mb-12 max-w-2xl mx-auto slide-up" style="animation-delay: 0.2s;">ידע הוא כוח. אספנו עבורכם מאמרים מבוססי מחקר שיעניקו לכם הבנה וכלים נוספים.</p>
+                <div id="articles-grid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
+            </div>
+        </section>
+        <section id="about" class="py-20 bg-gray-50">
             <div class="container mx-auto px-6 flex flex-col md:flex-row items-center gap-12">
                 <div class="md:w-1/2 slide-up">
                     <h2 class="text-3xl md:text-4xl font-bold mb-4">מה זה בעצם CBT?</h2>
-                    <p class="text-lg text-gray-600 mb-4 leading-relaxed">
-                        טיפול קוגניטיבי-התנהגותי (CBT) היא גישה פסיכולוגית ממוקדת וקצרת-מועד, שזכתה לביסוס מחקרי נרחב. היא מבוססת על הרעיון שהרגשות וההתנהגויות שלנו לא מושפעים ישירות מאירועים, אלא מהפרשנות והמחשבות שלנו על אותם אירועים.
-                    </p>
-                    <p class="text-lg text-gray-600 leading-relaxed">
-                        במילים פשוטות, אם נלמד לזהות את המחשבות הלא-מועילות שלנו ולאתגר אותן, נוכל לשנות את הרגשתנו ואת דרך פעולתנו. יונתן משתמש בעקרונות אלו כדי לעזור לכם לראות את הסיטואציות עם המתבגרים שלכם באור חדש ולמצוא פתרונות יעילים.
-                    </p>
+                    <p class="text-lg text-gray-600 mb-4 leading-relaxed">טיפול קוגניטיבי-התנהגותי (CBT) היא גישה פסיכולוגית ממוקדת וקצרת-מועד, שזכתה לביסוס מחקרי נרחב. היא מבוססת על הרעיון שהרגשות וההתנהגויות שלנו לא מושפעים ישירות מאירועים, אלא מהפרשנות והמחשבות שלנו על אותם אירועים.</p>
+                    <p class="text-lg text-gray-600 leading-relaxed">במילים פשוטות, אם נלמד לזהות את המחשבות הלא-מועילות שלנו ולאתגר אותן, נוכל לשנות את הרגשתנו ואת דרך פעולתנו. יונתן משתמש בעקרונות אלו כדי לעזור לכם לראות את הסיטואציות עם המתבגרים שלכם באור חדש ולמצוא פתרונות יעילים.</p>
                 </div>
-                <div class="md:w-1/2 slide-up" style="animation-delay: 0.3s;">
-                    <img src="https://placehold.co/600x400/e9d5ff/4c1d95?text=%D7%9E%D7%95%D7%93%D7%9C+%D7%90%D7%A4%D7%A8%22%D7%AA" alt="איור של מודל אפרת - אירוע, פרשנות, רגש, תגובה" class="rounded-2xl shadow-lg w-full">
-                </div>
+                <div class="md:w-1/2 slide-up" style="animation-delay: 0.3s;"><img src="https://placehold.co/600x400/e9d5ff/4c1d95?text=%D7%9E%D7%95%D7%93%D7%9C+%D7%90%D7%A4%D7%A8%22%D7%AA" alt="איור של מודל אפרת - אירוע, פרשנות, רגש, תגובה" class="rounded-2xl shadow-lg w-full"></div>
             </div>
         </section>
     </main>
@@ -147,16 +130,15 @@
     <script>
     document.addEventListener('DOMContentLoaded', () => {
         
-        // --- Article Rendering ---
-        const articlesGrid = document.getElementById('articles-grid');
-
         async function fetchAndRenderArticles() {
+            const articlesGrid = document.getElementById('articles-grid');
             try {
-                const response = await fetch('/api/articles');
+                // *** FIX: Use absolute path to static asset ***
+                const response = await fetch('/static/articles.json');
                 if (!response.ok) throw new Error('Network response was not ok');
                 const articles = await response.json();
                 
-                articlesGrid.innerHTML = ''; // Clear existing
+                articlesGrid.innerHTML = '';
                 articles.forEach(article => {
                     const articleEl = document.createElement('div');
                     articleEl.className = 'article-card bg-white p-6 rounded-2xl shadow-sm flex flex-col slide-up';
@@ -179,7 +161,6 @@
                     articlesGrid.appendChild(articleEl);
                 });
 
-                // Add event listeners after elements are in the DOM
                 document.querySelectorAll('.toggle-expand').forEach(button => {
                     button.addEventListener('click', (e) => {
                         const content = e.target.closest('.article-card').querySelector('.expand-content');
@@ -194,7 +175,6 @@
             }
         }
 
-        // --- Animations ---
         function observeElements() {
             const observer = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
@@ -215,37 +195,26 @@
                     renderer: 'svg',
                     loop: true,
                     autoplay: true,
-                    path: '/character-animation.json' 
+                    // *** FIX: Use absolute path to static asset ***
+                    path: '/static/character-animation.json' 
                 });
             }
         }
 
-        // --- Event Listeners ---
-        const startChatButton = document.getElementById('start-chat-hero');
-        if (startChatButton) {
-            startChatButton.addEventListener('click', () => {
-                // This assumes the widget is loaded and has a global function to open it
-                if (window.yonatanWidget && typeof window.yonatanWidget.open === 'function') {
-                    window.yonatanWidget.open();
-                } else {
-                    // Fallback for when the widget isn't ready yet
-                    const widgetButton = document.getElementById('yonatan-widget-button');
-                    if(widgetButton) widgetButton.click();
-                }
-            });
-        }
+        document.getElementById('start-chat-hero').addEventListener('click', () => {
+            if (window.yonatanWidget && typeof window.yonatanWidget.open === 'function') {
+                window.yonatanWidget.open();
+            } else {
+                document.getElementById('yonatan-widget-button')?.click();
+            }
+        });
 
-        // --- Init ---
-        function init() {
-            fetchAndRenderArticles();
-            observeElements();
-            setupWalkingCharacter();
-        }
-
-        init();
+        fetchAndRenderArticles();
+        observeElements();
+        setupWalkingCharacter();
     });
     </script>
-    <!-- The widget script will be loaded here -->
-    <script src="/widget.js"></script>
+    <!-- *** FIX: Use absolute path to static asset *** -->
+    <script src="/static/widget.js"></script>
 </body>
 </html>
