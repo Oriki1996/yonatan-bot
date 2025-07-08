@@ -1,4 +1,4 @@
-// Yonatan Psycho-Bot Widget v8.0
+// Yonatan Psycho-Bot Widget v9.0 - Enhanced UX and Interactivity
 (function() {
     if (window.yonatanWidgetLoaded) return;
     window.yonatanWidgetLoaded = true;
@@ -8,10 +8,7 @@
     // --- State Management ---
     let state = {
         uiState: 'closed', // closed, loading, questionnaire, chat
-        isFullScreen: false,
         sessionId: localStorage.getItem('yonatan_session_id'),
-        userDetails: null,
-        childDetails: null,
         conversationHistory: [],
         isTyping: false,
         questionnaireStep: 0,
@@ -22,13 +19,11 @@
     const elements = {
         chatButton: null,
         widgetContainer: null,
-        chatWindow: null,
         messagesContainer: null,
         chatInput: null,
-        sendButton: null,
     };
 
-    // --- Questionnaire Definition ---
+    // --- Questionnaire Definition (same as before) ---
     const questionnaire = [
         { id: 'parent_name', question: "נעים מאוד, אני יונתן. איך קוראים לך?", type: 'text', placeholder: "השם שלך" },
         { id: 'parent_gender', question: "באיזה מגדר לפנות אליך?", type: 'radio', options: ['זכר', 'נקבה', 'אחר'] },
@@ -46,17 +41,20 @@
     function injectStyles() {
         const style = document.createElement('style');
         style.textContent = `
-            :root { --primary: #4f46e5; --secondary: #7c3aed; }
+            :root { --primary: #4f46e5; --secondary: #7c3aed; --user-bubble: #eef2ff; --bot-bubble: #f3f4f6; }
             #yonatan-widget-button { position: fixed; bottom: 20px; right: 20px; background: var(--primary); color: white; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.2); cursor: pointer; transition: all 0.3s ease; z-index: 9998; border: none; }
             #yonatan-widget-button:hover { transform: scale(1.1); }
             #yonatan-widget-container { position: fixed; bottom: 20px; right: 20px; width: 400px; height: 600px; max-height: calc(100vh - 40px); background: white; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); display: flex; flex-direction: column; overflow: hidden; transform: scale(0.5) translateY(100px); opacity: 0; transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); pointer-events: none; z-index: 9999; }
             #yonatan-widget-container.open { transform: scale(1) translateY(0); opacity: 1; pointer-events: auto; }
-            #yonatan-widget-container.fullscreen { bottom: 0; right: 0; width: 100%; height: 100%; max-height: 100vh; border-radius: 0; }
             .yonatan-header { background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%); color: white; padding: 16px; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
-            .yonatan-chat-window { flex-grow: 1; overflow-y: auto; padding: 16px; background-color: #f9fafb; }
-            .yonatan-message { max-width: 80%; padding: 10px 15px; border-radius: 18px; margin-bottom: 10px; line-height: 1.5; animation: fadeIn 0.3s ease; }
-            .yonatan-message.user { background-color: #eef2ff; color: #312e81; align-self: flex-end; border-bottom-right-radius: 4px; margin-right: auto; }
-            .yonatan-message.bot { background-color: #ffffff; color: #374151; align-self: flex-start; border: 1px solid #e5e7eb; border-bottom-left-radius: 4px; margin-left: auto; }
+            .yonatan-chat-window { flex-grow: 1; overflow-y: auto; padding: 16px; background-color: #f9fafb; scroll-behavior: smooth; }
+            .yonatan-message-wrapper { display: flex; margin-bottom: 12px; max-width: 90%; align-items: flex-end; animation: fadeIn 0.4s ease-out; }
+            .yonatan-message-wrapper.user { margin-left: auto; flex-direction: row-reverse; }
+            .yonatan-message-wrapper.bot { margin-right: auto; }
+            .yonatan-avatar { width: 32px; height: 32px; border-radius: 50%; background-color: var(--secondary); color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0; margin: 0 8px; }
+            .yonatan-message { padding: 10px 15px; border-radius: 18px; line-height: 1.5; }
+            .yonatan-message.user { background-color: var(--user-bubble); color: #312e81; border-bottom-right-radius: 4px; }
+            .yonatan-message.bot { background-color: var(--bot-bubble); color: #374151; border-bottom-left-radius: 4px; }
             .yonatan-footer { padding: 16px; border-top: 1px solid #e5e7eb; background: white; flex-shrink: 0; }
             .yonatan-input-area { display: flex; align-items: center; }
             .yonatan-input { flex-grow: 1; border: 1px solid #d1d5db; border-radius: 20px; padding: 10px 16px; font-size: 16px; outline: none; transition: border-color 0.2s; }
@@ -70,6 +68,8 @@
             .questionnaire-view { padding: 24px; text-align: center; height: 100%; display: flex; flex-direction: column; justify-content: center; }
             .question-btn { background-color: #f3f4f6; border: 1px solid #e5e7eb; color: #374151; padding: 10px 15px; border-radius: 12px; cursor: pointer; transition: all 0.2s; margin: 5px; }
             .question-btn:hover, .question-btn.selected { background-color: #eef2ff; border-color: var(--primary); color: var(--primary); }
+            .suggestion-btn { background-color: white; border: 1px solid var(--primary); color: var(--primary); padding: 8px 12px; border-radius: 20px; cursor: pointer; transition: all 0.2s; margin: 4px; font-family: 'Assistant', sans-serif; font-size: 14px; }
+            .suggestion-btn:hover { background-color: #eef2ff; }
             @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
             @keyframes spin { to { transform: rotate(360deg); } }
             @keyframes typing-bounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1.0); } }
@@ -78,44 +78,35 @@
     }
 
     function createWidget() {
-        // Chat Button
         elements.chatButton = document.createElement('button');
         elements.chatButton.id = 'yonatan-widget-button';
         elements.chatButton.setAttribute('aria-label', 'פתח את הצ\'אט עם יונתן');
         elements.chatButton.innerHTML = `<svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>`;
         document.body.appendChild(elements.chatButton);
 
-        // Widget Container
         elements.widgetContainer = document.createElement('div');
         elements.widgetContainer.id = 'yonatan-widget-container';
         elements.widgetContainer.innerHTML = `
             <div class="yonatan-header">
                 <div class="flex items-center">
-                    <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.657 7.343A8 8 0 0117.657 18.657z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.879 16.121A3 3 0 1014.12 11.88l-4.242 4.242z"></path></svg>
+                    <div class="yonatan-avatar text-base">י</div>
                     <h3 class="font-bold text-lg">יונתן</h3>
                 </div>
-                <div>
-                    <button id="yonatan-fullscreen-btn" class="p-1" aria-label="מסך מלא">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1v4m0 0h-4m4 0l-5-5M4 16v4m0 0h4m-4 0l5-5m11 1v-4m0 0h-4m4 0l-5 5"></path></svg>
-                    </button>
-                    <button id="yonatan-close-btn" class="p-1 mr-2" aria-label="סגור צ'אט">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                    </button>
-                </div>
+                <button id="yonatan-close-btn" class="p-1" aria-label="סגור צ'אט">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
             </div>
             <div id="yonatan-content-area" class="flex-grow overflow-hidden"></div>
         `;
         document.body.appendChild(elements.widgetContainer);
         
-        // Add event listeners
         elements.chatButton.addEventListener('click', toggleWidget);
         document.getElementById('yonatan-close-btn').addEventListener('click', () => toggleWidget(false));
-        document.getElementById('yonatan-fullscreen-btn').addEventListener('click', toggleFullScreen);
     }
 
     function renderView() {
         const contentArea = document.getElementById('yonatan-content-area');
-        contentArea.innerHTML = ''; // Clear previous view
+        contentArea.innerHTML = ''; 
 
         switch (state.uiState) {
             case 'loading':
@@ -130,6 +121,7 @@
         }
     }
 
+    // --- Questionnaire Logic (largely unchanged) ---
     function renderQuestionnaire(container) {
         const step = state.questionnaireStep;
         const q = questionnaire[step];
@@ -159,20 +151,13 @@
             </div>
         `;
 
-        // Add event listeners for the current question
         if (q.type === 'radio' || q.type === 'choice') {
-            container.querySelectorAll('.question-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    handleQuestionnaireAnswer(btn.dataset.value);
-                });
-            });
+            container.querySelectorAll('.question-btn').forEach(btn => btn.addEventListener('click', () => handleQuestionnaireAnswer(btn.dataset.value)));
         } else {
             const nextBtn = document.getElementById('q-next-btn');
             const input = document.getElementById('q-input');
             nextBtn.addEventListener('click', () => handleQuestionnaireAnswer(input.value));
-            input.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') handleQuestionnaireAnswer(input.value);
-            });
+            input.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleQuestionnaireAnswer(input.value); });
         }
     }
     
@@ -192,26 +177,24 @@
     async function finishQuestionnaire() {
         state.uiState = 'loading';
         renderView();
-
         try {
-            const response = await fetch(`${API_URL}/api/questionnaire`, {
+            await fetch(`${API_URL}/api/questionnaire`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ session_id: state.sessionId, ...state.questionnaireData })
             });
-            if (!response.ok) throw new Error('Failed to submit questionnaire');
-            
             state.uiState = 'chat';
             renderView();
-            addMessageToChat('bot', `תודה שמילאת את השאלון, ${state.questionnaireData.parent_name}. אני מבין שאת/ה מתמודד/ת עם ${state.questionnaireData.main_challenge}. אני כאן כדי לעזור. איך תרצה/י שנתחיל?`);
+            addMessageToChat('bot', `תודה שמילאת את השאלון, ${state.questionnaireData.parent_name}. אני מבין שהאתגר המרכזי הוא ${state.questionnaireData.main_challenge}. אני כאן כדי לעזור. איך תרצה/י שנתחיל?`);
         } catch (error) {
             console.error(error);
-            addMessageToChat('bot', 'אופס, הייתה בעיה בשמירת הנתונים. בוא/י ננסה לדבר בכל זאת.');
             state.uiState = 'chat';
             renderView();
+            addMessageToChat('bot', 'אופס, הייתה בעיה בשמירת הנתונים. בוא/י ננסה לדבר בכל זאת.');
         }
     }
 
+    // --- Chat Logic (HEAVILY REVISED) ---
     function renderChat(container) {
         container.innerHTML = `
             <div class="yonatan-chat-window">
@@ -219,54 +202,71 @@
             </div>
             <div class="yonatan-footer">
                 <div class="yonatan-input-area">
+                     <input id="yonatan-input" type="text" class="yonatan-input" placeholder="כתוב/י הודעה...">
                     <button id="yonatan-send-btn" class="yonatan-send-btn">
-                        <svg class="w-6 h-6 transform rotate-180" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707l-3-3a1 1 0 00-1.414 1.414L10.586 9H7a1 1 0 100 2h3.586l-1.293 1.293a1 1 0 101.414 1.414l3-3a1 1 0 000-1.414z" clip-rule="evenodd"></path></svg>
+                        <svg class="w-6 h-6 transform -rotate-90" fill="currentColor" viewBox="0 0 20 20"><path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.428A1 1 0 009.17 15.57l-1.722-7.224a1 1 0 01.224-.97l4.573-5.336z"></path></svg>
                     </button>
-                    <input id="yonatan-input" type="text" class="yonatan-input" placeholder="כתוב/י הודעה...">
                 </div>
             </div>
         `;
         elements.messagesContainer = document.getElementById('yonatan-messages');
         elements.chatInput = document.getElementById('yonatan-input');
-        elements.sendButton = document.getElementById('yonatan-send-btn');
         
-        elements.sendButton.addEventListener('click', sendMessage);
-        elements.chatInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') sendMessage();
-        });
+        document.getElementById('yonatan-send-btn').addEventListener('click', () => sendMessage());
+        elements.chatInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
 
-        // Render existing messages
         state.conversationHistory.forEach(msg => addMessageToChat(msg.sender, msg.text, false));
     }
 
     function addMessageToChat(sender, text, animate = true) {
         if (!elements.messagesContainer) return;
         
-        // Remove typing indicator if it exists
         const typingIndicator = elements.messagesContainer.querySelector('.yonatan-typing-indicator');
         if (typingIndicator) typingIndicator.remove();
         
-        const messageEl = document.createElement('div');
-        messageEl.classList.add('yonatan-message', sender);
-        if (!animate) messageEl.style.animation = 'none';
-        
-        // Basic markdown support for bold text
-        messageEl.innerHTML = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-        
-        elements.messagesContainer.appendChild(messageEl);
-        elements.messagesContainer.parentElement.scrollTop = elements.messagesContainer.parentElement.scrollHeight;
-        
-        if (sender === 'user') {
-            state.conversationHistory.push({ sender, text });
+        const wrapper = document.createElement('div');
+        wrapper.className = `yonatan-message-wrapper ${sender}`;
+        if (!animate) wrapper.style.animation = 'none';
+
+        let contentHTML = text
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\[(.*?)\]/g, `<button class="suggestion-btn" data-text="$1">$1</button>`);
+
+        let messageHTML = `
+            <div class="yonatan-message ${sender}">
+                ${contentHTML}
+            </div>
+        `;
+
+        if (sender === 'bot') {
+            messageHTML = `<div class="yonatan-avatar">י</div>` + messageHTML;
         }
+
+        wrapper.innerHTML = messageHTML;
+        elements.messagesContainer.appendChild(wrapper);
+
+        // Add event listeners to newly created suggestion buttons
+        wrapper.querySelectorAll('.suggestion-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                sendMessage(btn.dataset.text);
+                // Visually disable buttons after one is clicked
+                wrapper.querySelectorAll('.suggestion-btn').forEach(b => { b.disabled = true; b.style.cursor = 'not-allowed'; b.style.opacity = '0.6'; });
+            });
+        });
+        
+        // ** SCROLLING FIX **
+        const chatWindow = elements.messagesContainer.parentElement;
+        chatWindow.scrollTop = chatWindow.scrollHeight;
     }
     
-    async function sendMessage() {
-        const messageText = elements.chatInput.value.trim();
+    async function sendMessage(messageTextOverride) {
+        const messageText = messageTextOverride || elements.chatInput.value.trim();
         if (!messageText) return;
 
         addMessageToChat('user', messageText);
-        elements.chatInput.value = '';
+        state.conversationHistory.push({ sender: 'user', text: messageText });
+        if (!messageTextOverride) elements.chatInput.value = '';
+        
         toggleTyping(true);
 
         try {
@@ -294,11 +294,20 @@
         state.isTyping = isTyping;
         const typingIndicator = elements.messagesContainer.querySelector('.yonatan-typing-indicator');
         if (isTyping && !typingIndicator) {
-            const indicatorEl = document.createElement('div');
-            indicatorEl.className = 'yonatan-typing-indicator';
-            indicatorEl.innerHTML = `<span></span><span></span><span></span>`;
-            elements.messagesContainer.appendChild(indicatorEl);
-            elements.messagesContainer.parentElement.scrollTop = elements.messagesContainer.parentElement.scrollHeight;
+            const wrapper = document.createElement('div');
+            wrapper.className = 'yonatan-message-wrapper bot yonatan-typing-indicator';
+            wrapper.innerHTML = `
+                <div class="yonatan-avatar">י</div>
+                <div class="yonatan-message bot">
+                    <div class="flex items-center justify-center h-full">
+                        <span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span>
+                    </div>
+                </div>`;
+            // Simplified typing indicator for better integration
+            wrapper.querySelector('.bot').innerHTML = `<div class="yonatan-typing-indicator"><span></span><span></span><span></span></div>`;
+            elements.messagesContainer.appendChild(wrapper);
+            const chatWindow = elements.messagesContainer.parentElement;
+            chatWindow.scrollTop = chatWindow.scrollHeight;
         } else if (!isTyping && typingIndicator) {
             typingIndicator.remove();
         }
@@ -325,11 +334,9 @@
                     renderView();
                 } catch (error) {
                     console.error("Init error:", error);
-                    const contentArea = document.getElementById('yonatan-content-area');
-                    contentArea.innerHTML = '<p class="p-4 text-center text-red-600">לא ניתן היה להתחיל שיחה. אנא נסה לרענן את הדף.</p>';
+                    document.getElementById('yonatan-content-area').innerHTML = '<p class="p-4 text-center text-red-600">לא ניתן היה להתחיל שיחה. אנא נסה לרענן את הדף.</p>';
                 }
             } else {
-                 // If returning user, skip questionnaire and go to chat
                 if(state.uiState !== 'chat') {
                     state.uiState = 'chat';
                     renderView();
@@ -343,21 +350,14 @@
             elements.chatButton.style.opacity = '1';
         }
     }
-    
-    function toggleFullScreen() {
-        state.isFullScreen = !state.isFullScreen;
-        elements.widgetContainer.classList.toggle('fullscreen');
-    }
 
     // --- Initialization ---
     function initialize() {
         injectStyles();
         createWidget();
-        // Expose a public method to open the widget from other scripts
         window.yonatanWidget = { open: () => toggleWidget(true) };
     }
 
-    // Wait for the DOM to be fully loaded before initializing
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', initialize);
     } else {
