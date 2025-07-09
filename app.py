@@ -170,9 +170,8 @@ def serve_other_html(page_name):
     except Exception:
         return "Page not found", 404
 
-# Note: The /api/articles route is no longer needed.
-# The frontend will fetch '/static/articles.json' directly,
-# and Flask serves the 'static' folder automatically.
+# Note: Flask serves the 'static' folder automatically.
+# No need for a special route for static files.
 
 if __name__ == '__main__':
     app.run(debug=True)
