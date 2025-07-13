@@ -1,49 +1,40 @@
-# app.py - v14.1 - DB Connection Fix
+# app.py - v15.0 - Refactored Configuration
 import os
 import logging
 import json
 from flask import Flask, jsonify, render_template, request, Response, stream_with_context
 from flask_cors import CORS
-from dotenv import load_dotenv
 from models import db, Parent, Child, Conversation, Message, QuestionnaireResponse, init_app_db
 import google.generativeai as genai
 from sqlalchemy.exc import SQLAlchemyError
 from uuid import uuid4
+from config import config_by_name # Import the config dictionary
 
 # --- App Initialization & Config ---
-load_dotenv()
+# Determine the environment and load the appropriate configuration
+env = os.environ.get('FLASK_ENV', 'development')
 app = Flask(__name__)
+app.config.from_object(config_by_name[env])
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(name)s - %(message)s')
+# Initialize logging after config is loaded
+logging.basicConfig(level=logging.INFO if not app.config['DEBUG'] else logging.DEBUG,
+                    format='%(asctime)s - %(levelname)s - %(name)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-# --- Database Configuration (Updated for Production) ---
-DATABASE_URL = os.environ.get('DATABASE_URL')
-if DATABASE_URL and DATABASE_URL.startswith('postgresql://'):
-    app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
-    logger.info("Connecting to PostgreSQL database.")
-else:
-    # For local development, fall back to a SQLite database.
-    instance_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'instance')
-    os.makedirs(instance_path, exist_ok=True)
-    db_path = os.path.join(instance_path, 'yonatan.db')
-    app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{db_path}"
-    logger.info("Connecting to local SQLite database.")
+logger.info(f"Flask environment set to: {env}")
 
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['JSON_AS_ASCII'] = False
-
+# Initialize extensions
 init_app_db(app)
 CORS(app)
 
 # --- AI Model Configuration ---
 model = None
 try:
-    GOOGLE_API_KEY = os.environ.get('GOOGLE_API_KEY')
-    if not GOOGLE_API_KEY:
+    api_key = app.config.get('GOOGLE_API_KEY')
+    if not api_key:
         logger.warning("GOOGLE_API_KEY not found. Chatbot will not function.")
     else:
-        genai.configure(api_key=GOOGLE_API_KEY)
+        genai.configure(api_key=api_key)
         model = genai.GenerativeModel('gemini-1.5-flash')
         logger.info("Google Generative AI model configured successfully.")
 except Exception as e:
@@ -194,4 +185,6 @@ def serve_other_html(page_name):
         return "Page not found", 404
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    # This block is for local development only
+    # Gunicorn will not run this
+    app.run()

@@ -1,8 +1,26 @@
-# Ignore Python cache files
-__pycache__/
+Python
+pycache/
+*.pyc
+*.pyo
+*.pyd
 
-# Ignore virtual environment folder
+Virtual Environment
 venv/
+.venv/
+env/
+ENV/
 
-# Ignore sensitive environment variables
+Instance Folder (for local DB)
+/instance/
+
+Environment variables
 .env
+
+IDE / Editor specific
+.vscode/
+.idea/
+*.suo
+.ntvs
+*.njsproj
+*.sln
+*.sw?
