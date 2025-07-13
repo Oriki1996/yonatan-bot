@@ -1,4 +1,4 @@
-# app.py - v14.0 - Response Streaming Implementation
+# app.py - v14.1 - DB Connection Fix
 import os
 import logging
 import json
@@ -19,10 +19,12 @@ logger = logging.getLogger(__name__)
 
 # --- Database Configuration (Updated for Production) ---
 DATABASE_URL = os.environ.get('DATABASE_URL')
-if DATABASE_URL and DATABASE_URL.startswith('postgres://'):
-    app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL.replace('postgres://', 'postgresql://')
+# FIX: Check for the correct 'postgresql://' prefix provided by Render.
+if DATABASE_URL and DATABASE_URL.startswith('postgresql://'):
+    app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
     logger.info("Connecting to PostgreSQL database.")
 else:
+    # For local development, fall back to a SQLite database.
     instance_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'instance')
     os.makedirs(instance_path, exist_ok=True)
     db_path = os.path.join(instance_path, 'yonatan.db')
