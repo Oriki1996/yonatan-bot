@@ -1,14 +1,14 @@
-# models.py - v8.0 - Stable version
+# models.py - v9.0 - Manual DB creation
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 
 db = SQLAlchemy()
 
 def init_app_db(app):
-    """Initializes the database and creates tables if they don't exist."""
+    """Initializes the database extension."""
     db.init_app(app)
-    with app.app_context():
-        db.create_all()
+    # IMPORTANT: We no longer call db.create_all() here.
+    # This will be done manually via a separate script.
 
 class Parent(db.Model):
     __tablename__ = 'parent'
@@ -52,4 +52,3 @@ class QuestionnaireResponse(db.Model):
     child_id = db.Column(db.Integer, db.ForeignKey('child.id'), nullable=False)
     response_data = db.Column(db.Text, nullable=False) # Storing as JSON string
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-
