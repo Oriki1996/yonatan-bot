@@ -1,8 +1,8 @@
-# app.py - v13.0 - Conversation Management Upgrade
+# app.py - v14.0 - Response Streaming Implementation
 import os
 import logging
 import json
-from flask import Flask, jsonify, render_template, request
+from flask import Flask, jsonify, render_template, request, Response, stream_with_context
 from flask_cors import CORS
 from dotenv import load_dotenv
 from models import db, Parent, Child, Conversation, Message, QuestionnaireResponse, init_app_db
@@ -49,8 +49,6 @@ except Exception as e:
     logger.error(f"Error configuring Google AI model: {e}")
 
 # --- In-Memory Session Storage ---
-# This dictionary will hold active chat sessions to avoid rebuilding them on every request.
-# Key: session_id, Value: genai.ChatSession object
 chat_sessions = {}
 
 # --- CBT System Prompt ---
@@ -107,7 +105,7 @@ def handle_questionnaire():
         logger.error(f"Error saving questionnaire: {e}")
         return jsonify({"error": "Failed to save questionnaire data"}), 500
 
-# --- MODIFIED CHAT ENDPOINT ---
+# --- MODIFIED CHAT ENDPOINT FOR STREAMING ---
 @app.route('/api/chat', methods=['POST'])
 def chat():
     data = request.json
@@ -118,68 +116,67 @@ def chat():
         return jsonify({"error": "Missing data or AI model not configured."}), 400
 
     try:
-        # Step 1: Get or create the ChatSession object
         if session_id not in chat_sessions:
             logger.info(f"Creating new chat session for session_id: {session_id}")
-            
-            # Retrieve user and conversation context from DB
             parent = db.session.get(Parent, session_id)
             if not parent: return jsonify({"error": "User not found"}), 404
             child = Child.query.filter_by(parent_id=session_id).first()
             questionnaire = QuestionnaireResponse.query.filter_by(parent_id=session_id).first()
             
-            # Construct the initial context prompt
-            context = f"""
-            --- CONTEXT ---
-            Parent Name: {parent.name}
-            Child Name: {child.name if child else 'N/A'}
-            Child Age: {child.age if child else 'N/A'}
-            Initial Questionnaire Answers: {json.loads(questionnaire.response_data) if questionnaire else 'N/A'}
-            --- END CONTEXT ---
-            """
+            context = f"--- CONTEXT ---\nParent Name: {parent.name}\nChild Name: {child.name if child else 'N/A'}\nChild Age: {child.age if child else 'N/A'}\nInitial Questionnaire Answers: {json.loads(questionnaire.response_data) if questionnaire else 'N/A'}\n--- END CONTEXT ---"
             
-            # Load previous messages from DB to build history for the new session
             db_conversation = Conversation.query.filter_by(parent_id=session_id).first()
             history = []
             if db_conversation:
                 messages = Message.query.filter_by(conversation_id=db_conversation.id).order_by(Message.timestamp.asc()).all()
                 for msg in messages:
-                    # The role must be 'user' or 'model' for the genai library
                     role = 'user' if msg.sender_type == 'user' else 'model'
                     history.append({'role': role, 'parts': [{'text': msg.content}]})
 
-            # Create the new ChatSession with the system prompt and history
             chat_sessions[session_id] = model.start_chat(
                 history=history,
                 system_instruction=f"{CBT_SYSTEM_PROMPT}\n{context}"
             )
         
-        # Step 2: Use the existing or new chat session to send the message
         active_chat = chat_sessions[session_id]
-        response = active_chat.send_message(user_message)
-        ai_response = response.text
-
-        # Step 3: Save the new messages to the database for long-term storage
-        db_conversation = Conversation.query.filter_by(parent_id=session_id).first()
-        if not db_conversation:
-            child = Child.query.filter_by(parent_id=session_id).first()
-            db_conversation = Conversation(parent_id=session_id, child_id=child.id if child else None, topic="General")
-            db.session.add(db_conversation)
-            db.session.commit()
-            db.session.refresh(db_conversation)
-
+        
+        # Save user message to DB before starting the stream
         if user_message != "START_CONVERSATION":
+            db_conversation = Conversation.query.filter_by(parent_id=session_id).first()
+            if not db_conversation:
+                child = Child.query.filter_by(parent_id=session_id).first()
+                db_conversation = Conversation(parent_id=session_id, child_id=child.id if child else None, topic="General")
+                db.session.add(db_conversation)
+                db.session.commit()
+                db.session.refresh(db_conversation)
             user_msg_db = Message(conversation_id=db_conversation.id, sender_type='user', content=user_message)
             db.session.add(user_msg_db)
-            
-        ai_msg_db = Message(conversation_id=db_conversation.id, sender_type='bot', content=ai_response)
-        db.session.add(ai_msg_db)
-        db.session.commit()
+            db.session.commit()
 
-        return jsonify({"reply": ai_response})
+        # Generate content with streaming enabled
+        stream = active_chat.send_message(user_message, stream=True)
+
+        def generate_and_save():
+            full_response_text = []
+            for chunk in stream:
+                if chunk.text:
+                    full_response_text.append(chunk.text)
+                    yield chunk.text
+            
+            # After the stream is complete, save the full response to the database
+            final_text = "".join(full_response_text)
+            
+            # We need a conversation ID to save the message
+            db_conv = Conversation.query.filter_by(parent_id=session_id).first()
+            if db_conv:
+                ai_msg_db = Message(conversation_id=db_conv.id, sender_type='bot', content=final_text)
+                db.session.add(ai_msg_db)
+                db.session.commit()
+                logger.info(f"Saved streamed response for session {session_id}")
+
+        return Response(stream_with_context(generate_and_save()), mimetype='text/plain')
 
     except Exception as e:
-        db.session.rollback()
         logger.error(f"Error in chat endpoint: {e}", exc_info=True)
         return jsonify({"error": "An internal error occurred."}), 500
 

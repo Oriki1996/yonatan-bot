@@ -1,4 +1,4 @@
-// Yonatan Psycho-Bot Widget v10.0 - Visual & UX Overhaul
+// Yonatan Psycho-Bot Widget v11.0 - Response Streaming
 (function() {
     if (window.yonatanWidgetLoaded) return;
     window.yonatanWidgetLoaded = true;
@@ -174,7 +174,7 @@
             });
             state.uiState = 'chat';
             renderView();
-            sendMessage("START_CONVERSATION"); // Trigger the smart opening message
+            sendMessage("START_CONVERSATION");
         } catch (error) {
             console.error(error);
             state.uiState = 'chat';
@@ -207,7 +207,6 @@
     }
 
     function parseAndRenderContent(text) {
-        // Regex to find CARD[...] syntax
         const cardRegex = /CARD\[([^|]+)\|([^\]]+)\]/g;
         return text.replace(cardRegex, (match, title, body) => {
             return `
@@ -223,9 +222,6 @@
     function addMessageToChat(sender, text, animate = true) {
         if (!elements.messagesContainer) return;
         
-        const typingIndicator = elements.messagesContainer.querySelector('.yonatan-typing-indicator');
-        if (typingIndicator) typingIndicator.remove();
-        
         const wrapper = document.createElement('div');
         wrapper.className = `yonatan-message-wrapper ${sender}`;
         if (!animate) wrapper.style.animation = 'none';
@@ -235,12 +231,12 @@
         wrapper.innerHTML = `
             ${sender === 'bot' ? '<div class="yonatan-avatar">י</div>' : ''}
             <div class="yonatan-message ${sender}">
-                ${contentHTML}
+                <div class="message-content">${contentHTML}</div>
             </div>
         `;
         
         elements.messagesContainer.appendChild(wrapper);
-
+        
         wrapper.querySelectorAll('.suggestion-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 sendMessage(btn.dataset.text);
@@ -250,13 +246,14 @@
         
         const chatWindow = elements.messagesContainer.parentElement;
         chatWindow.scrollTop = chatWindow.scrollHeight;
+        return wrapper;
     }
     
+    // --- MODIFIED SENDMESSAGE FOR STREAMING ---
     async function sendMessage(messageTextOverride) {
         const messageText = messageTextOverride || elements.chatInput.value.trim();
         if (!messageText) return;
 
-        // Don't show the "START_CONVERSATION" message to the user
         if (messageText !== "START_CONVERSATION") {
             addMessageToChat('user', messageText);
             state.conversationHistory.push({ sender: 'user', text: messageText });
@@ -264,10 +261,7 @@
         
         if (!messageTextOverride) elements.chatInput.value = '';
         
-        // "Thinking time" delay
-        setTimeout(() => {
-            toggleTyping(true);
-        }, 700);
+        toggleTyping(true);
 
         try {
             const response = await fetch(`${API_URL}/api/chat`, {
@@ -275,13 +269,45 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ session_id: state.sessionId, message: messageText })
             });
-            const data = await response.json();
-            
-            if (data.error) throw new Error(data.error);
 
+            if (!response.ok || !response.body) {
+                throw new Error('Network response was not ok.');
+            }
+            
             toggleTyping(false);
-            addMessageToChat('bot', data.reply);
-            state.conversationHistory.push({ sender: 'bot', text: data.reply });
+            
+            // Create an empty bot message bubble to stream content into
+            const botMessageWrapper = addMessageToChat('bot', '');
+            const botMessageContent = botMessageWrapper.querySelector('.message-content');
+            
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            let fullResponseText = '';
+
+            while (true) {
+                const { value, done } = await reader.read();
+                if (done) break;
+                
+                const chunk = decoder.decode(value, { stream: true });
+                fullResponseText += chunk;
+                
+                // Update the content of the message bubble with parsed markdown/cards
+                botMessageContent.innerHTML = parseAndRenderContent(fullResponseText);
+                
+                const chatWindow = elements.messagesContainer.parentElement;
+                chatWindow.scrollTop = chatWindow.scrollHeight;
+            }
+            
+            // Re-bind event listeners for any new suggestion buttons
+            botMessageWrapper.querySelectorAll('.suggestion-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    sendMessage(btn.dataset.text);
+                    botMessageWrapper.querySelectorAll('.suggestion-btn').forEach(b => { b.disabled = true; b.style.cssText = 'cursor: not-allowed; opacity: 0.6;'; });
+                });
+            });
+
+            // Save the complete message to history
+            state.conversationHistory.push({ sender: 'bot', text: fullResponseText });
 
         } catch (error) {
             console.error("Chat API error:", error);
@@ -291,10 +317,10 @@
     }
 
     function toggleTyping(isTyping) {
-        const typingIndicator = elements.messagesContainer.querySelector('.yonatan-typing-indicator');
+        let typingIndicator = elements.messagesContainer.querySelector('.typing-indicator-wrapper');
         if (isTyping && !typingIndicator) {
             const wrapper = document.createElement('div');
-            wrapper.className = 'yonatan-message-wrapper bot yonatan-typing-indicator';
+            wrapper.className = 'yonatan-message-wrapper bot typing-indicator-wrapper';
             wrapper.innerHTML = `<div class="yonatan-avatar">י</div><div class="yonatan-message bot"><div class="yonatan-typing-indicator"><span></span><span></span><span></span></div></div>`;
             elements.messagesContainer.appendChild(wrapper);
             const chatWindow = elements.messagesContainer.parentElement;
