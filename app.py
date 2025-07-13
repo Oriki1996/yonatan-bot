@@ -1,8 +1,8 @@
-# app.py - v12.0 - Standard Flask project structure
+# app.py - v13.0 - Conversation Management Upgrade
 import os
 import logging
 import json
-from flask import Flask, jsonify, render_template, send_from_directory, request
+from flask import Flask, jsonify, render_template, request
 from flask_cors import CORS
 from dotenv import load_dotenv
 from models import db, Parent, Child, Conversation, Message, QuestionnaireResponse, init_app_db
@@ -12,24 +12,28 @@ from uuid import uuid4
 
 # --- App Initialization & Config ---
 load_dotenv()
-# Flask will now automatically look for 'templates' and 'static' folders
 app = Flask(__name__)
-
-instance_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'instance')
-os.makedirs(instance_path, exist_ok=True)
-
-db_path = os.path.join(instance_path, 'yonatan.db')
-app.config.from_mapping(
-    SQLALCHEMY_DATABASE_URI=f"sqlite:///{db_path}",
-    SQLALCHEMY_TRACK_MODIFICATIONS=False,
-    JSON_AS_ASCII=False
-)
-
-init_app_db(app)
-CORS(app)
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(name)s - %(message)s')
 logger = logging.getLogger(__name__)
+
+# --- Database Configuration (Updated for Production) ---
+DATABASE_URL = os.environ.get('DATABASE_URL')
+if DATABASE_URL and DATABASE_URL.startswith('postgres://'):
+    app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL.replace('postgres://', 'postgresql://')
+    logger.info("Connecting to PostgreSQL database.")
+else:
+    instance_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'instance')
+    os.makedirs(instance_path, exist_ok=True)
+    db_path = os.path.join(instance_path, 'yonatan.db')
+    app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{db_path}"
+    logger.info("Connecting to local SQLite database.")
+
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['JSON_AS_ASCII'] = False
+
+init_app_db(app)
+CORS(app)
 
 # --- AI Model Configuration ---
 model = None
@@ -43,6 +47,11 @@ try:
         logger.info("Google Generative AI model configured successfully.")
 except Exception as e:
     logger.error(f"Error configuring Google AI model: {e}")
+
+# --- In-Memory Session Storage ---
+# This dictionary will hold active chat sessions to avoid rebuilding them on every request.
+# Key: session_id, Value: genai.ChatSession object
+chat_sessions = {}
 
 # --- CBT System Prompt ---
 CBT_SYSTEM_PROMPT = """
@@ -98,6 +107,7 @@ def handle_questionnaire():
         logger.error(f"Error saving questionnaire: {e}")
         return jsonify({"error": "Failed to save questionnaire data"}), 500
 
+# --- MODIFIED CHAT ENDPOINT ---
 @app.route('/api/chat', methods=['POST'])
 def chat():
     data = request.json
@@ -108,44 +118,61 @@ def chat():
         return jsonify({"error": "Missing data or AI model not configured."}), 400
 
     try:
-        parent = db.session.get(Parent, session_id)
-        if not parent: return jsonify({"error": "User not found"}), 404
+        # Step 1: Get or create the ChatSession object
+        if session_id not in chat_sessions:
+            logger.info(f"Creating new chat session for session_id: {session_id}")
+            
+            # Retrieve user and conversation context from DB
+            parent = db.session.get(Parent, session_id)
+            if not parent: return jsonify({"error": "User not found"}), 404
+            child = Child.query.filter_by(parent_id=session_id).first()
+            questionnaire = QuestionnaireResponse.query.filter_by(parent_id=session_id).first()
+            
+            # Construct the initial context prompt
+            context = f"""
+            --- CONTEXT ---
+            Parent Name: {parent.name}
+            Child Name: {child.name if child else 'N/A'}
+            Child Age: {child.age if child else 'N/A'}
+            Initial Questionnaire Answers: {json.loads(questionnaire.response_data) if questionnaire else 'N/A'}
+            --- END CONTEXT ---
+            """
+            
+            # Load previous messages from DB to build history for the new session
+            db_conversation = Conversation.query.filter_by(parent_id=session_id).first()
+            history = []
+            if db_conversation:
+                messages = Message.query.filter_by(conversation_id=db_conversation.id).order_by(Message.timestamp.asc()).all()
+                for msg in messages:
+                    # The role must be 'user' or 'model' for the genai library
+                    role = 'user' if msg.sender_type == 'user' else 'model'
+                    history.append({'role': role, 'parts': [{'text': msg.content}]})
 
-        child = Child.query.filter_by(parent_id=session_id).first()
-        questionnaire = QuestionnaireResponse.query.filter_by(parent_id=session_id).first()
+            # Create the new ChatSession with the system prompt and history
+            chat_sessions[session_id] = model.start_chat(
+                history=history,
+                system_instruction=f"{CBT_SYSTEM_PROMPT}\n{context}"
+            )
         
-        conversation = Conversation.query.filter_by(parent_id=session_id).first()
-        if not conversation:
-            conversation = Conversation(parent_id=session_id, child_id=child.id if child else None, topic="General")
-            db.session.add(conversation)
-            db.session.commit()
-            db.session.refresh(conversation)
-
-        history_records = Message.query.filter_by(conversation_id=conversation.id).order_by(Message.timestamp.desc()).limit(10).all()
-        history_records.reverse()
-        history_str = "\n".join([f"{'User' if msg.sender_type == 'user' else 'Bot'}: {msg.content}" for msg in history_records])
-
-        context = f"""
-        --- CONTEXT ---
-        Parent Name: {parent.name}
-        Child Name: {child.name if child else 'N/A'}
-        Child Age: {child.age if child else 'N/A'}
-        Initial Questionnaire Answers: {json.loads(questionnaire.response_data) if questionnaire else 'N/A'}
-        --- PREVIOUS CONVERSATION ---
-        {history_str}
-        --- END CONTEXT ---
-        """
-        
-        full_prompt = f"{CBT_SYSTEM_PROMPT}\n{context}\n\nUser: {user_message}"
-        
-        response = model.generate_content(full_prompt)
+        # Step 2: Use the existing or new chat session to send the message
+        active_chat = chat_sessions[session_id]
+        response = active_chat.send_message(user_message)
         ai_response = response.text
 
+        # Step 3: Save the new messages to the database for long-term storage
+        db_conversation = Conversation.query.filter_by(parent_id=session_id).first()
+        if not db_conversation:
+            child = Child.query.filter_by(parent_id=session_id).first()
+            db_conversation = Conversation(parent_id=session_id, child_id=child.id if child else None, topic="General")
+            db.session.add(db_conversation)
+            db.session.commit()
+            db.session.refresh(db_conversation)
+
         if user_message != "START_CONVERSATION":
-            user_msg_db = Message(conversation_id=conversation.id, sender_type='user', content=user_message)
+            user_msg_db = Message(conversation_id=db_conversation.id, sender_type='user', content=user_message)
             db.session.add(user_msg_db)
             
-        ai_msg_db = Message(conversation_id=conversation.id, sender_type='bot', content=ai_response)
+        ai_msg_db = Message(conversation_id=db_conversation.id, sender_type='bot', content=ai_response)
         db.session.add(ai_msg_db)
         db.session.commit()
 
@@ -153,25 +180,21 @@ def chat():
 
     except Exception as e:
         db.session.rollback()
-        logger.error(f"Error in chat endpoint: {e}")
+        logger.error(f"Error in chat endpoint: {e}", exc_info=True)
         return jsonify({"error": "An internal error occurred."}), 500
+
 
 # --- Frontend Serving ---
 @app.route('/')
 def serve_main_landing():
-    # Looks for index.html in the 'templates' folder
     return render_template('index.html')
 
 @app.route('/<page_name>.html')
 def serve_other_html(page_name):
-    # For accessibility.html, dashboard.html etc.
     try:
         return render_template(f'{page_name}.html')
     except Exception:
         return "Page not found", 404
-
-# Note: Flask serves the 'static' folder automatically.
-# No need for a special route for static files.
 
 if __name__ == '__main__':
     app.run(debug=True)
