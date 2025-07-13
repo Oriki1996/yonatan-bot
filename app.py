@@ -19,7 +19,6 @@ logger = logging.getLogger(__name__)
 
 # --- Database Configuration (Updated for Production) ---
 DATABASE_URL = os.environ.get('DATABASE_URL')
-# FIX: Check for the correct 'postgresql://' prefix provided by Render.
 if DATABASE_URL and DATABASE_URL.startswith('postgresql://'):
     app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
     logger.info("Connecting to PostgreSQL database.")
@@ -107,7 +106,6 @@ def handle_questionnaire():
         logger.error(f"Error saving questionnaire: {e}")
         return jsonify({"error": "Failed to save questionnaire data"}), 500
 
-# --- MODIFIED CHAT ENDPOINT FOR STREAMING ---
 @app.route('/api/chat', methods=['POST'])
 def chat():
     data = request.json
@@ -142,7 +140,6 @@ def chat():
         
         active_chat = chat_sessions[session_id]
         
-        # Save user message to DB before starting the stream
         if user_message != "START_CONVERSATION":
             db_conversation = Conversation.query.filter_by(parent_id=session_id).first()
             if not db_conversation:
@@ -155,20 +152,21 @@ def chat():
             db.session.add(user_msg_db)
             db.session.commit()
 
-        # Generate content with streaming enabled
         stream = active_chat.send_message(user_message, stream=True)
 
         def generate_and_save():
             full_response_text = []
-            for chunk in stream:
-                if chunk.text:
-                    full_response_text.append(chunk.text)
-                    yield chunk.text
+            try:
+                for chunk in stream:
+                    if chunk.text:
+                        full_response_text.append(chunk.text)
+                        yield chunk.text
+            except Exception as e:
+                logger.error(f"Error during stream generation: {e}")
+                yield "אני מתנצל, התרחשה שגיאה במהלך יצירת התשובה."
             
-            # After the stream is complete, save the full response to the database
             final_text = "".join(full_response_text)
             
-            # We need a conversation ID to save the message
             db_conv = Conversation.query.filter_by(parent_id=session_id).first()
             if db_conv:
                 ai_msg_db = Message(conversation_id=db_conv.id, sender_type='bot', content=final_text)
