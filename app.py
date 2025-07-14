@@ -1,4 +1,4 @@
-# app.py - v15.0 - Refactored Configuration
+# app.py - v16.0 - Final Clean Version
 import os
 import logging
 import json
@@ -25,14 +25,6 @@ logger.info(f"Flask environment set to: {env}")
 
 # Initialize extensions
 init_app_db(app)
-# --- TEMPORARY CODE FOR DB CREATION - START ---
-# This block will create the database tables on the next deployment.
-# It should be removed after the deployment is successful.
-with app.app_context():
-    logger.info("Attempting to create database tables...")
-    db.create_all()
-    logger.info("db.create_all() executed.")
-# --- TEMPORARY CODE FOR DB CREATION - END ---
 CORS(app)
 
 # --- AI Model Configuration ---
