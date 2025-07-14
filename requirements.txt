@@ -5,4 +5,4 @@ python-dotenv==1.0.1
 google-generativeai==0.7.1
 gunicorn==22.0.0
 SQLAlchemy==2.0.31
-psycopg[binary]==3.2.1
+psycopg[binary]==3.2.9
