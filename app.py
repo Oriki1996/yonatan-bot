@@ -1,569 +1,270 @@
-// Yonatan Psycho-Bot Widget v12.0 - API חדש ושיפורים
-(function() {
-    if (window.yonatanWidgetLoaded) return;
-    window.yonatanWidgetLoaded = true;
+# app.py - v17.0 - API החדש ושיפורים
+import os
+import logging
+import json
+from flask import Flask, jsonify, render_template, request, Response, stream_with_context
+from flask_cors import CORS
+from models import db, Parent, Child, Conversation, Message, QuestionnaireResponse, init_app_db
+import google.generativeai as genai
+from sqlalchemy.exc import SQLAlchemyError
+from uuid import uuid4
+from datetime import datetime
+from config import config_by_name # Import the config dictionary
 
-    const API_URL = window.location.origin;
+# --- App Initialization & Config ---
+# Determine the environment and load the appropriate configuration
+env = os.environ.get('FLASK_ENV', 'development')
+app = Flask(__name__)
+app.config.from_object(config_by_name[env])
 
-    let state = {
-        uiState: 'closed',
-        sessionId: localStorage.getItem('yonatan_session_id'),
-        conversationHistory: [],
-        questionnaireStep: 0,
-        questionnaireData: {},
-    };
+# Initialize logging after config is loaded
+logging.basicConfig(level=logging.INFO if not app.config['DEBUG'] else logging.DEBUG,
+                    format='%(asctime)s - %(levelname)s - %(name)s - %(message)s')
+logger = logging.getLogger(__name__)
 
-    const elements = {
-        chatButton: null,
-        widgetContainer: null,
-        messagesContainer: null,
-        chatInput: null,
-    };
+logger.info(f"Flask environment set to: {env}")
 
-    const questionnaire = [
-        { id: 'parent_name', question: "נעים מאוד, אני יונתן. איך קוראים לך?", type: 'text', placeholder: "השם שלך" },
-        { id: 'parent_gender', question: "באיזה מגדר לפנות אליך?", type: 'radio', options: ['זכר', 'נקבה', 'אחר'] },
-        { id: 'child_name', question: "ומה שם המתבגר/ת שעליו/ה נרצה לדבר?", type: 'text', placeholder: "שם הילד/ה" },
-        { id: 'child_age', question: "בן/בת כמה הוא/היא?", type: 'number', placeholder: "לדוגמה: 15" },
-        { id: 'child_gender', question: "ומה המגדר שלו/ה?", type: 'radio', options: ['זכר', 'נקבה', 'אחר'] },
-        { id: 'main_challenge', question: "מהו האתגר המרכזי שבו את/ה רוצה להתמקד היום?", type: 'choice', options: ['תקשורת וריבים', 'קשיים בלימודים', 'ויסות רגשי והתפרצויות', 'זמן מסך והתמכרויות', 'קשיים חברתיים', 'התנהגות סיכונית', 'אחר'] },
-        { id: 'challenge_context', question: "מתי הבעיה הזו מופיעה בדרך כלל?", type: 'text', placeholder: "למשל, בערבים, סביב הכנת שיעורים..." },
-        { id: 'past_solutions', question: "איך ניסית להתמודד עם זה עד עכשיו?", type: 'text', placeholder: "למשל, ניסיתי לדבר, לקחת את הטלפון..." },
-        { id: 'distress_level', question: "בסקאלה של 1 עד 10, כמה המצב הזה גורם לך למצוקה?", type: 'scale', min: 1, max: 10 },
-        { id: 'goal', question: "ומה המטרה העיקרית שלך מהשיחה שלנו?", type: 'choice', options: ['לקבל כלים פרקטיים', 'להבין טוב יותר את הילד/ה', 'להרגיש יותר ביטחון בהורות', 'לפרוק ולשתף'] },
-    ];
+# Initialize extensions
+init_app_db(app)
+CORS(app)
 
-    function injectStyles() {
-        const style = document.createElement('style');
-        style.textContent = `
-            :root { --primary: #4f46e5; --secondary: #7c3aed; --user-bubble: #eef2ff; --bot-bubble: #f3f4f6; }
-            #yonatan-widget-button { position: fixed; bottom: 20px; right: 20px; background: var(--primary); color: white; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.2); cursor: pointer; transition: all 0.3s ease; z-index: 9998; border: none; }
-            #yonatan-widget-button.api-error { background: #ef4444; }
-            #yonatan-widget-container { position: fixed; bottom: 20px; right: 20px; width: 400px; height: 600px; max-height: calc(100vh - 40px); background: white; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); display: flex; flex-direction: column; overflow: hidden; transform: scale(0.5) translateY(100px); opacity: 0; transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); pointer-events: none; z-index: 9999; }
-            #yonatan-widget-container.open { transform: scale(1) translateY(0); opacity: 1; pointer-events: auto; }
-            .yonatan-header { background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%); color: white; padding: 16px; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
-            .yonatan-chat-window { flex-grow: 1; overflow-y: auto; padding: 16px; background-color: #f9fafb; scroll-behavior: smooth; }
-            .yonatan-message-wrapper { display: flex; margin-bottom: 12px; max-width: 90%; align-items: flex-end; animation: fadeIn 0.4s ease-out; }
-            .yonatan-message-wrapper.user { margin-left: auto; flex-direction: row-reverse; }
-            .yonatan-message-wrapper.bot { margin-right: auto; }
-            .yonatan-avatar { width: 32px; height: 32px; border-radius: 50%; background-color: var(--secondary); color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0; margin: 0 8px; }
-            .yonatan-message { padding: 10px 15px; border-radius: 18px; line-height: 1.5; }
-            .yonatan-message.user { background-color: var(--user-bubble); color: #312e81; border-bottom-right-radius: 4px; }
-            .yonatan-message.bot { background-color: var(--bot-bubble); color: #374151; border-bottom-left-radius: 4px; }
-            .yonatan-footer { padding: 16px; border-top: 1px solid #e5e7eb; background: white; flex-shrink: 0; }
-            .yonatan-input-area { display: flex; align-items: center; }
-            .yonatan-input { flex-grow: 1; border: 1px solid #d1d5db; border-radius: 20px; padding: 10px 16px; font-size: 16px; outline: none; transition: border-color 0.2s; }
-            .yonatan-input:focus { border-color: var(--primary); }
-            .yonatan-send-btn { background: var(--primary); color: white; border: none; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 10px; cursor: pointer; transition: background-color 0.2s; }
-            .yonatan-typing-indicator span { height: 8px; width: 8px; border-radius: 50%; background-color: #9ca3af; margin: 0 2px; animation: typing-bounce 1.4s infinite ease-in-out both; }
-            .yonatan-typing-indicator span:nth-child(1) { animation-delay: -0.32s; } .yonatan-typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
-            .yonatan-loader { border: 4px solid #f3f3f3; border-top: 4px solid var(--primary); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: auto; }
-            .questionnaire-view { padding: 24px; text-align: center; height: 100%; display: flex; flex-direction: column; justify-content: center; }
-            .question-btn { background-color: #f3f4f6; border: 1px solid #e5e7eb; color: #374151; padding: 10px 15px; border-radius: 12px; cursor: pointer; transition: all 0.2s; margin: 5px; }
-            .question-btn:hover, .question-btn.selected { background-color: #eef2ff; border-color: var(--primary); color: var(--primary); }
-            .suggestion-btn { background-color: white; border: 1px solid var(--primary); color: var(--primary); padding: 8px 12px; border-radius: 20px; cursor: pointer; transition: all 0.2s; margin: 4px; font-family: 'Assistant', sans-serif; font-size: 14px; }
-            .suggestion-btn:hover { background-color: #eef2ff; }
-            .yonatan-card { background-color: white; border-radius: 12px; border: 1px solid #e5e7eb; margin-top: 8px; overflow: hidden; }
-            .yonatan-card-header { background-color: #f9fafb; padding: 10px 15px; font-weight: bold; border-bottom: 1px solid #e5e7eb; }
-            .yonatan-card-body { padding: 15px; }
-            .error-message { color: #ef4444; padding: 8px; margin: 8px 0; background-color: #fee2e2; border-radius: 8px; font-size: 14px; }
-            .retry-button { background-color: #ef4444; color: white; border: none; padding: 6px 12px; border-radius: 8px; cursor: pointer; margin-top: 8px; font-size: 14px; }
-            @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-            @keyframes spin { to { transform: rotate(360deg); } }
-            @keyframes typing-bounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1.0); } }
-        `;
-        document.head.appendChild(style);
-    }
+# --- AI Model Configuration ---
+model = None
+try:
+    api_key = app.config.get('GOOGLE_API_KEY')
+    if not api_key:
+        logger.warning("GOOGLE_API_KEY לא נמצא. הצ'אט בוט לא יפעל כראוי.")
+    else:
+        genai.configure(api_key=api_key)
+        try:
+            model = genai.GenerativeModel('gemini-1.5-flash')
+            # בדיקה קצרה שהמודל עובד
+            test_response = model.generate_content("בדיקה")
+            if test_response:
+                logger.info("מודל Google AI הוגדר והופעל בהצלחה.")
+        except Exception as model_error:
+            logger.error(f"שגיאה בהפעלת מודל ה-AI: {model_error}")
+except Exception as e:
+    logger.error(f"שגיאה בהגדרת מודל ה-AI של Google: {e}")
 
-    function createWidget() {
-        elements.chatButton = document.createElement('button');
-        elements.chatButton.id = 'yonatan-widget-button';
-        elements.chatButton.setAttribute('aria-label', 'פתח את הצ\'אט עם יונתן');
-        elements.chatButton.innerHTML = `<svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>`;
-        document.body.appendChild(elements.chatButton);
+# --- In-Memory Session Storage ---
+chat_sessions = {}
 
-        elements.widgetContainer = document.createElement('div');
-        elements.widgetContainer.id = 'yonatan-widget-container';
-        elements.widgetContainer.innerHTML = `
-            <div class="yonatan-header">
-                <div class="flex items-center space-x-2 space-x-reverse">
-                    <div class="yonatan-avatar text-base">י</div>
-                    <h3 class="font-bold text-lg">יונתן</h3>
-                </div>
-                <button id="yonatan-close-btn" class="p-1" aria-label="סגור צ'אט">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                </button>
-            </div>
-            <div id="yonatan-content-area" class="flex-grow overflow-hidden"></div>
-        `;
-        document.body.appendChild(elements.widgetContainer);
-        
-        elements.chatButton.addEventListener('click', toggleWidget);
-        document.getElementById('yonatan-close-btn').addEventListener('click', () => toggleWidget(false));
-    }
+# --- CBT System Prompt ---
+CBT_SYSTEM_PROMPT = """
+אתה "יונתן", פסיכו-בוט חינוכי דיגיטלי, המבוסס על עקרונות טיפול קוגניטיבי-התנהגותי (CBT).
+תפקידך הוא לסייע להורים למתבגרים. אתה אמפתי, מקצועי, ופרקטי.
+המשתמש הוא הורה. פרטיו, פרטי ילדו, ותשובותיו לשאלון ראשוני יסופקו לך.
 
-    function renderView() {
-        const contentArea = document.getElementById('yonatan-content-area');
-        contentArea.innerHTML = ''; 
+הנחיות הפעולה שלך:
+1.  **הודעת פתיחה חכמה:** אם הודעת המשתמש היא "START_CONVERSATION", תפקידך הוא להתחיל את השיחה. פנה להורה בשמו, ציין את האתגר המרכזי מהשאלון, והצע לו מיד שתי דרכים להתחיל. למשל: "שלום אורי, אני מבין שהאתגר הוא **תקשורת וריבים**. בוא נתחיל. [ספר לי על מקרה ספציפי] או [שנבין קודם מושג מפתח]?".
+2.  **מסגור CBT:** הסבר בקצרה את מודל אפר"ת. כשאתה מסביר מושג מפתח, השתמש בתחביר מיוחד כדי ליצור כרטיס ויזואלי: `CARD[כותרת הכרטיס|גוף ההסבר. אפשר להשתמש ב-**הדגשות**.]`.
+3.  **חקירה סוקרטית:** השתמש בשאלות פתוחות כדי לעזור להורה לחקור את המחשבות האוטומטיות שלו.
+4.  **הצעת כלים אינטראקטיביים:** הצע כלים פרקטיים והפוך אותם לבחירות באמצעות סוגריים מרובעים. למשל: "מה דעתך שננסה את [טבלת המחשבות] או שנעדיף [ניסוי התנהגותי]?". אל תציע יותר מ-2-3 אפשרויות בכל פעם.
+5.  **שמירה על מיקוד:** אם ההורה גולש לנושאים אחרים, הכר בכך בעדינות והחזר אותו למסלול.
+6.  **שפה דינמית:** גוון את תגובותיך. אל תפתח כל הודעה באותה הדרך. היה תמציתי והשתמש בפסקאות קצרות.
+"""
 
-        switch (state.uiState) {
-            case 'loading':
-                contentArea.innerHTML = `<div class="flex items-center justify-center h-full"><div class="yonatan-loader"></div></div>`;
-                break;
-            case 'questionnaire':
-                renderQuestionnaire(contentArea);
-                break;
-            case 'chat':
-                renderChat(contentArea);
-                break;
-            case 'error':
-                contentArea.innerHTML = `
-                    <div class="flex flex-col items-center justify-center h-full p-4 text-center">
-                        <svg class="w-16 h-16 text-red-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                        <h3 class="text-xl font-bold mb-2">אופס, משהו השתבש</h3>
-                        <p class="mb-4">לא הצלחנו להתחבר למערכת. אנא נסה שוב מאוחר יותר.</p>
-                        <button id="retry-button" class="bg-indigo-600 text-white py-2 px-4 rounded-lg hover:bg-indigo-700 transition">
-                            נסה שוב
-                        </button>
-                    </div>
-                `;
-                document.getElementById('retry-button').addEventListener('click', async () => {
-                    state.uiState = 'loading';
-                    renderView();
-                    const isHealthy = await checkSystemHealth();
-                    if (isHealthy) {
-                        if (state.sessionId) {
-                            state.uiState = 'chat';
-                        } else {
-                            state.uiState = 'questionnaire';
-                        }
-                    } else {
-                        state.uiState = 'error';
-                    }
-                    renderView();
-                });
-                break;
-        }
-    }
-
-    function renderQuestionnaire(container) {
-        const step = state.questionnaireStep;
-        const q = questionnaire[step];
-        
-        let inputHtml = '';
-        switch(q.type) {
-            case 'text':
-            case 'number':
-                inputHtml = `<input type="${q.type}" id="q-input" class="yonatan-input w-full max-w-sm mx-auto mt-4" placeholder="${q.placeholder}">`;
-                break;
-            case 'radio':
-            case 'choice':
-                inputHtml = `<div class="flex flex-wrap justify-center gap-3 mt-4">${q.options.map(o => `<button class="question-btn" data-value="${o}">${o}</button>`).join('')}</div>`;
-                break;
-            case 'scale':
-                inputHtml = `<div class="flex justify-center items-center gap-2 mt-4">1 <input type="range" id="q-input" min="${q.min}" max="${q.max}" class="w-full max-w-xs"> 10</div>`;
-                break;
-        }
-
-        container.innerHTML = `
-            <div class="questionnaire-view">
-                <p class="text-xl font-semibold text-gray-700">${q.question}</p>
-                <div class="mt-6">${inputHtml}</div>
-                ${(q.type === 'text' || q.type === 'number' || q.type === 'scale') ? `<button id="q-next-btn" class="yonatan-send-btn mx-auto mt-6"><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm.707-10.293a1 1 0 00-1.414-1.414l-3 3a1 1 0 001.414 1.414L9 9.414V13a1 1 0 102 0V9.414l1.293 1.293a1 1 0 001.414-1.414l-3-3z" clip-rule="evenodd"></path></svg></button>` : ''}
-            </div>`;
-
-        if (q.type === 'radio' || q.type === 'choice') {
-            container.querySelectorAll('.question-btn').forEach(btn => btn.addEventListener('click', () => handleQuestionnaireAnswer(btn.dataset.value)));
-        } else {
-            const nextBtn = document.getElementById('q-next-btn');
-            const input = document.getElementById('q-input');
-            nextBtn.addEventListener('click', () => handleQuestionnaireAnswer(input.value));
-            input.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleQuestionnaireAnswer(input.value); });
-        }
+# --- נקודת קצה לבדיקת בריאות המערכת ---
+@app.route('/api/health', methods=['GET'])
+def api_health():
+    """נקודת קצה לבדיקת תקינות המערכת"""
+    health_status = {
+        "status": "ok",
+        "api_running": True,
+        "database_connected": False,
+        "ai_model_configured": model is not None,
+        "timestamp": datetime.utcnow().isoformat()
     }
     
-    function handleQuestionnaireAnswer(answer) {
-        if (!answer) return;
-        state.questionnaireData[questionnaire[state.questionnaireStep].id] = answer;
-        if (state.questionnaireStep < questionnaire.length - 1) {
-            state.questionnaireStep++;
-            renderView();
-        } else {
-            finishQuestionnaire();
-        }
-    }
+    # בדיקת חיבור למסד הנתונים
+    try:
+        db.session.execute("SELECT 1")
+        health_status["database_connected"] = True
+    except Exception as e:
+        health_status["database_error"] = str(e)
     
-    async function finishQuestionnaire() {
-        state.uiState = 'loading';
-        renderView();
-        try {
-            const response = await fetch(`${API_URL}/api/questionnaire`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ session_id: state.sessionId, ...state.questionnaireData })
-            });
-
-            if (!response.ok) {
-                throw new Error(`שגיאת שרת: ${response.status}`);
-            }
-
-            state.uiState = 'chat';
-            renderView();
-            sendMessage("START_CONVERSATION");
-        } catch (error) {
-            console.error("שגיאה בשמירת שאלון:", error);
-            state.uiState = 'chat';
-            renderView();
-            addMessageToChat('bot', 'אופס, הייתה בעיה בשמירת הנתונים. בוא/י ננסה לדבר בכל זאת.');
-        }
-    }
-
-    function renderChat(container) {
-        container.innerHTML = `
-            <div class="yonatan-chat-window">
-                <div id="yonatan-messages" class="flex flex-col"></div>
-            </div>
-            <div class="yonatan-footer">
-                <div class="yonatan-input-area">
-                    <input id="yonatan-input" type="text" class="yonatan-input" placeholder="כתוב/י הודעה...">
-                    <button id="yonatan-send-btn" class="yonatan-send-btn">
-                        <svg class="w-6 h-6 transform -rotate-90" fill="currentColor" viewBox="0 0 20 20"><path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.428A1 1 0 009.17 15.57l-1.722-7.224a1 1 0 01.224-.97l4.573-5.336z"></path></svg>
-                    </button>
-                </div>
-            </div>
-        `;
-        elements.messagesContainer = document.getElementById('yonatan-messages');
-        elements.chatInput = document.getElementById('yonatan-input');
-        
-        document.getElementById('yonatan-send-btn').addEventListener('click', () => sendMessage());
-        elements.chatInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
-
-        state.conversationHistory.forEach(msg => addMessageToChat(msg.sender, msg.text, false));
-    }
-
-    function parseAndRenderContent(text) {
-        const cardRegex = /CARD\[([^|]+)\|([^\]]+)\]/g;
-        return text.replace(cardRegex, (match, title, body) => {
-            return `
-                <div class="yonatan-card">
-                    <div class="yonatan-card-header">${title}</div>
-                    <div class="yonatan-card-body">${body.replace(/\n/g, '<br>')}</div>
-                </div>
-            `;
-        }).replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-          .replace(/\[(.*?)\]/g, `<button class="suggestion-btn" data-text="$1">$1</button>`);
-    }
-
-    function addMessageToChat(sender, text, animate = true) {
-        if (!elements.messagesContainer) return;
-        
-        const wrapper = document.createElement('div');
-        wrapper.className = `yonatan-message-wrapper ${sender}`;
-        if (!animate) wrapper.style.animation = 'none';
-
-        const contentHTML = parseAndRenderContent(text);
-
-        wrapper.innerHTML = `
-            ${sender === 'bot' ? '<div class="yonatan-avatar">י</div>' : ''}
-            <div class="yonatan-message ${sender}">
-                <div class="message-content">${contentHTML}</div>
-            </div>
-        `;
-        
-        elements.messagesContainer.appendChild(wrapper);
-        
-        wrapper.querySelectorAll('.suggestion-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                sendMessage(btn.dataset.text);
-                wrapper.querySelectorAll('.suggestion-btn').forEach(b => { b.disabled = true; b.style.cssText = 'cursor: not-allowed; opacity: 0.6;'; });
-            });
-        });
-        
-        const chatWindow = elements.messagesContainer.parentElement;
-        chatWindow.scrollTop = chatWindow.scrollHeight;
-        return wrapper;
-    }
+    # בדיקת המודל
+    if model:
+        try:
+            test_response = model.generate_content("בדיקה")
+            health_status["ai_model_working"] = bool(test_response)
+        except Exception as e:
+            health_status["ai_model_working"] = False
+            health_status["ai_model_error"] = str(e)
     
-    // משופר sendMessage עם ניסיונות חוזרים ושיפור תמיכה בשגיאות
-    async function sendMessage(messageTextOverride) {
-        const messageText = messageTextOverride || elements.chatInput.value.trim();
-        if (!messageText) return;
+    status_code = 200 if health_status["database_connected"] and health_status.get("ai_model_working", False) else 500
+    return jsonify(health_status), status_code
 
-        if (messageText !== "START_CONVERSATION") {
-            addMessageToChat('user', messageText);
-            state.conversationHistory.push({ sender: 'user', text: messageText });
-        }
-        
-        if (!messageTextOverride) elements.chatInput.value = '';
-        
-        toggleTyping(true);
-        
-        // משתנים לניסיונות חוזרים
-        let retryCount = 0;
-        const maxRetries = 2;
-        
-        async function attemptSendMessage() {
-            try {
-                // הגדרת timeout לבקשה
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 שניות timeout
-                
-                const response = await fetch(`${API_URL}/api/chat`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ session_id: state.sessionId, message: messageText }),
-                    signal: controller.signal
-                });
-                
-                clearTimeout(timeoutId);
+# --- API Endpoints ---
+@app.route('/api/init', methods=['POST'])
+def init_session():
+    session_id = str(uuid4())
+    try:
+        parent = Parent(id=session_id, name="אורח", gender="לא צוין")
+        db.session.add(parent)
+        db.session.commit()
+        logger.info(f"סשן חדש נוצר עם מזהה: {session_id}")
+        return jsonify({"session_id": session_id, "status": "new_user"})
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        logger.error(f"שגיאת מסד נתונים באתחול: {e}")
+        return jsonify({"error": "לא ניתן לאתחל סשן"}), 500
 
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    let errorData;
-                    try {
-                        errorData = JSON.parse(errorText);
-                    } catch (e) {
-                        errorData = { error: errorText || "שגיאה לא מזוהה" };
-                    }
-                    console.error("שגיאת שרת:", response.status, errorData);
-                    throw new Error(`שגיאת שרת: ${errorData.error || response.status}`);
-                }
-                
-                if (!response.body) {
-                    throw new Error('התגובה לא מכילה תוכן זורם.');
-                }
-                
-                toggleTyping(false);
-                
-                // יצירת בועת הודעה ריקה לסטרימינג התוכן
-                const botMessageWrapper = addMessageToChat('bot', '');
-                const botMessageContent = botMessageWrapper.querySelector('.message-content');
-                
-                const reader = response.body.getReader();
-                const decoder = new TextDecoder();
-                let fullResponseText = '';
-                let receivedAnyContent = false;
+@app.route('/api/questionnaire', methods=['POST'])
+def handle_questionnaire():
+    data = request.json
+    session_id = data.get('session_id')
+    if not session_id: return jsonify({"error": "מזהה סשן חסר"}), 400
+    try:
+        parent = db.session.get(Parent, session_id)
+        if not parent: return jsonify({"error": "מזהה סשן לא תקין"}), 404
+        parent.name = data.get('parent_name')
+        parent.gender = data.get('parent_gender')
+        child = Child(name=data.get('child_name'), age=int(data.get('child_age')), gender=data.get('child_gender'), parent_id=session_id)
+        db.session.add(child)
+        db.session.flush()
+        response = QuestionnaireResponse(parent_id=session_id, child_id=child.id, response_data=json.dumps(data, ensure_ascii=False))
+        db.session.add(response)
+        db.session.commit()
+        logger.info(f"נתוני שאלון נשמרו עבור סשן: {session_id}")
+        return jsonify({"status": "success"})
+    except (SQLAlchemyError, KeyError, ValueError) as e:
+        db.session.rollback()
+        logger.error(f"שגיאה בשמירת שאלון: {e}")
+        return jsonify({"error": "לא ניתן לשמור את נתוני השאלון"}), 500
 
-                try {
-                    while (true) {
-                        const { value, done } = await reader.read();
-                        if (done) break;
-                        
-                        const chunk = decoder.decode(value, { stream: true });
-                        if (chunk) receivedAnyContent = true;
-                        fullResponseText += chunk;
-                        
-                        // עדכון תוכן בועת ההודעה עם תוכן מעובד
-                        botMessageContent.innerHTML = parseAndRenderContent(fullResponseText);
-                        
-                        const chatWindow = elements.messagesContainer.parentElement;
-                        chatWindow.scrollTop = chatWindow.scrollHeight;
-                    }
-                    
-                    // בדיקה שהתקבל תוכן כלשהו
-                    if (!receivedAnyContent || !fullResponseText.trim()) {
-                        throw new Error('לא התקבל תוכן מהשרת');
-                    }
-                    
-                    // קישור מחדש של מאזיני אירועים לכפתורי הצעה חדשים
-                    botMessageWrapper.querySelectorAll('.suggestion-btn').forEach(btn => {
-                        btn.addEventListener('click', () => {
-                            sendMessage(btn.dataset.text);
-                            botMessageWrapper.querySelectorAll('.suggestion-btn').forEach(b => { 
-                                b.disabled = true; 
-                                b.style.cssText = 'cursor: not-allowed; opacity: 0.6;'; 
-                            });
-                        });
-                    });
+@app.route('/api/chat', methods=['POST'])
+def chat():
+    data = request.json
+    session_id = data.get('session_id')
+    user_message = data.get('message')
 
-                    // שמירת ההודעה המלאה להיסטוריה
-                    state.conversationHistory.push({ sender: 'bot', text: fullResponseText });
-                    
-                } catch (streamError) {
-                    console.error("שגיאת סטרימינג:", streamError);
-                    botMessageContent.innerHTML = '<div class="error-message">אירעה שגיאה בקבלת התשובה. אנא נסה שוב.</div>';
-                    botMessageContent.innerHTML += '<button class="retry-button" id="retry-stream-btn">נסה שוב</button>';
-                    document.getElementById('retry-stream-btn').addEventListener('click', () => {
-                        botMessageWrapper.remove();
-                        sendMessage(messageText);
-                    });
-                    throw streamError;
-                }
-                
-            } catch (error) {
-                console.error("שגיאת API:", error);
-                
-                if (retryCount < maxRetries) {
-                    retryCount++;
-                    console.log(`ניסיון ${retryCount} מתוך ${maxRetries}...`);
-                    
-                    // אם זה ניסיון ראשון, ננסה לאפס את הסשן
-                    if (retryCount === 1) {
-                        try {
-                            await fetch(`${API_URL}/api/reset_session`, {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ session_id: state.sessionId })
-                            });
-                            console.log("הסשן אופס, מנסה שוב...");
-                        } catch (resetError) {
-                            console.error("שגיאה באיפוס הסשן:", resetError);
-                        }
-                    }
-                    
-                    // המתנה קצרה לפני ניסיון חוזר
-                    await new Promise(resolve => setTimeout(resolve, 1000));
-                    return attemptSendMessage();
-                }
-                
-                toggleTyping(false);
-                addMessageToChat('bot', 'אני מתנצל, נתקלתי בבעיה טכנית. אנא נסה שוב מאוחר יותר או רענן את הדף.');
-            }
-        }
-        
-        return attemptSendMessage();
-    }
+    if not all([session_id, user_message]):
+        return jsonify({"error": "חסרים נתונים."}), 400
+    
+    if not model:
+        return jsonify({"error": "מודל ה-AI לא מוגדר במערכת."}), 503
 
-    function toggleTyping(isTyping) {
-        let typingIndicator = elements.messagesContainer.querySelector('.typing-indicator-wrapper');
-        if (isTyping && !typingIndicator) {
-            const wrapper = document.createElement('div');
-            wrapper.className = 'yonatan-message-wrapper bot typing-indicator-wrapper';
-            wrapper.innerHTML = `<div class="yonatan-avatar">י</div><div class="yonatan-message bot"><div class="yonatan-typing-indicator"><span></span><span></span><span></span></div></div>`;
-            elements.messagesContainer.appendChild(wrapper);
-            const chatWindow = elements.messagesContainer.parentElement;
-            chatWindow.scrollTop = chatWindow.scrollHeight;
-        } else if (!isTyping && typingIndicator) {
-            typingIndicator.remove();
-        }
-    }
-
-    // בדיקת בריאות המערכת
-    async function checkSystemHealth() {
-        try {
-            const response = await fetch(`${API_URL}/api/health`);
-            if (!response.ok) {
-                console.error(`בדיקת בריאות המערכת נכשלה: סטטוס ${response.status}`);
-                return false;
-            }
+    try:
+        if session_id not in chat_sessions:
+            logger.info(f"יוצר סשן צ'אט חדש עבור session_id: {session_id}")
+            parent = db.session.get(Parent, session_id)
+            if not parent: 
+                logger.error(f"לא נמצא משתמש עם session_id: {session_id}")
+                return jsonify({"error": "המשתמש לא נמצא"}), 404
+                
+            child = Child.query.filter_by(parent_id=session_id).first()
+            questionnaire = QuestionnaireResponse.query.filter_by(parent_id=session_id).first()
             
-            const health = await response.json();
+            context = f"--- CONTEXT ---\nParent Name: {parent.name}\nChild Name: {child.name if child else 'N/A'}\nChild Age: {child.age if child else 'N/A'}\nInitial Questionnaire Answers: {json.loads(questionnaire.response_data) if questionnaire else 'N/A'}\n--- END CONTEXT ---"
             
-            if (!health.ai_model_configured || !health.ai_model_working) {
-                console.error("מודל ה-AI אינו מוגדר או אינו עובד:", health);
-                return false;
-            }
-            
-            if (!health.database_connected) {
-                console.error("אין חיבור לבסיס הנתונים:", health);
-                return false;
-            }
-            
-            console.log("בדיקת בריאות המערכת עברה בהצלחה:", health);
-            return true;
-        } catch (error) {
-            console.error("שגיאה בבדיקת בריאות המערכת:", error);
-            return false;
-        }
-    }
+            db_conversation = Conversation.query.filter_by(parent_id=session_id).first()
+            history = []
+            if db_conversation:
+                messages = Message.query.filter_by(conversation_id=db_conversation.id).order_by(Message.timestamp.asc()).all()
+                for msg in messages:
+                    role = 'user' if msg.sender_type == 'user' else 'model'
+                    history.append({'role': role, 'parts': [{'text': msg.content}]})
 
-    async function toggleWidget(forceOpen) {
-        const isOpen = elements.widgetContainer.classList.contains('open');
-        const shouldOpen = forceOpen !== undefined ? forceOpen : !isOpen;
-
-        if (shouldOpen) {
-            elements.widgetContainer.classList.add('open');
-            elements.chatButton.style.opacity = '0';
-            
-            if (!state.sessionId) {
-                state.uiState = 'loading';
-                renderView();
-                
-                // בדיקת בריאות המערכת לפני המשך
-                const isHealthy = await checkSystemHealth();
-                if (!isHealthy) {
-                    state.uiState = 'error';
-                    renderView();
-                    return;
-                }
-                
-                try {
-                    const response = await fetch(`${API_URL}/api/init`, { method: 'POST' });
-                    if (!response.ok) {
-                        throw new Error(`שגיאת שרת: ${response.status}`);
-                    }
-                    
-                    const data = await response.json();
-                    if (data.error) throw new Error(data.error);
-                    
-                    state.sessionId = data.session_id;
-                    localStorage.setItem('yonatan_session_id', state.sessionId);
-                    state.uiState = 'questionnaire';
-                    renderView();
-                } catch (error) {
-                    console.error("שגיאת אתחול:", error);
-                    state.uiState = 'error';
-                    renderView();
-                }
-            } else {
-                // בדיקת בריאות המערכת לפני המשך
-                const isHealthy = await checkSystemHealth();
-                if (!isHealthy) {
-                    state.uiState = 'error';
-                    renderView();
-                    return;
-                }
-                
-                if(state.uiState !== 'chat') {
-                    state.uiState = 'chat';
-                    renderView();
-                    if(state.conversationHistory.length === 0) {
-                         addMessageToChat('bot', 'ברוך/ה שובך! אני כאן אם תרצה/י להמשיך את שיחתנו.');
-                    }
-                }
-            }
-        } else {
-            elements.widgetContainer.classList.remove('open');
-            elements.chatButton.style.opacity = '1';
-        }
-    }
-
-    async function initialize() {
-        injectStyles();
-        createWidget();
+            try:
+                chat_sessions[session_id] = model.start_chat(
+                    history=history,
+                    system_instruction=f"{CBT_SYSTEM_PROMPT}\n{context}"
+                )
+                logger.info(f"סשן צ'אט נוצר בהצלחה עבור {session_id}")
+            except Exception as e:
+                logger.error(f"שגיאה ביצירת סשן צ'אט: {e}")
+                return jsonify({"error": f"לא ניתן ליצור סשן צ'אט: {str(e)}"}), 500
         
-        // בדיקת בריאות המערכת בטעינה
-        const systemReady = await checkSystemHealth();
-        if (!systemReady) {
-            // הצגת כפתור עם חיווי מצב
-            elements.chatButton.classList.add('api-error');
-            elements.chatButton.setAttribute('title', 'יש בעיה בחיבור לשרת');
-        }
+        active_chat = chat_sessions[session_id]
         
-        window.yonatanWidget = { 
-            open: () => toggleWidget(true),
-            checkHealth: checkSystemHealth,
-            resetSession: async () => {
-                try {
-                    await fetch(`${API_URL}/api/reset_session`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ session_id: state.sessionId })
-                    });
-                    return true;
-                } catch (error) {
-                    console.error("שגיאה באיפוס הסשן:", error);
-                    return false;
-                }
-            }
-        };
-    }
+        if user_message != "START_CONVERSATION":
+            db_conversation = Conversation.query.filter_by(parent_id=session_id).first()
+            if not db_conversation:
+                child = Child.query.filter_by(parent_id=session_id).first()
+                db_conversation = Conversation(parent_id=session_id, child_id=child.id if child else None, topic="General")
+                db.session.add(db_conversation)
+                db.session.commit()
+                db.session.refresh(db_conversation)
+            user_msg_db = Message(conversation_id=db_conversation.id, sender_type='user', content=user_message)
+            db.session.add(user_msg_db)
+            db.session.commit()
+            logger.info(f"הודעת משתמש נשמרה עבור סשן {session_id}")
 
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initialize);
-    } else {
-        initialize();
-    }
-})();
+        try:
+            stream = active_chat.send_message(user_message, stream=True)
+            logger.info(f"הודעה נשלחה למודל ה-AI עבור סשן {session_id}")
+        except Exception as e:
+            logger.error(f"שגיאה בשליחת הודעה למודל: {e}")
+            return jsonify({"error": f"שגיאה בשליחת הודעה למודל: {str(e)}"}), 500
+
+        def generate_and_save():
+            full_response_text = []
+            try:
+                for chunk in stream:
+                    if chunk.text:
+                        full_response_text.append(chunk.text)
+                        yield chunk.text
+            except Exception as e:
+                error_message = f"אני מתנצל, התרחשה שגיאה במהלך יצירת התשובה: {str(e)}"
+                logger.error(f"שגיאה במהלך סטרימינג: {e}")
+                yield error_message
+                full_response_text.append(error_message)
+            
+            final_text = "".join(full_response_text)
+            
+            # שמירה למסד הנתונים רק אם יש טקסט
+            if final_text.strip():
+                try:
+                    db_conv = Conversation.query.filter_by(parent_id=session_id).first()
+                    if db_conv:
+                        ai_msg_db = Message(conversation_id=db_conv.id, sender_type='bot', content=final_text)
+                        db.session.add(ai_msg_db)
+                        db.session.commit()
+                        logger.info(f"תשובת בוט נשמרה עבור סשן {session_id}")
+                except Exception as db_err:
+                    logger.error(f"שגיאה בשמירת תשובה למסד הנתונים: {db_err}")
+
+        return Response(stream_with_context(generate_and_save()), mimetype='text/plain')
+
+    except Exception as e:
+        logger.error(f"שגיאה כללית בנקודת קצה chat: {e}", exc_info=True)
+        return jsonify({"error": f"שגיאה פנימית במערכת: {str(e)}"}), 500
+
+@app.route('/api/reset_session', methods=['POST'])
+def reset_session():
+    """אפשרות לאיפוס סשן במקרה של תקלה"""
+    data = request.json
+    session_id = data.get('session_id')
+    
+    if not session_id:
+        return jsonify({"error": "חסר מזהה סשן"}), 400
+    
+    try:
+        # ניקוי הסשן מהזיכרון
+        if session_id in chat_sessions:
+            del chat_sessions[session_id]
+            logger.info(f"סשן {session_id} נוקה מהזיכרון")
+        
+        return jsonify({"status": "success", "message": "הסשן אופס בהצלחה"})
+    except Exception as e:
+        logger.error(f"שגיאה באיפוס סשן: {e}")
+        return jsonify({"error": f"שגיאה באיפוס סשן: {str(e)}"}), 500
+
+# --- Frontend Serving ---
+@app.route('/')
+def serve_main_landing():
+    return render_template('index.html')
+
+@app.route('/<page_name>.html')
+def serve_other_html(page_name):
+    try:
+        return render_template(f'{page_name}.html')
+    except Exception:
+        return "Page not found", 404
+
+if __name__ == '__main__':
+    # This block is for local development only
+    # Gunicorn will not run this
+    app.run()

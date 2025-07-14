@@ -1,4 +1,4 @@
-// Yonatan Psycho-Bot Widget v11.0 - Response Streaming
+// Yonatan Psycho-Bot Widget v12.0 - API חדש ושיפורים
 (function() {
     if (window.yonatanWidgetLoaded) return;
     window.yonatanWidgetLoaded = true;
@@ -38,6 +38,7 @@
         style.textContent = `
             :root { --primary: #4f46e5; --secondary: #7c3aed; --user-bubble: #eef2ff; --bot-bubble: #f3f4f6; }
             #yonatan-widget-button { position: fixed; bottom: 20px; right: 20px; background: var(--primary); color: white; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.2); cursor: pointer; transition: all 0.3s ease; z-index: 9998; border: none; }
+            #yonatan-widget-button.api-error { background: #ef4444; }
             #yonatan-widget-container { position: fixed; bottom: 20px; right: 20px; width: 400px; height: 600px; max-height: calc(100vh - 40px); background: white; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); display: flex; flex-direction: column; overflow: hidden; transform: scale(0.5) translateY(100px); opacity: 0; transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); pointer-events: none; z-index: 9999; }
             #yonatan-widget-container.open { transform: scale(1) translateY(0); opacity: 1; pointer-events: auto; }
             .yonatan-header { background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%); color: white; padding: 16px; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
@@ -53,7 +54,7 @@
             .yonatan-input-area { display: flex; align-items: center; }
             .yonatan-input { flex-grow: 1; border: 1px solid #d1d5db; border-radius: 20px; padding: 10px 16px; font-size: 16px; outline: none; transition: border-color 0.2s; }
             .yonatan-input:focus { border-color: var(--primary); }
-            .yonatan-send-btn { background: var(--primary); color: white; border: none; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-left: 10px; cursor: pointer; transition: background-color 0.2s; }
+            .yonatan-send-btn { background: var(--primary); color: white; border: none; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 10px; cursor: pointer; transition: background-color 0.2s; }
             .yonatan-typing-indicator span { height: 8px; width: 8px; border-radius: 50%; background-color: #9ca3af; margin: 0 2px; animation: typing-bounce 1.4s infinite ease-in-out both; }
             .yonatan-typing-indicator span:nth-child(1) { animation-delay: -0.32s; } .yonatan-typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
             .yonatan-loader { border: 4px solid #f3f3f3; border-top: 4px solid var(--primary); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: auto; }
@@ -65,6 +66,8 @@
             .yonatan-card { background-color: white; border-radius: 12px; border: 1px solid #e5e7eb; margin-top: 8px; overflow: hidden; }
             .yonatan-card-header { background-color: #f9fafb; padding: 10px 15px; font-weight: bold; border-bottom: 1px solid #e5e7eb; }
             .yonatan-card-body { padding: 15px; }
+            .error-message { color: #ef4444; padding: 8px; margin: 8px 0; background-color: #fee2e2; border-radius: 8px; font-size: 14px; }
+            .retry-button { background-color: #ef4444; color: white; border: none; padding: 6px 12px; border-radius: 8px; cursor: pointer; margin-top: 8px; font-size: 14px; }
             @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
             @keyframes spin { to { transform: rotate(360deg); } }
             @keyframes typing-bounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1.0); } }
@@ -112,6 +115,35 @@
                 break;
             case 'chat':
                 renderChat(contentArea);
+                break;
+            case 'error':
+                contentArea.innerHTML = `
+                    <div class="flex flex-col items-center justify-center h-full p-4 text-center">
+                        <svg class="w-16 h-16 text-red-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <h3 class="text-xl font-bold mb-2">אופס, משהו השתבש</h3>
+                        <p class="mb-4">לא הצלחנו להתחבר למערכת. אנא נסה שוב מאוחר יותר.</p>
+                        <button id="retry-button" class="bg-indigo-600 text-white py-2 px-4 rounded-lg hover:bg-indigo-700 transition">
+                            נסה שוב
+                        </button>
+                    </div>
+                `;
+                document.getElementById('retry-button').addEventListener('click', async () => {
+                    state.uiState = 'loading';
+                    renderView();
+                    const isHealthy = await checkSystemHealth();
+                    if (isHealthy) {
+                        if (state.sessionId) {
+                            state.uiState = 'chat';
+                        } else {
+                            state.uiState = 'questionnaire';
+                        }
+                    } else {
+                        state.uiState = 'error';
+                    }
+                    renderView();
+                });
                 break;
         }
     }
@@ -167,16 +199,21 @@
         state.uiState = 'loading';
         renderView();
         try {
-            await fetch(`${API_URL}/api/questionnaire`, {
+            const response = await fetch(`${API_URL}/api/questionnaire`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ session_id: state.sessionId, ...state.questionnaireData })
             });
+
+            if (!response.ok) {
+                throw new Error(`שגיאת שרת: ${response.status}`);
+            }
+
             state.uiState = 'chat';
             renderView();
             sendMessage("START_CONVERSATION");
         } catch (error) {
-            console.error(error);
+            console.error("שגיאה בשמירת שאלון:", error);
             state.uiState = 'chat';
             renderView();
             addMessageToChat('bot', 'אופס, הייתה בעיה בשמירת הנתונים. בוא/י ננסה לדבר בכל זאת.');
@@ -249,7 +286,7 @@
         return wrapper;
     }
     
-    // --- MODIFIED SENDMESSAGE FOR STREAMING ---
+    // משופר sendMessage עם ניסיונות חוזרים ושיפור תמיכה בשגיאות
     async function sendMessage(messageTextOverride) {
         const messageText = messageTextOverride || elements.chatInput.value.trim();
         if (!messageText) return;
@@ -262,58 +299,131 @@
         if (!messageTextOverride) elements.chatInput.value = '';
         
         toggleTyping(true);
-
-        try {
-            const response = await fetch(`${API_URL}/api/chat`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ session_id: state.sessionId, message: messageText })
-            });
-
-            if (!response.ok || !response.body) {
-                throw new Error('Network response was not ok.');
-            }
-            
-            toggleTyping(false);
-            
-            // Create an empty bot message bubble to stream content into
-            const botMessageWrapper = addMessageToChat('bot', '');
-            const botMessageContent = botMessageWrapper.querySelector('.message-content');
-            
-            const reader = response.body.getReader();
-            const decoder = new TextDecoder();
-            let fullResponseText = '';
-
-            while (true) {
-                const { value, done } = await reader.read();
-                if (done) break;
+        
+        // משתנים לניסיונות חוזרים
+        let retryCount = 0;
+        const maxRetries = 2;
+        
+        async function attemptSendMessage() {
+            try {
+                // הגדרת timeout לבקשה
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 שניות timeout
                 
-                const chunk = decoder.decode(value, { stream: true });
-                fullResponseText += chunk;
-                
-                // Update the content of the message bubble with parsed markdown/cards
-                botMessageContent.innerHTML = parseAndRenderContent(fullResponseText);
-                
-                const chatWindow = elements.messagesContainer.parentElement;
-                chatWindow.scrollTop = chatWindow.scrollHeight;
-            }
-            
-            // Re-bind event listeners for any new suggestion buttons
-            botMessageWrapper.querySelectorAll('.suggestion-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    sendMessage(btn.dataset.text);
-                    botMessageWrapper.querySelectorAll('.suggestion-btn').forEach(b => { b.disabled = true; b.style.cssText = 'cursor: not-allowed; opacity: 0.6;'; });
+                const response = await fetch(`${API_URL}/api/chat`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ session_id: state.sessionId, message: messageText }),
+                    signal: controller.signal
                 });
-            });
+                
+                clearTimeout(timeoutId);
 
-            // Save the complete message to history
-            state.conversationHistory.push({ sender: 'bot', text: fullResponseText });
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    let errorData;
+                    try {
+                        errorData = JSON.parse(errorText);
+                    } catch (e) {
+                        errorData = { error: errorText || "שגיאה לא מזוהה" };
+                    }
+                    console.error("שגיאת שרת:", response.status, errorData);
+                    throw new Error(`שגיאת שרת: ${errorData.error || response.status}`);
+                }
+                
+                if (!response.body) {
+                    throw new Error('התגובה לא מכילה תוכן זורם.');
+                }
+                
+                toggleTyping(false);
+                
+                // יצירת בועת הודעה ריקה לסטרימינג התוכן
+                const botMessageWrapper = addMessageToChat('bot', '');
+                const botMessageContent = botMessageWrapper.querySelector('.message-content');
+                
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let fullResponseText = '';
+                let receivedAnyContent = false;
 
-        } catch (error) {
-            console.error("Chat API error:", error);
-            toggleTyping(false);
-            addMessageToChat('bot', 'אני מתנצל, נתקלתי בבעיה טכנית. נוכל לנסות שוב בעוד כמה רגעים?');
+                try {
+                    while (true) {
+                        const { value, done } = await reader.read();
+                        if (done) break;
+                        
+                        const chunk = decoder.decode(value, { stream: true });
+                        if (chunk) receivedAnyContent = true;
+                        fullResponseText += chunk;
+                        
+                        // עדכון תוכן בועת ההודעה עם תוכן מעובד
+                        botMessageContent.innerHTML = parseAndRenderContent(fullResponseText);
+                        
+                        const chatWindow = elements.messagesContainer.parentElement;
+                        chatWindow.scrollTop = chatWindow.scrollHeight;
+                    }
+                    
+                    // בדיקה שהתקבל תוכן כלשהו
+                    if (!receivedAnyContent || !fullResponseText.trim()) {
+                        throw new Error('לא התקבל תוכן מהשרת');
+                    }
+                    
+                    // קישור מחדש של מאזיני אירועים לכפתורי הצעה חדשים
+                    botMessageWrapper.querySelectorAll('.suggestion-btn').forEach(btn => {
+                        btn.addEventListener('click', () => {
+                            sendMessage(btn.dataset.text);
+                            botMessageWrapper.querySelectorAll('.suggestion-btn').forEach(b => { 
+                                b.disabled = true; 
+                                b.style.cssText = 'cursor: not-allowed; opacity: 0.6;'; 
+                            });
+                        });
+                    });
+
+                    // שמירת ההודעה המלאה להיסטוריה
+                    state.conversationHistory.push({ sender: 'bot', text: fullResponseText });
+                    
+                } catch (streamError) {
+                    console.error("שגיאת סטרימינג:", streamError);
+                    botMessageContent.innerHTML = '<div class="error-message">אירעה שגיאה בקבלת התשובה. אנא נסה שוב.</div>';
+                    botMessageContent.innerHTML += '<button class="retry-button" id="retry-stream-btn">נסה שוב</button>';
+                    document.getElementById('retry-stream-btn').addEventListener('click', () => {
+                        botMessageWrapper.remove();
+                        sendMessage(messageText);
+                    });
+                    throw streamError;
+                }
+                
+            } catch (error) {
+                console.error("שגיאת API:", error);
+                
+                if (retryCount < maxRetries) {
+                    retryCount++;
+                    console.log(`ניסיון ${retryCount} מתוך ${maxRetries}...`);
+                    
+                    // אם זה ניסיון ראשון, ננסה לאפס את הסשן
+                    if (retryCount === 1) {
+                        try {
+                            await fetch(`${API_URL}/api/reset_session`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ session_id: state.sessionId })
+                            });
+                            console.log("הסשן אופס, מנסה שוב...");
+                        } catch (resetError) {
+                            console.error("שגיאה באיפוס הסשן:", resetError);
+                        }
+                    }
+                    
+                    // המתנה קצרה לפני ניסיון חוזר
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    return attemptSendMessage();
+                }
+                
+                toggleTyping(false);
+                addMessageToChat('bot', 'אני מתנצל, נתקלתי בבעיה טכנית. אנא נסה שוב מאוחר יותר או רענן את הדף.');
+            }
         }
+        
+        return attemptSendMessage();
     }
 
     function toggleTyping(isTyping) {
@@ -330,6 +440,35 @@
         }
     }
 
+    // בדיקת בריאות המערכת
+    async function checkSystemHealth() {
+        try {
+            const response = await fetch(`${API_URL}/api/health`);
+            if (!response.ok) {
+                console.error(`בדיקת בריאות המערכת נכשלה: סטטוס ${response.status}`);
+                return false;
+            }
+            
+            const health = await response.json();
+            
+            if (!health.ai_model_configured || !health.ai_model_working) {
+                console.error("מודל ה-AI אינו מוגדר או אינו עובד:", health);
+                return false;
+            }
+            
+            if (!health.database_connected) {
+                console.error("אין חיבור לבסיס הנתונים:", health);
+                return false;
+            }
+            
+            console.log("בדיקת בריאות המערכת עברה בהצלחה:", health);
+            return true;
+        } catch (error) {
+            console.error("שגיאה בבדיקת בריאות המערכת:", error);
+            return false;
+        }
+    }
+
     async function toggleWidget(forceOpen) {
         const isOpen = elements.widgetContainer.classList.contains('open');
         const shouldOpen = forceOpen !== undefined ? forceOpen : !isOpen;
@@ -341,19 +480,42 @@
             if (!state.sessionId) {
                 state.uiState = 'loading';
                 renderView();
+                
+                // בדיקת בריאות המערכת לפני המשך
+                const isHealthy = await checkSystemHealth();
+                if (!isHealthy) {
+                    state.uiState = 'error';
+                    renderView();
+                    return;
+                }
+                
                 try {
                     const response = await fetch(`${API_URL}/api/init`, { method: 'POST' });
+                    if (!response.ok) {
+                        throw new Error(`שגיאת שרת: ${response.status}`);
+                    }
+                    
                     const data = await response.json();
                     if (data.error) throw new Error(data.error);
+                    
                     state.sessionId = data.session_id;
                     localStorage.setItem('yonatan_session_id', state.sessionId);
                     state.uiState = 'questionnaire';
                     renderView();
                 } catch (error) {
-                    console.error("Init error:", error);
-                    document.getElementById('yonatan-content-area').innerHTML = '<p class="p-4 text-center text-red-600">לא ניתן היה להתחיל שיחה. אנא נסה לרענן את הדף.</p>';
+                    console.error("שגיאת אתחול:", error);
+                    state.uiState = 'error';
+                    renderView();
                 }
             } else {
+                // בדיקת בריאות המערכת לפני המשך
+                const isHealthy = await checkSystemHealth();
+                if (!isHealthy) {
+                    state.uiState = 'error';
+                    renderView();
+                    return;
+                }
+                
                 if(state.uiState !== 'chat') {
                     state.uiState = 'chat';
                     renderView();
@@ -368,10 +530,35 @@
         }
     }
 
-    function initialize() {
+    async function initialize() {
         injectStyles();
         createWidget();
-        window.yonatanWidget = { open: () => toggleWidget(true) };
+        
+        // בדיקת בריאות המערכת בטעינה
+        const systemReady = await checkSystemHealth();
+        if (!systemReady) {
+            // הצגת כפתור עם חיווי מצב
+            elements.chatButton.classList.add('api-error');
+            elements.chatButton.setAttribute('title', 'יש בעיה בחיבור לשרת');
+        }
+        
+        window.yonatanWidget = { 
+            open: () => toggleWidget(true),
+            checkHealth: checkSystemHealth,
+            resetSession: async () => {
+                try {
+                    await fetch(`${API_URL}/api/reset_session`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ session_id: state.sessionId })
+                    });
+                    return true;
+                } catch (error) {
+                    console.error("שגיאה באיפוס הסשן:", error);
+                    return false;
+                }
+            }
+        };
     }
 
     if (document.readyState === 'loading') {
