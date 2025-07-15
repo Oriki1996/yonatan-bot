@@ -3,6 +3,7 @@
 
 import os
 import sys
+from sqlalchemy.exc import OperationalError, ProgrammingError
 
 def create_tables():
     """יצירת כל הטבלאות במערכת"""
@@ -10,6 +11,7 @@ def create_tables():
     
     try:
         # ייבוא המודולים הנדרשים
+        # הייבוא מתבצע כאן כדי לוודא שהאפליקציה וה-db מאותחלים
         from app import app, db
         
         # עבודה בקונטקסט של האפליקציה
@@ -17,6 +19,20 @@ def create_tables():
             print(f"📊 יוצר טבלאות בסביבה: {os.environ.get('FLASK_ENV', 'production')}")
             print(f"🗄️  בסיס נתונים: {app.config['SQLALCHEMY_DATABASE_URI'][:50]}...")
             
+            # בדיקת חיבור לבסיס הנתונים לפני יצירת טבלאות
+            try:
+                # ניסיון ליצור חיבור למסד הנתונים
+                with db.engine.connect() as connection:
+                    connection.execute(db.text("SELECT 1"))
+                print("✅ חיבור לבסיס הנתונים תקין.")
+            except (OperationalError, ProgrammingError) as conn_err:
+                print(f"❌ שגיאת חיבור לבסיס הנתונים: {conn_err}")
+                print("💡 וודא ש-DATABASE_URL מוגדר נכון ושהמסד נתונים נגיש.")
+                return False
+            except Exception as conn_err:
+                print(f"❌ שגיאה בלתי צפויה בחיבור לבסיס הנתונים: {conn_err}")
+                return False
+
             # יצירת כל הטבלאות
             db.create_all()
             
@@ -45,17 +61,18 @@ def create_tables():
                 
             except Exception as inspect_error:
                 print(f"⚠️  לא ניתן לבדוק את הטבלאות: {inspect_error}")
-                print("✅ הטבלאות כנראה נוצרו (SQLite לא תומך בinspection)")
+                print("✅ הטבלאות כנראה נוצרו (ייתכן שזו סביבת SQLite ללא תמיכה מלאה ב-inspection).")
                 return True
                 
     except ImportError as e:
+        # לכידת שגיאת ייבוא ספציפית כמו 'psycopg2'
         print(f"❌ שגיאה בייבוא מודולים: {e}")
-        print("💡 וודא שכל החבילות מותקנות: pip install -r requirements.txt")
+        print("💡 וודא שכל החבילות מותקנות, במיוחד psycopg2-binary אם אתה משתמש ב-PostgreSQL.")
         return False
         
     except Exception as e:
-        print(f"❌ שגיאה ביצירת הטבלאות: {e}")
-        print("💡 בדוק את ההגדרות בקובץ config.py ואת משתני הסביבה")
+        print(f"❌ שגיאה כללית ביצירת הטבלאות: {e}")
+        print("💡 בדוק את ההגדרות בקובץ config.py ואת משתני הסביבה (DATABASE_URL, FLASK_ENV).")
         return False
 
 def main():
