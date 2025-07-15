@@ -1,4 +1,4 @@
-// Yonatan Psycho-Bot Widget v12.0 - API חדש ושיפורים
+// Yonatan Psycho-Bot Widget v13.0 - עם תמיכה מלאה ב-Fallback
 (function() {
     if (window.yonatanWidgetLoaded) return;
     window.yonatanWidgetLoaded = true;
@@ -39,6 +39,7 @@
             :root { --primary: #4f46e5; --secondary: #7c3aed; --user-bubble: #eef2ff; --bot-bubble: #f3f4f6; }
             #yonatan-widget-button { position: fixed; bottom: 20px; right: 20px; background: var(--primary); color: white; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.2); cursor: pointer; transition: all 0.3s ease; z-index: 9998; border: none; }
             #yonatan-widget-button.api-error { background: #ef4444; }
+            #yonatan-widget-button.fallback-mode { background: #f59e0b; }
             #yonatan-widget-container { position: fixed; bottom: 20px; right: 20px; width: 400px; height: 600px; max-height: calc(100vh - 40px); background: white; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); display: flex; flex-direction: column; overflow: hidden; transform: scale(0.5) translateY(100px); opacity: 0; transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); pointer-events: none; z-index: 9999; }
             #yonatan-widget-container.open { transform: scale(1) translateY(0); opacity: 1; pointer-events: auto; }
             .yonatan-header { background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%); color: white; padding: 16px; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
@@ -50,6 +51,8 @@
             .yonatan-message { padding: 10px 15px; border-radius: 18px; line-height: 1.5; }
             .yonatan-message.user { background-color: var(--user-bubble); color: #312e81; border-bottom-right-radius: 4px; }
             .yonatan-message.bot { background-color: var(--bot-bubble); color: #374151; border-bottom-left-radius: 4px; }
+            .yonatan-message.fallback-mode { border-left: 3px solid #f59e0b; background-color: #fef3c7; }
+            .fallback-indicator { font-size: 12px; color: #d97706; font-weight: bold; margin-bottom: 5px; padding: 2px 6px; background-color: #fed7aa; border-radius: 8px; display: inline-block; }
             .yonatan-footer { padding: 16px; border-top: 1px solid #e5e7eb; background: white; flex-shrink: 0; }
             .yonatan-input-area { display: flex; align-items: center; }
             .yonatan-input { flex-grow: 1; border: 1px solid #d1d5db; border-radius: 20px; padding: 10px 16px; font-size: 16px; outline: none; transition: border-color 0.2s; }
@@ -68,6 +71,9 @@
             .yonatan-card-body { padding: 15px; }
             .error-message { color: #ef4444; padding: 8px; margin: 8px 0; background-color: #fee2e2; border-radius: 8px; font-size: 14px; }
             .retry-button { background-color: #ef4444; color: white; border: none; padding: 6px 12px; border-radius: 8px; cursor: pointer; margin-top: 8px; font-size: 14px; }
+            .system-status-indicator { position: absolute; top: 10px; right: 50px; background: #10b981; color: white; padding: 4px 8px; border-radius: 12px; font-size: 11px; font-weight: bold; z-index: 10000; opacity: 0.9; }
+            .system-status-indicator.fallback { background: #f59e0b; }
+            .system-status-indicator.error { background: #ef4444; }
             @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
             @keyframes spin { to { transform: rotate(360deg); } }
             @keyframes typing-bounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1.0); } }
@@ -132,8 +138,8 @@
                 document.getElementById('retry-button').addEventListener('click', async () => {
                     state.uiState = 'loading';
                     renderView();
-                    const isHealthy = await checkSystemHealth();
-                    if (isHealthy) {
+                    const healthStatus = await checkSystemHealth();
+                    if (healthStatus.available) {
                         if (state.sessionId) {
                             state.uiState = 'chat';
                         } else {
@@ -256,6 +262,17 @@
           .replace(/\[(.*?)\]/g, `<button class="suggestion-btn" data-text="$1">$1</button>`);
     }
 
+    function detectFallbackResponse(text) {
+        const fallbackIndicators = [
+            "המערכת שלי עמוסה כרגע",
+            "נסה שוב מאוחר יותר", 
+            "CARD[",
+            "🤖"
+        ];
+        
+        return fallbackIndicators.some(indicator => text.includes(indicator));
+    }
+
     function addMessageToChat(sender, text, animate = true) {
         if (!elements.messagesContainer) return;
         
@@ -264,10 +281,14 @@
         if (!animate) wrapper.style.animation = 'none';
 
         const contentHTML = parseAndRenderContent(text);
+        
+        // זיהוי אם זו תשובת fallback
+        const isFallback = sender === 'bot' && detectFallbackResponse(text);
 
         wrapper.innerHTML = `
             ${sender === 'bot' ? '<div class="yonatan-avatar">י</div>' : ''}
-            <div class="yonatan-message ${sender}">
+            <div class="yonatan-message ${sender} ${isFallback ? 'fallback-mode' : ''}">
+                ${isFallback ? '<div class="fallback-indicator">💡 מצב חכם</div>' : ''}
                 <div class="message-content">${contentHTML}</div>
             </div>
         `;
@@ -284,6 +305,76 @@
         const chatWindow = elements.messagesContainer.parentElement;
         chatWindow.scrollTop = chatWindow.scrollHeight;
         return wrapper;
+    }
+
+    async function checkSystemHealth() {
+        try {
+            const response = await fetch(`${API_URL}/api/health`);
+            if (!response.ok) {
+                console.error(`בדיקת בריאות המערכת נכשלה: סטטוס ${response.status}`);
+                return { available: false, fallbackMode: false };
+            }
+            
+            const health = await response.json();
+            
+            const systemAvailable = health.database_connected && 
+                                   (health.ai_model_working || health.fallback_system_available);
+            
+            const fallbackMode = health.status === "fallback_mode" || 
+                               health.quota_exceeded || 
+                               !health.ai_model_working;
+            
+            console.log("בדיקת בריאות המערכת:", health);
+            
+            return {
+                available: systemAvailable,
+                fallbackMode: fallbackMode,
+                details: health
+            };
+            
+        } catch (error) {
+            console.error("שגיאה בבדיקת בריאות המערכת:", error);
+            return { available: false, fallbackMode: false };
+        }
+    }
+
+    function updateSystemStatusIndicator(systemHealth) {
+        let indicator = document.getElementById('yonatan-system-status');
+        
+        if (!indicator) {
+            indicator = document.createElement('div');
+            indicator.id = 'yonatan-system-status';
+            indicator.className = 'system-status-indicator';
+            document.body.appendChild(indicator);
+        }
+        
+        if (systemHealth.available) {
+            if (systemHealth.fallbackMode) {
+                indicator.className = 'system-status-indicator fallback';
+                indicator.textContent = 'מצב חכם';
+                indicator.title = 'הבוט פועל במצב fallback - תשובות מוכנות מראש';
+            } else {
+                indicator.className = 'system-status-indicator';
+                indicator.textContent = 'פעיל';
+                indicator.title = 'הבוט פועל במלוא התפקוד';
+            }
+        } else {
+            indicator.className = 'system-status-indicator error';
+            indicator.textContent = 'שגיאה';
+            indicator.title = 'הבוט לא זמין כרגע';
+        }
+        
+        // הסתר את האינדיקטור אחרי 10 שניות
+        setTimeout(() => {
+            if (indicator && indicator.parentNode) {
+                indicator.style.opacity = '0.7';
+                setTimeout(() => {
+                    if (indicator && indicator.parentNode) {
+                        indicator.remove();
+                    }
+                }, 5000);
+            }
+        }, 10000);
     }
     
     // משופר sendMessage עם ניסיונות חוזרים ושיפור תמיכה בשגיאות
@@ -357,6 +448,14 @@
                         
                         // עדכון תוכן בועת ההודעה עם תוכן מעובד
                         botMessageContent.innerHTML = parseAndRenderContent(fullResponseText);
+                        
+                        // בדיקה אם זו תשובת fallback ועדכון הסגנון
+                        const isFallback = detectFallbackResponse(fullResponseText);
+                        if (isFallback && !botMessageWrapper.querySelector('.fallback-indicator')) {
+                            const messageDiv = botMessageWrapper.querySelector('.yonatan-message');
+                            messageDiv.classList.add('fallback-mode');
+                            botMessageContent.insertAdjacentHTML('beforebegin', '<div class="fallback-indicator">💡 מצב חכם</div>');
+                        }
                         
                         const chatWindow = elements.messagesContainer.parentElement;
                         chatWindow.scrollTop = chatWindow.scrollHeight;
@@ -440,40 +539,23 @@
         }
     }
 
-    // בדיקת בריאות המערכת
-    async function checkSystemHealth() {
-        try {
-            const response = await fetch(`${API_URL}/api/health`);
-            if (!response.ok) {
-                console.error(`בדיקת בריאות המערכת נכשלה: סטטוס ${response.status}`);
-                return false;
-            }
-            
-            const health = await response.json();
-            
-            if (!health.ai_model_configured || !health.ai_model_working) {
-                console.error("מודל ה-AI אינו מוגדר או אינו עובד:", health);
-                return false;
-            }
-            
-            if (!health.database_connected) {
-                console.error("אין חיבור לבסיס הנתונים:", health);
-                return false;
-            }
-            
-            console.log("בדיקת בריאות המערכת עברה בהצלחה:", health);
-            return true;
-        } catch (error) {
-            console.error("שגיאה בבדיקת בריאות המערכת:", error);
-            return false;
-        }
-    }
-
     async function toggleWidget(forceOpen) {
         const isOpen = elements.widgetContainer.classList.contains('open');
         const shouldOpen = forceOpen !== undefined ? forceOpen : !isOpen;
 
         if (shouldOpen) {
+            // בדיקת מצב המערכת לפני פתיחה
+            const systemHealth = await checkSystemHealth();
+            updateSystemStatusIndicator(systemHealth);
+            
+            // עדכון מצב הכפתור בהתאם למצב המערכת
+            elements.chatButton.classList.remove('api-error', 'fallback-mode');
+            if (!systemHealth.available) {
+                elements.chatButton.classList.add('api-error');
+            } else if (systemHealth.fallbackMode) {
+                elements.chatButton.classList.add('fallback-mode');
+            }
+            
             elements.widgetContainer.classList.add('open');
             elements.chatButton.style.opacity = '0';
             
@@ -481,9 +563,7 @@
                 state.uiState = 'loading';
                 renderView();
                 
-                // בדיקת בריאות המערכת לפני המשך
-                const isHealthy = await checkSystemHealth();
-                if (!isHealthy) {
+                if (!systemHealth.available) {
                     state.uiState = 'error';
                     renderView();
                     return;
@@ -508,9 +588,7 @@
                     renderView();
                 }
             } else {
-                // בדיקת בריאות המערכת לפני המשך
-                const isHealthy = await checkSystemHealth();
-                if (!isHealthy) {
+                if (!systemHealth.available) {
                     state.uiState = 'error';
                     renderView();
                     return;
@@ -520,7 +598,10 @@
                     state.uiState = 'chat';
                     renderView();
                     if(state.conversationHistory.length === 0) {
-                         addMessageToChat('bot', 'ברוך/ה שובך! אני כאן אם תרצה/י להמשיך את שיחתנו.');
+                        const welcomeMessage = systemHealth.fallbackMode ? 
+                            'ברוך שובך! אני פועל במצב חכם היום - עדיין אוכל לעזור לך בהרבה דרכים!' :
+                            'ברוך שובך! אני כאן אם תרצה להמשיך את שיחתנו.';
+                        addMessageToChat('bot', welcomeMessage);
                     }
                 }
             }
@@ -534,17 +615,25 @@
         injectStyles();
         createWidget();
         
-        // בדיקת בריאות המערכת בטעינה
-        const systemReady = await checkSystemHealth();
-        if (!systemReady) {
-            // הצגת כפתור עם חיווי מצב
+        // בדיקת בריאות המערכת בטעינה עם עדכון אינדיקטור
+        const systemHealth = await checkSystemHealth();
+        updateSystemStatusIndicator(systemHealth);
+        
+        // עדכון מצב הכפתור בהתאם למצב המערכת
+        if (!systemHealth.available) {
             elements.chatButton.classList.add('api-error');
             elements.chatButton.setAttribute('title', 'יש בעיה בחיבור לשרת');
+        } else if (systemHealth.fallbackMode) {
+            elements.chatButton.classList.add('fallback-mode');
+            elements.chatButton.setAttribute('title', 'בוט יונתן פועל במצב חכם');
+        } else {
+            elements.chatButton.setAttribute('title', 'בוט יונתן פועל במלוא התפקוד');
         }
         
         window.yonatanWidget = { 
             open: () => toggleWidget(true),
             checkHealth: checkSystemHealth,
+            getSystemStatus: () => systemHealth,
             resetSession: async () => {
                 try {
                     await fetch(`${API_URL}/api/reset_session`, {

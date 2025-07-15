@@ -1,4 +1,4 @@
-# app.py - v18.0 - Production Ready with Fixes
+# app.py - v19.0 - Production Ready with Complete Fallback System
 import os
 import logging
 import json
@@ -10,6 +10,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from uuid import uuid4
 from datetime import datetime
 from config import config_by_name
+from fallback_responses import FallbackResponseSystem
 
 # --- App Initialization & Config ---
 env = os.environ.get('FLASK_ENV', 'production')
@@ -53,6 +54,14 @@ except Exception as e:
     logger.error(f"שגיאה בהגדרת מודל ה-AI של Google: {e}")
     model = None
 
+# --- Fallback System Initialization ---
+try:
+    fallback_system = FallbackResponseSystem()
+    logger.info("מערכת Fallback הופעלה בהצלחה")
+except Exception as e:
+    logger.error(f"שגיאה בהפעלת מערכת Fallback: {e}")
+    fallback_system = None
+
 # --- In-Memory Session Storage ---
 chat_sessions = {}
 
@@ -93,16 +102,82 @@ def ensure_db_connection():
         logger.error(f"Database connection error: {e}")
         return False
 
+def generate_and_save_with_fallback(stream, session_id, user_message):
+    """גנרציה עם fallback אוטומטי במקרה של שגיאה"""
+    full_response_text = []
+    is_fallback_used = False
+    
+    try:
+        for chunk in stream:
+            if chunk.text:
+                full_response_text.append(chunk.text)
+                yield chunk.text
+                
+    except Exception as e:
+        error_str = str(e)
+        logger.error(f"שגיאה במהלך סטרימינג: {e}")
+        
+        # בדיקה אם זו שגיאת quota (429)
+        if "429" in error_str or "quota" in error_str.lower() or "exceeded" in error_str.lower():
+            logger.info("זוהתה שגיאת quota - עובר למצב fallback")
+            
+            # מחיקת תוכן קיים אם יש
+            if full_response_text:
+                full_response_text.clear()
+            
+            # קבלת תשובה מוכנה מראש
+            if fallback_system:
+                fallback_response = fallback_system.get_fallback_response(user_message)
+                full_response_text.append(fallback_response)
+                is_fallback_used = True
+                yield fallback_response
+            else:
+                error_message = "אני מתנצל, המערכת עמוסה כרגע. אנא נסה שוב מאוחר יותר."
+                full_response_text.append(error_message)
+                yield error_message
+            
+        else:
+            # שגיאה אחרת - תשובה כללית
+            error_message = f"אני מתנצל, התרחשה שגיאה טכנית. אנא נסה שוב מאוחר יותר."
+            logger.error(f"שגיאה לא צפויה במהלך סטרימינג: {e}")
+            yield error_message
+            full_response_text.append(error_message)
+    
+    final_text = "".join(full_response_text)
+    
+    # שמירה למסד הנתונים (רק אם יש תוכן)
+    if final_text.strip():
+        try:
+            db_conv = Conversation.query.filter_by(parent_id=session_id).first()
+            if db_conv:
+                ai_msg_db = Message(
+                    conversation_id=db_conv.id,
+                    sender_type='bot',
+                    content=final_text
+                )
+                db.session.add(ai_msg_db)
+                db.session.commit()
+                
+                if is_fallback_used:
+                    logger.info(f"תשובת fallback נשמרה עבור סשן {session_id}")
+                else:
+                    logger.info(f"תשובת בוט נשמרה עבור סשן {session_id}")
+                    
+        except Exception as db_err:
+            logger.error(f"שגיאה בשמירת תשובה למסד הנתונים: {db_err}")
+
 # --- API Endpoints ---
 @app.route('/api/health', methods=['GET'])
 def api_health():
-    """נקודת קצה לבדיקת תקינות המערכת"""
+    """נקודת קצה לבדיקת תקינות המערכת עם fallback"""
     health_status = {
         "status": "ok",
         "api_running": True,
         "database_connected": False,
         "ai_model_configured": model is not None,
         "ai_model_working": False,
+        "fallback_system_available": fallback_system is not None,
+        "fallback_system_working": False,
         "timestamp": datetime.utcnow().isoformat(),
         "environment": env
     }
@@ -119,18 +194,34 @@ def api_health():
             logger.error(f"AI model test error: {e}")
             health_status["ai_model_working"] = False
             health_status["ai_model_error"] = str(e)
+            
+            # בדיקה אם זו שגיאת quota
+            if "429" in str(e) or "quota" in str(e).lower():
+                health_status["quota_exceeded"] = True
+                health_status["fallback_active"] = True
     
-    # קביעת סטטוס כללי
-    all_systems_ok = (
-        health_status["database_connected"] and 
-        health_status["ai_model_configured"] and 
-        health_status["ai_model_working"]
-    )
+    # בדיקת מערכת fallback
+    if fallback_system:
+        try:
+            test_fallback = fallback_system.get_fallback_response("בדיקה")
+            health_status["fallback_system_working"] = bool(test_fallback)
+        except Exception as e:
+            logger.error(f"Fallback system test error: {e}")
+            health_status["fallback_system_working"] = False
+    
+    # קביעת סטטוס כללי - עכשיו גם עם fallback
+    core_systems_ok = health_status["database_connected"] and health_status["fallback_system_available"]
+    ai_or_fallback_ok = health_status["ai_model_working"] or health_status["fallback_system_working"]
+    
+    all_systems_ok = core_systems_ok and ai_or_fallback_ok
     
     if not all_systems_ok:
-        health_status["status"] = "degraded"
+        if core_systems_ok and health_status["fallback_system_working"]:
+            health_status["status"] = "fallback_mode"  # מצב fallback אבל עובד
+        else:
+            health_status["status"] = "degraded"
     
-    status_code = 200 if all_systems_ok else 503
+    status_code = 200 if all_systems_ok or health_status["status"] == "fallback_mode" else 503
     return jsonify(health_status), status_code
 
 @app.route('/api/init', methods=['POST'])
@@ -213,7 +304,7 @@ def handle_questionnaire():
 
 @app.route('/api/chat', methods=['POST'])
 def chat():
-    """נקודת קצה לצ'אט"""
+    """נקודת קצה לצ'אט עם תמיכה ב-fallback מלא"""
     try:
         data = request.get_json()
         if not data:
@@ -228,9 +319,66 @@ def chat():
         if not validate_session(session_id):
             return jsonify({"error": "סשן לא תקין או פג תוקף"}), 404
         
+        # בדיקה מיוחדת: אם אין מודל AI, עבור ישירות ל-fallback
         if not model:
-            return jsonify({"error": "מודל ה-AI לא זמין כעת"}), 503
+            logger.warning("מודל AI לא זמין - עובר ישירות למצב fallback")
+            
+            # שמירת הודעת המשתמש
+            if user_message != "START_CONVERSATION":
+                try:
+                    db_conversation = Conversation.query.filter_by(parent_id=session_id).first()
+                    if not db_conversation:
+                        child = Child.query.filter_by(parent_id=session_id).first()
+                        db_conversation = Conversation(
+                            parent_id=session_id,
+                            child_id=child.id if child else None,
+                            topic="General"
+                        )
+                        db.session.add(db_conversation)
+                        db.session.commit()
+                        db.session.refresh(db_conversation)
+                    
+                    user_msg_db = Message(
+                        conversation_id=db_conversation.id,
+                        sender_type='user',
+                        content=user_message
+                    )
+                    db.session.add(user_msg_db)
+                    db.session.commit()
+                except Exception as e:
+                    logger.error(f"שגיאה בשמירת הודעת משתמש: {e}")
+            
+            # החזרת תשובת fallback ישירה
+            if fallback_system:
+                fallback_response = fallback_system.get_fallback_response(user_message)
+            else:
+                fallback_response = "אני מתנצל, המערכת לא זמינה כרגע. אנא נסה שוב מאוחר יותר."
+            
+            def generate_fallback():
+                yield fallback_response
+                
+                # שמירה למסד הנתונים
+                try:
+                    db_conv = Conversation.query.filter_by(parent_id=session_id).first()
+                    if db_conv:
+                        ai_msg_db = Message(
+                            conversation_id=db_conv.id,
+                            sender_type='bot',
+                            content=fallback_response
+                        )
+                        db.session.add(ai_msg_db)
+                        db.session.commit()
+                        logger.info(f"תשובת fallback (ללא AI) נשמרה עבור סשן {session_id}")
+                except Exception as db_err:
+                    logger.error(f"שגיאה בשמירת תשובת fallback: {db_err}")
+            
+            return Response(
+                stream_with_context(generate_fallback()),
+                mimetype='text/plain',
+                headers={'Cache-Control': 'no-cache'}
+            )
 
+        # המשך התהליך הרגיל עם AI + fallback
         # יצירת או קבלת סשן צ'אט
         if session_id not in chat_sessions:
             logger.info(f"יוצר סשן צ'אט חדש עבור session_id: {session_id}")
@@ -293,49 +441,51 @@ Initial Questionnaire: {json.loads(questionnaire.response_data) if questionnaire
                 logger.info(f"הודעת משתמש נשמרה עבור סשן {session_id}")
             except Exception as e:
                 logger.error(f"שגיאה בשמירת הודעת משתמש: {e}")
-                # ממשיכים למרות השגיאה
 
-        # שליחת הודעה למודל
+        # שליחת הודעה למודל עם טיפול חכם בשגיאות
         try:
             stream = active_chat.send_message(user_message, stream=True)
             logger.info(f"הודעה נשלחה למודל ה-AI עבור סשן {session_id}")
         except Exception as e:
             logger.error(f"שגיאה בשליחת הודעה למודל: {e}")
-            return jsonify({"error": "לא ניתן לשלוח הודעה למודל"}), 500
-
-        def generate_and_save():
-            full_response_text = []
-            try:
-                for chunk in stream:
-                    if chunk.text:
-                        full_response_text.append(chunk.text)
-                        yield chunk.text
-            except Exception as e:
-                error_message = f"אני מתנצל, התרחשה שגיאה: {str(e)}"
-                logger.error(f"שגיאה במהלך סטרימינג: {e}")
-                yield error_message
-                full_response_text.append(error_message)
             
-            final_text = "".join(full_response_text)
-            
-            # שמירה למסד הנתונים
-            if final_text.strip():
-                try:
-                    db_conv = Conversation.query.filter_by(parent_id=session_id).first()
-                    if db_conv:
-                        ai_msg_db = Message(
-                            conversation_id=db_conv.id,
-                            sender_type='bot',
-                            content=final_text
-                        )
-                        db.session.add(ai_msg_db)
-                        db.session.commit()
-                        logger.info(f"תשובת בוט נשמרה עבור סשן {session_id}")
-                except Exception as db_err:
-                    logger.error(f"שגיאה בשמירת תשובה למסד הנתונים: {db_err}")
+            # בדיקה אם זו שגיאת quota
+            error_str = str(e)
+            if "429" in error_str or "quota" in error_str.lower() or "exceeded" in error_str.lower():
+                logger.info("זוהתה שגיאת quota בשליחת הודעה - עובר למצב fallback")
+                
+                if fallback_system:
+                    fallback_response = fallback_system.get_fallback_response(user_message)
+                else:
+                    fallback_response = "אני מתנצל, המערכת עמוסה כרגע. אנא נסה שוב מאוחר יותר."
+                
+                def generate_quota_fallback():
+                    yield fallback_response
+                    # שמירה למסד הנתונים
+                    try:
+                        db_conv = Conversation.query.filter_by(parent_id=session_id).first()
+                        if db_conv:
+                            ai_msg_db = Message(
+                                conversation_id=db_conv.id,
+                                sender_type='bot',
+                                content=fallback_response
+                            )
+                            db.session.add(ai_msg_db)
+                            db.session.commit()
+                            logger.info(f"תשובת fallback (quota) נשמרה עבור סשן {session_id}")
+                    except Exception as db_err:
+                        logger.error(f"שגיאה בשמירת fallback: {db_err}")
+                
+                return Response(
+                    stream_with_context(generate_quota_fallback()),
+                    mimetype='text/plain',
+                    headers={'Cache-Control': 'no-cache'}
+                )
+            else:
+                return jsonify({"error": "לא ניתן לשלוח הודעה למודל"}), 500
 
         return Response(
-            stream_with_context(generate_and_save()),
+            stream_with_context(generate_and_save_with_fallback(stream, session_id, user_message)),
             mimetype='text/plain',
             headers={'Cache-Control': 'no-cache'}
         )
