@@ -6,7 +6,7 @@
     "image": "/static/images/image_e75a56.jpg",
     "short_desc": "הפחד משיפוט שלילי בבית הספר יכול להיות משתק. מאמר זה מסביר את מעגל הקסמים של החרדה החברתית ומציע כלים להתמודדות.",
     "long_desc": "המודל הקוגניטיבי של חרדה חברתית מסביר כיצד 'התנהגויות ביטחון' (כמו הימנעות מקשר עין) והתמקדות-יתר בתחושות פנימיות, דווקא מחזקות את האמונה שאנו נראים מגוחכים. המאמר מציע דרכים לעזור למתבגר להפנות את תשומת הלב החוצה ולבחון את נכונות חששותיו במציאות.",
-    "link": "https://www.infocop.es/view_article.asp?id=141"
+    "link": "https://www.apa.org/topics/anxiety/social-anxiety-adolescents"
   },
   {
     "key": "test_anxiety_cbt",
@@ -15,7 +15,7 @@
     "image": "/static/images/image_e7655b.jpg",
     "short_desc": "חרדת בחינות יכולה לשתק. מאמר זה מציג כלים מבוססי CBT לזיהוי מחשבות קטסטרופליות, הרגעת הסימפטומים הפיזיים ופיתוח אסטרטגיות למידה יעילות.",
     "long_desc": "המאמר מסביר כיצד חרדת בחינות נוצרת מ'מחשבות קטסטרופליות' (כמו 'אם אכשל במבחן, עתידי הרוס'). הוא מציע טכניקות קוגניטיביות לאתגור מחשבות אלו, וכלים התנהגותיים כמו תרגילי נשימה להפחתת הדופק המהיר והמתח הפיזי. בנוסף, הוא מדגיש את החשיבות של הכנה מובנית למבחן כדרך להגברת תחושת השליטה.",
-    "link": "https://www.apa.org/topics/anxiety/test-anxiety"
+    "link": "https://www.apa.org/topics/stress/test-taking"
   },
   {
     "key": "anger_aggression_home",
@@ -24,7 +24,7 @@
     "image": "/static/images/image_e75dfd.jpg",
     "short_desc": "כשהבית הופך לשדה קרב, התסכול גדול. מאמר זה מציע גישה המבוססת על הבנת המקור להתנהגות המאתגרת, וכלים ליצירת שיתוף פעולה במקום עימות.",
     "long_desc": "ד\"ר רוס גרין טוען ש'ילדים מצליחים אם הם יכולים'. המאמר מסביר שהתפרצויות הן לרוב סימן לקושי או לחסך במיומנות, ולא 'רצון רע'. הוא מציג את גישת ה'פתרונות השיתופיים', בה ההורה והילד מזהים יחד את הבעיה ומחפשים פתרון שמקובל על שניהם, מה שמפחית התנגדות ומחזק את הקשר.",
-    "link": "https://www.livesinthebalance.org/"
+    "link": "https://www.understood.org/en/articles/collaborative-problem-solving-what-it-is-and-how-it-works"
   },
   {
     "key": "sleep_cbti",
@@ -33,7 +33,7 @@
     "image": "/static/images/image_e7c31a.jpg",
     "short_desc": "מתבגרים רבים סובלים מקשיי שינה. מאמר זה מציג את עקרונות ה-CBT-I, טיפול ממוקד ויעיל המסייע בשינוי הרגלים הפוגעים באיכות השינה.",
     "long_desc": "המאמר סוקר את הפרוטוקול של טיפול קוגניטיבי-התנהגותי לאינסומניה (CBT-I), המותאם למתבגרים. הוא מסביר כיצד לזהות 'מחשבות גונבות שינה', להגביל זמן במיטה לפעילויות שינה בלבד, ולקבוע סדר יום קבוע. המאמר מדגיש את חשיבות שיתוף הפעולה של ההורים בתהליך.",
-    "link": "https://www.rehab.research.va.gov/jour/09/46/9/pdf/carney.pdf"
+    "link": "https://www.sleepfoundation.org/insomnia/cognitive-behavioral-therapy-insomnia"
   },
   {
     "key": "emotional_regulation_dbt",
@@ -42,7 +42,7 @@
     "image": "/static/images/image_e76d01.jpg",
     "short_desc": "התפרצויות זעם וקושי בניהול רגשות הם אתגר נפוץ. המאמר מציג כלים מעשיים המסייעים למתבגרים לזהות רגשות ולהתמודד איתם.",
     "long_desc": "מאמר זה מתמקד בארבעת עמודי התווך של טיפול דיאלקטי-התנהגותי (DBT): קשיבות (מיינדפולנס), יעילות בין-אישית, ויסות רגשי ועמידות במצוקה. הוא מציע תרגילים פשוטים שהורים יכולים ללמד את ילדיהם, כמו טכניקת 'STOP' לעצירה לפני תגובה אימפולסיבית.",
-    "link": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2963469/"
+    "link": "https://www.verywellmind.com/dbt-skills-and-techniques-425336"
   },
   {
     "key": "eating_disorders_fbt",
@@ -51,7 +51,7 @@
     "image": "https://placehold.co/600x400/fecaca/991b1b?text=הפרעות+אכילה",
     "short_desc": "בהתמודדות עם הפרעות אכילה, למשפחה יש תפקיד מרכזי. גישת FBT מעצימה הורים לקחת אחריות על החזרת ילדם לאכילה סדירה ובריאה.",
     "long_desc": "טיפול מבוסס-משפחה (FBT) הוא טיפול הבחירה באנורקסיה נרבוזה במתבגרים. המאמר מפרט את שלושת שלבי הטיפול: בשלב הראשון, ההורים מאוחדים ולוקחים שליטה מלאה על הארוחות. בשלב השני, השליטה מועברת בהדרגה חזרה למתבגר. בשלב השלישי, מתמקדים באתגרי גיל ההתבגרות הכלליים.",
-    "link": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3035837/"
+    "link": "https://www.nationaleatingdisorders.org/family-based-treatment"
   },
   {
     "key": "parent_child_interaction",
@@ -60,7 +60,7 @@
     "image": "https://placehold.co/600x400/a5f3fc/164e63?text=אינטראקציה+חיובית",
     "short_desc": "PCIT הוא טיפול מבוסס-ראיות שנועד לשפר את איכות היחסים בין הורים לילדים ולהפחית בעיות התנהגות, תוך התמקדות בתקשורת ופתרון קונפליקטים.",
     "long_desc": "למרות ש-PCIT פותח לילדים צעירים, עקרונותיו ישימים למתבגרים. השלב הראשון, 'אינטראקציה מונחית-ילד', מתמקד בהקשבה וחיזוקים. השני, 'אינטראקציה מונחית-הורה', מתמקד במתן הוראות יעילות. המטרה היא לבנות קשר חיובי כבסיס להצבת גבולות.",
-    "link": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4407422/"
+    "link": "https://www.apa.org/pubs/journals/features/ccp-ccp0000096.pdf"
   },
   {
     "key": "ocd_erp",
@@ -78,7 +78,7 @@
     "image": "https://placehold.co/600x400/bae6fd/0c4a6e?text=הפעלה+התנהגותית",
     "short_desc": "דיכאון גורם לנסיגה מפעילויות מהנות. הפעלה התנהגותית (BA) היא גישה המתמקדת בהגברת הפעילות באופן שיטתי כדי לשבור את מעגל הדיכאון.",
     "long_desc": "במקום להתמקד בניתוח מחשבות, BA מתרכז בקשר הישיר בין פעולה למצב רוח. הטיפול כולל ניטור הקשר בין פעילויות ומצב רוח, זיהוי דפוסי הימנעות, ובניית היררכיית פעילויות מהנות או בעלות ערך, מהקל אל הכבד. הורים יכולים לסייע בזיהוי ובתכנון שילובן ההדרגתי בסדר היום.",
-    "link": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4894325/"
+    "link": "https://www.verywellmind.com/behavioral-activation-for-depression-1067165"
   },
   {
     "key": "screen_time_cbt",
@@ -87,7 +87,7 @@
     "image": "https://placehold.co/600x400/93c5fd/1e3a8a?text=זמן+מסך",
     "short_desc": "המאבק על זמן מסך הוא אתגר מרכזי. מאמר זה מיישם עקרונות CBT להבנת השימוש הבעייתי במסכים ומציע כלים ליצירת הרגלים בריאים יותר.",
     "long_desc": "המאמר מסביר כיצד התראות ואלגוריתמים מתוכננים ללכוד את תשומת הלב. הוא מציע להורים ולמתבגרים לעבוד יחד על זיהוי הטריגרים לשימוש יתר (שעמום, חרדה חברתית), והמחשבות ('רק עוד סרטון אחד'). הפתרונות כוללים יצירת 'תקציב זמן מסך' וקביעת אזורים 'ללא מסך'.",
-    "link": "https://virtual-addiction.com/net-compulsion/dopamine-and-the-brain/"
+    "link": "https://www.commonsensemedia.org/articles/how-to-make-a-family-media-agreement"
   },
   {
     "key": "communication_skills",
@@ -96,7 +96,7 @@
     "image": "https://placehold.co/600x400/a5b4fc/312e81?text=תקשורת+במשפחה",
     "short_desc": "תקשורת לקויה נובעת לרוב מ'עיוותי חשיבה'. מאמר זה מסביר כיצד זיהוי מחשבות אוטומטיות במהלך ויכוח יכול להוביל לדיאלוג יעיל יותר.",
     "long_desc": "ד\"ר בק מסביר שמאחורי כל אמירה כועסת מסתתרת מחשבה אוטומטית. הוא מציע להורים לתרגל 'הקשבה פעילה' – לחזור על דברי המתבגר במילים שלהם כדי לוודא שהבינו נכון. כמו כן, הוא מלמד לזהות עיוותי חשיבה נפוצים בוויכוחים, כמו 'קריאת מחשבות'.",
-    "link": "https://beckinstitute.org/blog/3-ways-to-improve-communication-in-your-relationships/"
+    "link": "https://www.healthline.com/health/parenting/communication-with-teens"
   },
   {
     "key": "problem_solving_skills",
@@ -105,7 +105,7 @@
     "image": "https://placehold.co/600x400/d8b4fe/581c87?text=פתרון+בעיות",
     "short_desc": "קושי בפתרון בעיות יכול להוביל לתסכול. גישת SPS היא שיטת CBT מובנית בת 5 שלבים המסייעת למתבגרים לגשת לבעיות באופן שיטתי.",
     "long_desc": "המאמר מפרט את חמשת שלבי ה-SPS: 1. הגדרת הבעיה. 2. סיעור מוחות לפתרונות. 3. הערכת יתרונות וחסרונות. 4. בחירת הפתרון ותכנון. 5. ביצוע ומעקב. הורים יכולים להשתמש במודל זה כדי להדריך את ילדיהם בפתרון קונפליקטים.",
-    "link": "https://www.abct.org/fact-sheets/problem-solving/"
+    "link": "https://www.apa.org/science/about/psa/2004/10/problem-solving"
   },
   {
     "key": "mindfulness_cbt",
@@ -114,7 +114,7 @@
     "image": "https://placehold.co/600x400/818cf8/e0e7ff?text=מיינדפולנס",
     "short_desc": "מיינדפולנס היא היכולת לשים לב לרגע הנוכחי באופן לא שיפוטי. שילוב תרגולי מיינדפולנס ב-CBT מסייע לזהות מחשבות ורגשות מבלי להישאב לתוכם.",
     "long_desc": "מפתחי גישת MBCT מסבירים כיצד תרגול קשיבות משנה את היחס שלנו למחשבות. במקום להתווכח עם המחשבה, לומדים להתבונן בה כ'אירוע מנטלי' חולף. המאמר מציע תרגילים פשוטים כמו 'סריקת גוף' או 'תרגיל הצימוק', שהורים יכולים לעשות יחד עם ילדיהם.",
-    "link": "https://www.mindful.org/what-is-mindfulness-based-cognitive-therapy/"
+    "link": "https://www.mindful.org/an-introduction-to-mindfulness-based-cognitive-therapy/"
   },
   {
     "key": "procrastination_cbt",
@@ -123,6 +123,6 @@
     "image": "https://placehold.co/600x400/fdba74/9a3412?text=דחיינות",
     "short_desc": "דחיינות היא לא עצלנות, אלא קושי בוויסות רגשי. מאמר זה מציע אסטרטגיות CBT להתמודדות, כמו חלוקת משימות גדולות לצעדים קטנים.",
     "long_desc": "ד\"ר פיצ'ל מסביר שהיא נובעת מרצון להימנע מרגשות לא נעימים הקשורים למשימה. הוא מציע כלים מעשיים: טכניקת '5 דקות', התמקדות ב'פעולה הבאה' הקונקרטית, ושימוש ב'סליחה עצמית' לאחר דחיינות כדי לשבור את המעגל השלילי.",
-    "link": "https://www.researchgate.net/publication/268421110_Cognitive_behavioral_therapy_for_procrastination"
+    "link": "https://www.psychologytoday.com/us/blog/dont-delay/201208/cognitive-behavioral-therapy-procrastination"
   }
 ]
