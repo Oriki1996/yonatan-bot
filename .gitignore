@@ -22,72 +22,24 @@ share/python-wheels/
 *.egg
 MANIFEST
 
-# Virtual Environment
-venv/
-.venv/
-env/
-ENV/
-env.bak/
-venv.bak/
+# PyInstaller
+*.manifest
+*.spec
 
-# Instance Folder (for local DB)
-/instance/
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
 
-# Environment variables
-.env
-.env.local
-.env.production
-
-# Logs
-/logs/
-*.log
-
-# IDE / Editor specific
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-.project
-.metadata
-bin/
-tmp/
-*.tmp
-*.bak
-*.suo
-.ntvs*
-*.njsproj
-*.sln
-*.sw?
-
-# Database files (development only)
-*.db
-*.sqlite
-*.sqlite3
-
-# OS generated files
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
-
-# Flask specific
-instance/
-.webassets-cache
-
-# Coverage reports
+# Unit test / coverage reports
 htmlcov/
 .tox/
+.nox/
 .coverage
 .coverage.*
 .cache
 nosetests.xml
 coverage.xml
 *.cover
-*.py,cover
 .hypothesis/
 .pytest_cache/
 
@@ -95,7 +47,19 @@ coverage.xml
 *.mo
 *.pot
 
-# Documentation
+# Django stuff:
+*.log
+local_settings.py
+db.sqlite3
+
+# Flask stuff:
+instance/
+.webassets-cache
+
+# Scrapy stuff:
+.scrapy
+
+# Sphinx documentation
 docs/_build/
 
 # PyBuilder
@@ -108,12 +72,36 @@ target/
 profile_default/
 ipython_config.py
 
-# Celery
+# pyenv
+.python-version
+
+# pipenv
+Pipfile.lock
+
+# poetry
+poetry.lock
+
+# pdm
+.pdm.toml
+
+# PEP 582
+__pypackages__/
+
+# Celery stuff
 celerybeat-schedule
 celerybeat.pid
 
 # SageMath parsed files
 *.sage.py
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
 
 # Spyder project settings
 .spyderproject
@@ -135,18 +123,54 @@ dmypy.json
 
 # pytype static type analyzer
 .pytype/
-# Environment variables - קבצי סביבה
-.env
-.env.local
-.env.production
-*.env
 
-# API Keys and secrets - מפתחות וסודות
-*_key.py
-*_keys.py
-secrets.py
-config_local.py
+# Cython debug symbols
+cython_debug/
 
-# Test files with real data - קבצי בדיקה עם נתונים אמיתיים  
-test_key.py
-test_keys.py
+# PyCharm
+.idea/
+
+# VS Code
+.vscode/
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+
+# Vim
+*.swp
+*.swo
+*~
+
+# Database
+*.db
+*.sqlite3
+
+# Operating System
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+logs/
+*.log
+
+# Backup files
+*.bak
+*.tmp
+*.temp
+
+# Application specific
+yonatan_prod.db
+instance/
+uploads/".env" 

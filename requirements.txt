@@ -1,3 +1,4 @@
+# requirements.txt - גרסה מעודכנת עם כל התוספות
 Flask==3.0.3
 Flask-Cors==4.0.1
 Flask-SQLAlchemy==3.1.1
@@ -6,4 +7,33 @@ google-generativeai==0.7.1
 gunicorn==22.0.0
 SQLAlchemy==2.0.31
 psycopg[binary]==3.2.9
-psycopg2-binary # Added to ensure psycopg2 module is available for compatibility
+psycopg2-binary
+
+# Security and Validation
+Flask-Limiter==3.5.0
+marshmallow==3.20.1
+Flask-WTF==1.2.1
+
+# Error Handling and Monitoring
+sentry-sdk[flask]==1.40.0
+
+# Caching and Performance
+redis==5.0.1
+Flask-Caching==2.1.0
+
+# Background Tasks
+celery==5.3.4
+
+# Enhanced Utils
+psutil==5.9.8
+bleach==6.1.0
+
+# Development and Testing
+pytest==7.4.3
+pytest-flask==1.3.0
+pytest-cov==4.1.0
+black==23.12.1
+flake8==6.1.0
+
+# Additional dependencies for advanced fallback system
+dataclasses==0.6; python_version<"3.7"
