@@ -1,9 +1,10 @@
-// Yonatan Psycho-Bot Widget v13.0 - עם תמיכה מלאה ב-Fallback
+// Yonatan Psycho-Bot Widget v14.0 - עם תמיכה מלאה ב-CSRF
 (function() {
     if (window.yonatanWidgetLoaded) return;
     window.yonatanWidgetLoaded = true;
 
     const API_URL = window.location.origin;
+    let csrfToken = null; // 🔥 CSRF TOKEN VARIABLE
 
     let state = {
         uiState: 'closed',
@@ -32,6 +33,44 @@
         { id: 'distress_level', question: "בסקאלה של 1 עד 10, כמה המצב הזה גורם לך למצוקה?", type: 'scale', min: 1, max: 10 },
         { id: 'goal', question: "ומה המטרה העיקרית שלך מהשיחה שלנו?", type: 'choice', options: ['לקבל כלים פרקטיים', 'להבין טוב יותר את הילד/ה', 'להרגיש יותר ביטחון בהורות', 'לפרוק ולשתף'] },
     ];
+
+    // 🔥 CSRF FUNCTIONS
+    async function getCSRFToken() {
+        try {
+            const response = await fetch(`${API_URL}/api/csrf-token`);
+            if (response.ok) {
+                const data = await response.json();
+                csrfToken = data.csrf_token;
+                console.log('✅ CSRF token received');
+                return csrfToken;
+            }
+        } catch (error) {
+            console.warn('⚠️ Failed to get CSRF token:', error);
+        }
+        return null;
+    }
+
+    async function fetchWithCSRF(url, options = {}) {
+        // וודא שיש CSRF token למקרה של POST requests
+        if (options.method === 'POST' && !csrfToken) {
+            await getCSRFToken();
+        }
+        
+        // הוסף את ה-CSRF token ל-headers
+        const headers = {
+            'Content-Type': 'application/json',
+            ...options.headers
+        };
+        
+        if (csrfToken && options.method === 'POST') {
+            headers['X-CSRFToken'] = csrfToken;
+        }
+        
+        return fetch(url, {
+            ...options,
+            headers
+        });
+    }
 
     function injectStyles() {
         const style = document.createElement('style');
@@ -201,13 +240,13 @@
         }
     }
     
+    // 🔥 UPDATED WITH CSRF
     async function finishQuestionnaire() {
         state.uiState = 'loading';
         renderView();
         try {
-            const response = await fetch(`${API_URL}/api/questionnaire`, {
+            const response = await fetchWithCSRF(`${API_URL}/api/questionnaire`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ session_id: state.sessionId, ...state.questionnaireData })
             });
 
@@ -377,7 +416,7 @@
         }, 10000);
     }
     
-    // משופר sendMessage עם ניסיונות חוזרים ושיפור תמיכה בשגיאות
+    // 🔥 UPDATED sendMessage WITH CSRF HANDLING
     async function sendMessage(messageTextOverride) {
         const messageText = messageTextOverride || elements.chatInput.value.trim();
         if (!messageText) return;
@@ -401,9 +440,8 @@
                 const controller = new AbortController();
                 const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 שניות timeout
                 
-                const response = await fetch(`${API_URL}/api/chat`, {
+                const response = await fetchWithCSRF(`${API_URL}/api/chat`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ session_id: state.sessionId, message: messageText }),
                     signal: controller.signal
                 });
@@ -411,6 +449,21 @@
                 clearTimeout(timeoutId);
 
                 if (!response.ok) {
+                    // אם זו שגיאת CSRF, נסה לקבל token חדש
+                    if (response.status === 400) {
+                        const errorText = await response.text();
+                        if (errorText.includes('CSRF') || errorText.includes('csrf')) {
+                            console.log('🔄 CSRF token expired, refreshing...');
+                            csrfToken = null;
+                            await getCSRFToken();
+                            
+                            if (retryCount < maxRetries) {
+                                retryCount++;
+                                return attemptSendMessage();
+                            }
+                        }
+                    }
+                    
                     const errorText = await response.text();
                     let errorData;
                     try {
@@ -501,9 +554,8 @@
                     // אם זה ניסיון ראשון, ננסה לאפס את הסשן
                     if (retryCount === 1) {
                         try {
-                            await fetch(`${API_URL}/api/reset_session`, {
+                            await fetchWithCSRF(`${API_URL}/api/reset_session`, {
                                 method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
                                 body: JSON.stringify({ session_id: state.sessionId })
                             });
                             console.log("הסשן אופס, מנסה שוב...");
@@ -539,6 +591,7 @@
         }
     }
 
+    // 🔥 UPDATED toggleWidget WITH CSRF
     async function toggleWidget(forceOpen) {
         const isOpen = elements.widgetContainer.classList.contains('open');
         const shouldOpen = forceOpen !== undefined ? forceOpen : !isOpen;
@@ -570,7 +623,9 @@
                 }
                 
                 try {
-                    const response = await fetch(`${API_URL}/api/init`, { method: 'POST' });
+                    await getCSRFToken(); // 🔥 GET CSRF TOKEN FIRST
+                    
+                    const response = await fetchWithCSRF(`${API_URL}/api/init`, { method: 'POST' });
                     if (!response.ok) {
                         throw new Error(`שגיאת שרת: ${response.status}`);
                     }
@@ -580,6 +635,12 @@
                     
                     state.sessionId = data.session_id;
                     localStorage.setItem('yonatan_session_id', state.sessionId);
+                    
+                    // עדכון CSRF token אם התקבל חדש
+                    if (data.csrf_token) {
+                        csrfToken = data.csrf_token;
+                    }
+                    
                     state.uiState = 'questionnaire';
                     renderView();
                 } catch (error) {
@@ -611,9 +672,13 @@
         }
     }
 
+    // 🔥 UPDATED initialize WITH CSRF
     async function initialize() {
         injectStyles();
         createWidget();
+        
+        // קבלת CSRF token בטעינה הראשונית
+        await getCSRFToken();
         
         // בדיקת בריאות המערכת בטעינה עם עדכון אינדיקטור
         const systemHealth = await checkSystemHealth();
@@ -630,18 +695,24 @@
             elements.chatButton.setAttribute('title', 'בוט יונתן פועל במלוא התפקוד');
         }
         
+        // 🔥 UPDATED resetSession WITH CSRF
         window.yonatanWidget = { 
             open: () => toggleWidget(true),
             checkHealth: checkSystemHealth,
             getSystemStatus: () => systemHealth,
             resetSession: async () => {
                 try {
-                    await fetch(`${API_URL}/api/reset_session`, {
+                    const response = await fetchWithCSRF(`${API_URL}/api/reset_session`, {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ session_id: state.sessionId })
                     });
-                    return true;
+                    
+                    if (response.ok) {
+                        csrfToken = null; // נקה גם את ה-CSRF token
+                        return true;
+                    } else {
+                        return false;
+                    }
                 } catch (error) {
                     console.error("שגיאה באיפוס הסשן:", error);
                     return false;
