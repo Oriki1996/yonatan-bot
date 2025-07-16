@@ -62,7 +62,7 @@
 
         <div id="walking-character-container" class="w-full h-20 -mt-10" style="direction: ltr;"></div>
 
-        <!-- Features, Gallery, Articles, About sections... (Content is the same) -->
+        <!-- Features Section -->
         <section id="features" class="py-20 bg-white">
             <div class="container mx-auto px-6 text-center">
                 <h2 class="text-3xl md:text-4xl font-bold mb-3 slide-up">ליווי אישי וחכם, זמין 24/7</h2>
@@ -86,6 +86,8 @@
                 </div>
             </div>
         </section>
+
+        <!-- Gallery Section -->
         <section id="gallery" class="py-20 bg-gray-50">
             <div class="container mx-auto px-6">
                 <h2 class="text-3xl md:text-4xl font-bold text-center mb-12 slide-up">עולם שלם של הורות</h2>
@@ -98,6 +100,8 @@
                 </div>
             </div>
         </section>
+
+        <!-- Articles Section -->
         <section id="articles" class="py-20 bg-white">
             <div class="container mx-auto px-6">
                 <h2 class="text-3xl md:text-4xl font-bold text-center mb-3 slide-up">מאמרים וכלים להתמודדות</h2>
@@ -105,6 +109,8 @@
                 <div id="articles-grid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
             </div>
         </section>
+
+        <!-- About Section -->
         <section id="about" class="py-20 bg-gray-50">
             <div class="container mx-auto px-6 flex flex-col md:flex-row items-center gap-12">
                 <div class="md:w-1/2 slide-up">
@@ -133,8 +139,8 @@
         async function fetchAndRenderArticles() {
             const articlesGrid = document.getElementById('articles-grid');
             try {
-                // *** FIX: Use absolute path to static asset ***
-                const response = await fetch('/static/articles.json');
+                // Fixed: Use Flask url_for equivalent
+                const response = await fetch("{{ url_for('static', filename='articles.json') }}");
                 if (!response.ok) throw new Error('Network response was not ok');
                 const articles = await response.json();
                 
@@ -195,8 +201,8 @@
                     renderer: 'svg',
                     loop: true,
                     autoplay: true,
-                    // *** FIX: Use absolute path to static asset ***
-                    path: '/static/character-animation.json' 
+                    // Fixed: Use Flask url_for equivalent
+                    path: "{{ url_for('static', filename='character-animation.json') }}"
                 });
             }
         }
@@ -214,7 +220,7 @@
         setupWalkingCharacter();
     });
     </script>
-    <!-- *** FIX: Use absolute path to static asset *** -->
-    <script src="/static/widget.js"></script>
+    <!-- Fixed: Use Flask url_for equivalent -->
+    <script src="{{ url_for('static', filename='widget.js') }}"></script>
 </body>
 </html>
