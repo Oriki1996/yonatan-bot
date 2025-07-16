@@ -1,4 +1,4 @@
-# app.py - יונתן הפסיכו-בוט - Flask Application
+# app.py - יונתן הפסיכו-בוט - Flask Application עם יצירת טבלאות אוטומטית
 import os
 import json
 import logging
@@ -39,7 +39,7 @@ logger = logging.getLogger(__name__)
 app = Flask(__name__)
 
 # Load configuration
-config_name = os.environ.get('FLASK_ENV', 'development')
+config_name = os.environ.get('FLASK_ENV', 'production')  # Default to production for Render
 config = get_config(config_name)
 app.config.from_object(config)
 
@@ -55,7 +55,130 @@ limiter = Limiter(
     default_limits=["1000 per hour"]
 )
 limiter.init_app(app)
+
+# Initialize database
 init_app_db(app)
+
+# 🚨 CRITICAL: Auto-create tables on startup (Render-friendly)
+def ensure_tables_exist():
+    """יצירת טבלאות אוטומטית בהפעלה - פתרון ל-Render"""
+    try:
+        with app.app_context():
+            # בדיקה אם הטבלאות כבר קיימות
+            from sqlalchemy import inspect
+            inspector = inspect(db.engine)
+            existing_tables = inspector.get_table_names()
+            
+            expected_tables = ['parent', 'child', 'conversation', 'message', 'questionnaire_response']
+            missing_tables = [table for table in expected_tables if table not in existing_tables]
+            
+            if missing_tables:
+                logger.info(f"🔨 יוצר טבלאות חסרות: {missing_tables}")
+                db.create_all()
+                logger.info("✅ כל הטבלאות נוצרו בהצלחה!")
+            else:
+                logger.info("✅ כל הטבלאות כבר קיימות")
+                
+            # בדיקה שהטבלאות באמת נוצרו
+            inspector = inspect(db.engine)
+            final_tables = inspector.get_table_names()
+            logger.info(f"📋 טבלאות זמינות: {final_tables}")
+            
+            return True
+            
+    except Exception as e:
+        logger.error(f"❌ שגיאה ביצירת טבלאות: {e}")
+        # ניסיון חירום - יצירה ידנית
+        try:
+            from sqlalchemy import text
+            with db.engine.connect() as conn:
+                # יצירת טבלאות בSQL גולמי אם SQLAlchemy נכשל
+                create_tables_sql = """
+                CREATE TABLE IF NOT EXISTS parent (
+                    id VARCHAR(100) PRIMARY KEY,
+                    name VARCHAR(100) NOT NULL,
+                    gender VARCHAR(20) NOT NULL,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    last_activity TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    email VARCHAR(254),
+                    phone VARCHAR(20),
+                    preferred_language VARCHAR(5) DEFAULT 'he',
+                    data_processing_consent BOOLEAN DEFAULT FALSE,
+                    marketing_consent BOOLEAN DEFAULT FALSE
+                );
+
+                CREATE TABLE IF NOT EXISTS child (
+                    id SERIAL PRIMARY KEY,
+                    name VARCHAR(100) NOT NULL,
+                    gender VARCHAR(20) NOT NULL,
+                    age INTEGER NOT NULL,
+                    parent_id VARCHAR(100) REFERENCES parent(id) ON DELETE CASCADE,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    birth_month INTEGER,
+                    school_grade VARCHAR(20),
+                    special_needs TEXT,
+                    interests TEXT,
+                    anonymous_id VARCHAR(32) UNIQUE
+                );
+
+                CREATE TABLE IF NOT EXISTS conversation (
+                    id SERIAL PRIMARY KEY,
+                    parent_id VARCHAR(100) REFERENCES parent(id) ON DELETE CASCADE,
+                    child_id INTEGER REFERENCES child(id),
+                    topic VARCHAR(200) NOT NULL,
+                    start_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    end_time TIMESTAMP,
+                    status VARCHAR(20) DEFAULT 'active',
+                    priority VARCHAR(20) DEFAULT 'normal',
+                    satisfaction_rating INTEGER,
+                    tags TEXT,
+                    message_count INTEGER DEFAULT 0,
+                    avg_response_time FLOAT
+                );
+
+                CREATE TABLE IF NOT EXISTS message (
+                    id SERIAL PRIMARY KEY,
+                    conversation_id INTEGER REFERENCES conversation(id) ON DELETE CASCADE,
+                    sender_type VARCHAR(10) NOT NULL,
+                    content TEXT NOT NULL,
+                    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    message_type VARCHAR(20) DEFAULT 'text',
+                    message_metadata TEXT,
+                    is_edited BOOLEAN DEFAULT FALSE,
+                    edited_at TIMESTAMP,
+                    character_count INTEGER DEFAULT 0,
+                    word_count INTEGER DEFAULT 0,
+                    response_time FLOAT,
+                    sentiment_score FLOAT,
+                    toxicity_score FLOAT
+                );
+
+                CREATE TABLE IF NOT EXISTS questionnaire_response (
+                    id SERIAL PRIMARY KEY,
+                    parent_id VARCHAR(100) REFERENCES parent(id) ON DELETE CASCADE,
+                    child_id INTEGER REFERENCES child(id) ON DELETE CASCADE,
+                    response_data TEXT NOT NULL,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    version VARCHAR(10) DEFAULT '1.0',
+                    completion_time INTEGER,
+                    ip_address VARCHAR(45),
+                    user_agent TEXT,
+                    is_anonymized BOOLEAN DEFAULT FALSE,
+                    anonymized_at TIMESTAMP
+                );
+                """
+                
+                conn.execute(text(create_tables_sql))
+                conn.commit()
+                logger.info("✅ טבלאות נוצרו באמצעות SQL גולמי")
+                return True
+                
+        except Exception as sql_error:
+            logger.error(f"❌ שגיאה גם ב-SQL גולמי: {sql_error}")
+            return False
+
+# יצירת טבלאות בהפעלה
+ensure_tables_exist()
 
 # Initialize AI model
 model = None
