@@ -51,10 +51,10 @@ if not validate_config(config):
 # Initialize extensions
 cors = CORS(app)
 limiter = Limiter(
-    app,
     key_func=get_remote_address,
     default_limits=["1000 per hour"]
 )
+limiter.init_app(app)
 init_app_db(app)
 
 # Initialize AI model
