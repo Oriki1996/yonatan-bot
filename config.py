@@ -1,4 +1,4 @@
-# config.py - Enhanced Production Ready Configuration
+# config.py - Enhanced Production Ready Configuration - FIXED
 import os
 import logging
 from datetime import timedelta
@@ -37,13 +37,13 @@ class Config:
     RATELIMIT_STRATEGY = 'fixed-window'
     RATELIMIT_HEADERS_ENABLED = True
     
-    # Security Headers
+    # Security Headers - FIXED CSP
     SECURITY_HEADERS = {
         'X-Content-Type-Options': 'nosniff',
         'X-Frame-Options': 'DENY',
         'X-XSS-Protection': '1; mode=block',
         'Referrer-Policy': 'strict-origin-when-cross-origin',
-        'Content-Security-Policy': "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data:; connect-src 'self'"
+        'Content-Security-Policy': "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.tailwindcss.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://placehold.co https://*.placehold.co; connect-src 'self'; frame-ancestors 'none';"
     }
     
     # Chat Configuration
@@ -66,6 +66,11 @@ class Config:
     
     # CORS
     CORS_ORIGINS = os.environ.get('CORS_ORIGINS', 'http://localhost:5000').split(',')
+    
+    # Performance
+    ENABLE_CACHING = os.environ.get('ENABLE_CACHING', 'True').lower() == 'true'
+    CACHE_TYPE = os.environ.get('CACHE_TYPE', 'simple')
+    CACHE_DEFAULT_TIMEOUT = int(os.environ.get('CACHE_DEFAULT_TIMEOUT', '300'))
     
     @staticmethod
     def init_app(app):
@@ -115,20 +120,28 @@ class DevelopmentConfig(Config):
         SQLALCHEMY_DATABASE_URI = f"sqlite:///{db_path}"
     except OSError as e:
         print(f"Warning: Could not create instance directory: {e}")
-        # fallback to memory database
         SQLALCHEMY_DATABASE_URI = "sqlite:///yonatan_dev.db"
     
     # Development specific settings
     WTF_CSRF_ENABLED = False  # להקל על פיתוח
     
     # Enhanced logging for development
-    SQLALCHEMY_ECHO = True
+    SQLALCHEMY_ECHO = False  # Changed to False to reduce noise
     
     # CORS פתוח יותר לפיתוח
     CORS_ORIGINS = ['http://localhost:5000', 'http://127.0.0.1:5000']
     
     # Rate limiting רחב יותר לפיתוח
     RATELIMIT_STORAGE_URL = 'memory://'
+    
+    # More permissive CSP for development
+    SECURITY_HEADERS = {
+        'X-Content-Type-Options': 'nosniff',
+        'X-Frame-Options': 'DENY',
+        'X-XSS-Protection': '1; mode=block',
+        'Referrer-Policy': 'strict-origin-when-cross-origin',
+        'Content-Security-Policy': "default-src 'self' 'unsafe-inline' 'unsafe-eval'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.tailwindcss.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://placehold.co https://*.placehold.co; connect-src 'self';"
+    }
     
     @staticmethod
     def init_app(app):
@@ -148,7 +161,7 @@ class DevelopmentConfig(Config):
         print(f"   - CSRF: {app.config['WTF_CSRF_ENABLED']}")
 
 class ProductionConfig(Config):
-    """הגדרות פרודקשן"""
+    """הגדרות פרודקשן - ENHANCED"""
     DEBUG = False
     
     # קבלת URL של בסיס הנתונים
@@ -163,7 +176,7 @@ class ProductionConfig(Config):
         print("Warning: DATABASE_URL not set, using SQLite")
         SQLALCHEMY_DATABASE_URI = "sqlite:///yonatan_prod.db"
     
-    # Production security
+    # Production security - ENHANCED
     WTF_CSRF_ENABLED = True
     SESSION_COOKIE_SECURE = True
     SESSION_COOKIE_HTTPONLY = True
@@ -180,6 +193,17 @@ class ProductionConfig(Config):
     
     # Production rate limiting - more restrictive
     RATELIMIT_STORAGE_URL = os.environ.get('REDIS_URL', 'memory://')
+    
+    # Enhanced security headers for production
+    SECURITY_HEADERS = {
+        'X-Content-Type-Options': 'nosniff',
+        'X-Frame-Options': 'DENY',
+        'X-XSS-Protection': '1; mode=block',
+        'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',
+        'Referrer-Policy': 'strict-origin-when-cross-origin',
+        'Permissions-Policy': 'geolocation=(), microphone=(), camera=()',
+        'Content-Security-Policy': "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.tailwindcss.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://placehold.co https://*.placehold.co; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self';"
+    }
     
     @staticmethod
     def init_app(app):
@@ -273,15 +297,18 @@ def get_config(config_name: Optional[str] = None) -> Config:
     config_class = config_by_name.get(config_name, DevelopmentConfig)
     return config_class()
 
-# בדיקת הגדרות
+# בדיקת הגדרות - ENHANCED
 def validate_config(config: Config) -> bool:
     """בדיקת תקינות הגדרות"""
     errors = []
+    warnings = []
     
     # בדיקות בסיסיות
     if not config.SECRET_KEY or config.SECRET_KEY == 'dev-secret-key-change-in-production-immediately':
         if os.environ.get('FLASK_ENV') == 'production':
             errors.append("SECRET_KEY must be set in production")
+        else:
+            warnings.append("Using default SECRET_KEY in development")
     
     if not config.GOOGLE_API_KEY:
         errors.append("GOOGLE_API_KEY is required")
@@ -292,8 +319,15 @@ def validate_config(config: Config) -> bool:
     
     # בדיקת rate limiting
     if config.RATELIMIT_STORAGE_URL == 'memory://' and os.environ.get('FLASK_ENV') == 'production':
-        print("⚠️ Warning: Using memory storage for rate limiting in production")
+        warnings.append("Using memory storage for rate limiting in production")
     
+    # הדפסת warnings
+    if warnings:
+        print("⚠️ Configuration warnings:")
+        for warning in warnings:
+            print(f"   - {warning}")
+    
+    # הדפסת errors
     if errors:
         print("❌ Configuration errors:")
         for error in errors:
@@ -319,7 +353,9 @@ ADVANCED_SETTINGS = {
     'ENABLE_PROFILING': os.environ.get('ENABLE_PROFILING', 'False').lower() == 'true',
     'ENABLE_METRICS': os.environ.get('ENABLE_METRICS', 'False').lower() == 'true',
     'ENABLE_HEALTH_CHECK': os.environ.get('ENABLE_HEALTH_CHECK', 'True').lower() == 'true',
-    'ENABLE_BACKGROUND_TASKS': os.environ.get('ENABLE_BACKGROUND_TASKS', 'False').lower() == 'true'
+    'ENABLE_BACKGROUND_TASKS': os.environ.get('ENABLE_BACKGROUND_TASKS', 'False').lower() == 'true',
+    'ENABLE_STREAMING_RESPONSES': os.environ.get('ENABLE_STREAMING_RESPONSES', 'True').lower() == 'true',
+    'ENABLE_CONVERSATION_HISTORY': os.environ.get('ENABLE_CONVERSATION_HISTORY', 'True').lower() == 'true'
 }
 
 # Export הגדרות נוספות
