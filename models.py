@@ -1,4 +1,4 @@
-# models.py - v10.0 - Enhanced Models with Better Validation and Security
+# models.py - v10.1 - Fixed metadata naming conflict
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime, timezone
 from typing import Optional, Dict, Any, List
@@ -242,7 +242,7 @@ class Message(db.Model):
     
     # Enhanced fields
     message_type = db.Column(db.String(20), default='text')  # text, image, file, card
-    metadata = db.Column(db.Text, nullable=True)  # JSON string for additional data
+    message_metadata = db.Column(db.Text, nullable=True)  # JSON string for additional data - FIXED: renamed from metadata
     is_edited = db.Column(db.Boolean, default=False)
     edited_at = db.Column(db.DateTime, nullable=True)
     
@@ -279,7 +279,7 @@ class Message(db.Model):
         
         if include_metadata:
             data.update({
-                'metadata': json.loads(self.metadata) if self.metadata else {},
+                'message_metadata': json.loads(self.message_metadata) if self.message_metadata else {},
                 'response_time': self.response_time,
                 'sentiment_score': self.sentiment_score,
                 'toxicity_score': self.toxicity_score
@@ -295,18 +295,18 @@ class Message(db.Model):
         self.character_count = len(new_content)
         self.word_count = len(new_content.split())
     
-    def add_metadata(self, key: str, value: Any):
-        """Add metadata to message"""
-        metadata = json.loads(self.metadata) if self.metadata else {}
-        metadata[key] = value
-        self.metadata = json.dumps(metadata, ensure_ascii=False)
+    def add_message_metadata(self, key: str, value: Any):
+        """Add metadata to message - FIXED: renamed function"""
+        message_metadata = json.loads(self.message_metadata) if self.message_metadata else {}
+        message_metadata[key] = value
+        self.message_metadata = json.dumps(message_metadata, ensure_ascii=False)
     
-    def get_metadata(self, key: str, default: Any = None) -> Any:
-        """Get metadata value"""
-        if not self.metadata:
+    def get_message_metadata(self, key: str, default: Any = None) -> Any:
+        """Get metadata value - FIXED: renamed function"""
+        if not self.message_metadata:
             return default
-        metadata = json.loads(self.metadata)
-        return metadata.get(key, default)
+        message_metadata = json.loads(self.message_metadata)
+        return message_metadata.get(key, default)
 
 class QuestionnaireResponse(db.Model):
     __tablename__ = 'questionnaire_response'
