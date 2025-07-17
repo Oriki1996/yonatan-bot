@@ -854,7 +854,7 @@
             const healthStatus = await checkSystemHealth();
             if (healthStatus.available) {
                 if (state.sessionId) {
-                    state.uiState = 'chat';
+                    state.uiState = 'questionnaire';
                 } else {
                     state.uiState = 'questionnaire';
                 }
