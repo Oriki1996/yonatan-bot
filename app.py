@@ -1,5 +1,105 @@
 # app.py - תיקון endpoint /api/chat - הוסף זאת במקום הקוד הקיים
 
+from flask import Flask, request, jsonify, Response # Import Flask and other necessary modules
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+from flask_cors import CORS
+import logging
+import os
+from datetime import datetime, timedelta
+import json
+import re # For sanitize_input if used there
+
+# Import models and db initialization
+from models import db, init_app_db, Parent, Child, Conversation, Message, QuestionnaireResponse
+
+# Import Config and error handling
+from config import get_config, validate_config
+from errors import BotError, ValidationError, handle_generic_error, QuotaExceededError, RateLimitExceededError, AIModelError, FallbackSystemError
+
+# Import advanced_fallback_system
+from advanced_fallback_system import create_advanced_fallback_system, ResponseContext, AgeGroup, ChallengeCategory, ConversationStage, CBTTechnique
+
+# Import Google Generative AI
+import google.generativeai as genai
+
+
+# --- Application Initialization ---
+app = Flask(__name__)
+
+# Load configuration
+current_config = get_config(os.environ.get('FLASK_ENV', 'development'))
+app.config.from_object(current_config)
+current_config.init_app(app)
+
+# Validate configuration
+if not validate_config(current_config):
+    logging.error("❌ Configuration validation failed. Exiting.")
+    exit(1) # Exit if critical configuration is missing
+
+# Initialize database
+init_app_db(app)
+
+# Initialize CORS
+CORS(app, resources={r"/api/*": {"origins": app.config['CORS_ORIGINS']}})
+
+# Initialize Limiter
+limiter = Limiter(
+    get_remote_address,
+    app=app,
+    storage_uri=app.config['RATELIMIT_STORAGE_URL'],
+    strategy=app.config['RATELIMIT_STRATEGY'],
+    headers_enabled=app.config['RATELIMIT_HEADERS_ENABLED']
+)
+
+# Configure logging
+logging.basicConfig(level=getattr(logging, app.config['LOG_LEVEL'].upper()))
+logger = logging.getLogger(__name__)
+
+# Configure Google Generative AI
+model = None
+if app.config.get('GOOGLE_API_KEY'):
+    try:
+        genai.configure(api_key=app.config['GOOGLE_API_KEY'])
+        model = genai.GenerativeModel('gemini-pro')
+        logger.info("✅ Google Generative AI model initialized.")
+    except Exception as e:
+        logger.error(f"❌ Failed to initialize Google Generative AI model: {e}")
+        model = None
+else:
+    logger.warning(⚠️ GOOGLE_API_KEY not set. AI model will not be available.")
+
+# Initialize advanced fallback system
+advanced_fallback_system = create_advanced_fallback_system()
+if not advanced_fallback_system:
+    logger.error("❌ Advanced Fallback System could not be initialized.")
+
+
+# --- Helper Functions (assuming they are defined elsewhere or need to be moved here) ---
+
+def validate_session_id(session_id: str) -> bool:
+    """Basic validation for session_id (e.g., length, character set)"""
+    return isinstance(session_id, str) and 5 <= len(session_id) <= 100 and re.match(r"^[a-zA-Z0-9_-]+$", session_id)
+
+def is_suspicious_request():
+    """Placeholder for more advanced security checks"""
+    # Implement logic to detect suspicious requests (e.g., too many requests from an IP in a short time, unusual patterns)
+    return False
+
+def log_security_event(event_type: str, details: Dict[str, Any]):
+    """Log security events"""
+    logger.warning(f"SECURITY ALERT: {event_type} - Details: {details}")
+
+def sanitize_input(text: str) -> str:
+    """Sanitize user input to prevent injection attacks"""
+    # Simple example: remove HTML tags and limit length
+    cleaned_text = re.sub(r'<[^>]*>', '', text) # Remove HTML tags
+    cleaned_text = cleaned_text[:app.config.get('MAX_MESSAGE_LENGTH', 5000)] # Truncate
+    return cleaned_text.strip()
+
+
+# --- Routes ---
+
 @app.route('/api/chat', methods=['POST'])
 @limiter.limit("30 per minute")
 def chat():
@@ -156,8 +256,9 @@ def chat():
 
                 # Use fallback system
                 if advanced_fallback_system:
+                    # Pass the questionnaire_data to the fallback system
                     fallback_response = advanced_fallback_system.get_fallback_response(
-                        message, session_id, questionnaire_data
+                        user_input=message, session_id=session_id, questionnaire_data=questionnaire_data
                     )
                     
                     # Save fallback response to conversation
@@ -210,3 +311,42 @@ def chat():
         logger.error(f"Unexpected error in chat endpoint: {e}")
         error = handle_generic_error(e)
         return jsonify(error.to_dict()), error.status_code
+
+# Health check endpoint
+@app.route('/api/health', methods=['GET'])
+def health_check():
+    """Health check endpoint to verify service status."""
+    db_connected = False
+    try:
+        # Try to execute a simple query to check DB connection
+        with db.engine.connect() as connection:
+            connection.execute(db.text("SELECT 1"))
+        db_connected = True
+    except Exception as e:
+        logger.error(f"Database health check failed: {e}")
+        db_connected = False
+
+    ai_model_working = False
+    if model:
+        try:
+            # Try a simple generative call to check AI model
+            response = model.generate_content("hello")
+            if response and response.text:
+                ai_model_working = True
+        except Exception as e:
+            logger.error(f"AI model health check failed: {e}")
+            ai_model_working = False
+    
+    fallback_system_available = advanced_fallback_system is not None
+
+    return jsonify({
+        "status": "healthy",
+        "database_connected": db_connected,
+        "ai_model_working": ai_model_working,
+        "fallback_system_available": fallback_system_available,
+        "timestamp": datetime.now(timezone.utc).isoformat()
+    }), 200
+
+# Main entry point for running the app directly (for development)
+if __name__ == '__main__':
+    app.run(debug=current_config.DEBUG, host='0.0.0.0', port=5000)
