@@ -67,7 +67,7 @@ if app.config.get('GOOGLE_API_KEY'):
         logger.error(f"❌ Failed to initialize Google Generative AI model: {e}")
         model = None
 else:
-    logger.warning( GOOGLE_API_KEY not set. AI model will not be available.")
+    logger.warning("GOOGLE_API_KEY not set. AI model will not be available.")
 
 # Initialize advanced fallback system
 advanced_fallback_system = create_advanced_fallback_system()
