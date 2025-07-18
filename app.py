@@ -1,4 +1,4 @@
-# app.py - תיקון endpoint /api/chat - הוסף זאת במקום הקוד הקיים
+# app.py - קובץ מתוקן בשלמותו
 
 from flask import Flask, request, jsonify, Response # Import Flask and other necessary modules
 from flask_limiter import Limiter
@@ -6,9 +6,10 @@ from flask_limiter.util import get_remote_address
 from flask_cors import CORS
 import logging
 import os
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta # Added timezone for datetime.now(timezone.utc)
 import json
 import re # For sanitize_input if used there
+from typing import Dict, Any # ADDED: Import Dict and Any for type hinting
 
 # Import models and db initialization
 from models import db, init_app_db, Parent, Child, Conversation, Message, QuestionnaireResponse
@@ -67,6 +68,7 @@ if app.config.get('GOOGLE_API_KEY'):
         logger.error(f"❌ Failed to initialize Google Generative AI model: {e}")
         model = None
 else:
+    # Removed emoji from log message to prevent SyntaxError
     logger.warning("GOOGLE_API_KEY not set. AI model will not be available.")
 
 # Initialize advanced fallback system
@@ -75,7 +77,7 @@ if not advanced_fallback_system:
     logger.error("❌ Advanced Fallback System could not be initialized.")
 
 
-# --- Helper Functions (assuming they are defined elsewhere or need to be moved here) ---
+# --- Helper Functions ---
 
 def validate_session_id(session_id: str) -> bool:
     """Basic validation for session_id (e.g., length, character set)"""
@@ -86,7 +88,7 @@ def is_suspicious_request():
     # Implement logic to detect suspicious requests (e.g., too many requests from an IP in a short time, unusual patterns)
     return False
 
-def log_security_event(event_type: str, details: Dict[str, Any]):
+def log_security_event(event_type: str, details: Dict[str, Any]): # FIXED: Dict and Any are now imported
     """Log security events"""
     logger.warning(f"SECURITY ALERT: {event_type} - Details: {details}")
 
@@ -146,6 +148,9 @@ def chat():
             return jsonify({"error": "הודעה לא תקינה אחרי ניקוי"}), 400
 
         # Get or create session data
+        # Define conversation and parent here to ensure they are accessible in finally block
+        conversation = None
+        parent = None
         try:
             # Try to get questionnaire data for this session
             questionnaire_data = {}
@@ -181,13 +186,17 @@ def chat():
                         content=message
                     )
                     db.session.add(user_message)
-
+                    db.session.commit() # Commit here for user message
+                    
         except Exception as db_error:
             logger.error(f"Database error in chat: {db_error}")
+            db.session.rollback() # Rollback in case of error
             # Continue without database - let fallback handle it
 
         # Function to generate streaming response
-        def generate_response():
+        def generate_response_stream(): # Renamed to avoid confusion with Response class
+            current_conversation = conversation # Use the conversation object from outer scope
+            
             try:
                 # Try AI response first
                 if model:
@@ -223,21 +232,21 @@ def chat():
 """
 
                         # Generate AI response with streaming
-                        response = model.generate_content(prompt)
+                        response_ai = model.generate_content(prompt) # Renamed variable to avoid conflict
                         
-                        if response and response.text:
-                            full_response = response.text
+                        if response_ai and response_ai.text:
+                            full_response = response_ai.text
                             
                             # Save bot message to conversation
                             try:
-                                if 'conversation' in locals():
+                                if current_conversation: # Check if conversation object exists
                                     bot_message = Message(
-                                        conversation_id=conversation.id,
+                                        conversation_id=current_conversation.id,
                                         sender_type='bot',
                                         content=full_response
                                     )
                                     db.session.add(bot_message)
-                                    conversation.update_message_count()
+                                    current_conversation.update_message_count()
                                     db.session.commit()
                             except Exception as save_error:
                                 logger.warning(f"Could not save message to DB: {save_error}")
@@ -263,14 +272,14 @@ def chat():
                     
                     # Save fallback response to conversation
                     try:
-                        if 'conversation' in locals():
+                        if current_conversation: # Check if conversation object exists
                             bot_message = Message(
-                                conversation_id=conversation.id,
+                                conversation_id=current_conversation.id,
                                 sender_type='bot',
                                 content=fallback_response
                             )
                             db.session.add(bot_message)
-                            conversation.update_message_count()
+                            current_conversation.update_message_count()
                             db.session.commit()
                     except Exception as save_error:
                         logger.warning(f"Could not save fallback message to DB: {save_error}")
@@ -284,17 +293,17 @@ def chat():
                     return
                 
                 # Last resort - basic response
-                basic_response = f"שלום! אני יונתן. מצטער, יש לי קושי טכני כרגע, אבל אני כאן לעזור לך. איך אני יכול לסייע?"
+                basic_response = "שלום! אני יונתן. מצטער, יש לי קושי טכני כרגע, אבל אני כאן לעזור לך. איך אני יכול לסייע?"
                 yield basic_response
                 
             except Exception as e:
-                logger.error(f"Error in generate_response: {e}")
+                logger.error(f"Error in generate_response_stream: {e}")
                 error_response = "מצטער, אירעה שגיאה טכנית. אנא נסה שוב."
                 yield error_response
 
         # Return streaming response
         return Response(
-            generate_response(),
+            generate_response_stream(), # Call the renamed function
             mimetype='text/plain',
             headers={
                 'Cache-Control': 'no-cache',
@@ -306,8 +315,12 @@ def chat():
     except ValidationError as e:
         return jsonify({"error": "נתונים לא תקינים", "details": e.messages}), 400
     except BotError as e:
+        # Rollback any pending transaction if an error occurs and it's a BotError
+        db.session.rollback()
         return jsonify(e.to_dict()), e.status_code
     except Exception as e:
+        # Rollback any pending transaction for unexpected errors
+        db.session.rollback()
         logger.error(f"Unexpected error in chat endpoint: {e}")
         error = handle_generic_error(e)
         return jsonify(error.to_dict()), error.status_code
