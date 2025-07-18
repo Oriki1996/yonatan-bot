@@ -37,13 +37,14 @@ class Config:
     RATELIMIT_STRATEGY = 'fixed-window'
     RATELIMIT_HEADERS_ENABLED = True
     
-    # Security Headers - FIXED CSP
+    # Security Headers - UPDATED Content-Security-Policy
     SECURITY_HEADERS = {
         'X-Content-Type-Options': 'nosniff',
         'X-Frame-Options': 'DENY',
         'X-XSS-Protection': '1; mode=block',
         'Referrer-Policy': 'strict-origin-when-cross-origin',
-        'Content-Security-Policy': "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.tailwindcss.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://placehold.co https://*.placehold.co; connect-src 'self'; frame-ancestors 'none';"
+        # ADDED https://unpkg.com to script-src
+        'Content-Security-Policy': "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.tailwindcss.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://placehold.co https://*.placehold.co; connect-src 'self'; frame-ancestors 'none';"
     }
     
     # Chat Configuration
@@ -134,13 +135,14 @@ class DevelopmentConfig(Config):
     # Rate limiting רחב יותר לפיתוח
     RATELIMIT_STORAGE_URL = 'memory://'
     
-    # More permissive CSP for development
+    # More permissive CSP for development - UPDATED
     SECURITY_HEADERS = {
         'X-Content-Type-Options': 'nosniff',
         'X-Frame-Options': 'DENY',
         'X-XSS-Protection': '1; mode=block',
         'Referrer-Policy': 'strict-origin-when-cross-origin',
-        'Content-Security-Policy': "default-src 'self' 'unsafe-inline' 'unsafe-eval'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.tailwindcss.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://placehold.co https://*.placehold.co; connect-src 'self';"
+        # ADDED https://unpkg.com to script-src in DevelopmentConfig
+        'Content-Security-Policy': "default-src 'self' 'unsafe-inline' 'unsafe-eval'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.tailwindcss.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://placehold.co https://*.placehold.co; connect-src 'self';"
     }
     
     @staticmethod
@@ -194,7 +196,7 @@ class ProductionConfig(Config):
     # Production rate limiting - more restrictive
     RATELIMIT_STORAGE_URL = os.environ.get('REDIS_URL', 'memory://')
     
-    # Enhanced security headers for production
+    # Enhanced security headers for production - UPDATED
     SECURITY_HEADERS = {
         'X-Content-Type-Options': 'nosniff',
         'X-Frame-Options': 'DENY',
@@ -202,7 +204,8 @@ class ProductionConfig(Config):
         'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',
         'Referrer-Policy': 'strict-origin-when-cross-origin',
         'Permissions-Policy': 'geolocation=(), microphone=(), camera=()',
-        'Content-Security-Policy': "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.tailwindcss.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://placehold.co https://*.placehold.co; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self';"
+        # ADDED https://unpkg.com to script-src in ProductionConfig
+        'Content-Security-Policy': "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.tailwindcss.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://placehold.co https://*.placehold.co; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self';"
     }
     
     @staticmethod
@@ -371,3 +374,4 @@ __all__ = [
     'SECURITY_HEADERS',
     'ADVANCED_SETTINGS'
 ]
+}

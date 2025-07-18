@@ -18,7 +18,7 @@ from models import db, init_app_db, Parent, Child, Conversation, Message, Questi
 
 # Import Config and error handling
 from config import get_config, validate_config
-from errors import BotError, ValidationError, handle_generic_error, QuotaExceededError, RateLimitExceededError, AIModelError, FallbackSystemError
+from errors import BotError, ValidationError, handle_generic_error, QuotaExceededError, RateLimitExceededError, AIModelError, FallbackSystemError, SessionNotFoundError, DatabaseError # Added SessionNotFoundError, DatabaseError for specific raises
 
 # Import advanced_fallback_system
 from advanced_fallback_system import create_advanced_fallback_system, ResponseContext, AgeGroup, ChallengeCategory, ConversationStage, CBTTechnique
@@ -81,7 +81,8 @@ if not advanced_fallback_system:
     logger.error("❌ Advanced Fallback System could not be initialized.")
 
 # Initialize CSRF Serializer (used for token generation if not using Flask-WTF forms)
-s = URLSafeTimedSerializer(app.config['SECRET_KEY'])
+# Use a strong SECRET_KEY. Ensure it's defined in your .env or Render settings.
+s = URLSafeTimedSerializer(app.config.get('SECRET_KEY', 'default-dev-secret-key-please-change')) # Fallback for dev
 
 
 # --- Helper Functions ---
@@ -116,8 +117,6 @@ def index():
 def favicon():
     """Serves the favicon.ico file (you'll need to place it in the static directory)."""
     # Assuming you have a favicon.ico in your static folder.
-    # If not, you might want to return an empty response or a default icon.
-    # Updated to use send_from_directory with app.static_folder directly
     return send_from_directory(app.static_folder, 'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
 @app.route('/accessibility.html')
@@ -129,30 +128,33 @@ def accessibility():
 @app.route('/api/csrf-token', methods=['GET'])
 def get_csrf_token():
     """Provides a CSRF token for frontend requests."""
-    # Flask-WTF CSRFProtect usually handles this automatically for forms,
-    # but for pure API calls, we might need to expose it manually.
-    # We can generate a token using itsdangerous.
-    token = s.dumps(request.remote_addr, salt='csrf-salt') # Use remote_addr or session ID
-    return jsonify({'csrf_token': token}), 200
+    # This generates a CSRF token. The frontend should include this in X-CSRFToken header for POST requests.
+    try:
+        # Generate a CSRF token that changes per session/IP for better security.
+        # For this example, using remote_addr. In a real app, bind to Flask session.
+        token = s.dumps(request.remote_addr, salt='csrf-salt')
+        logger.info(f"Generated CSRF token for {request.remote_addr}")
+        return jsonify({'csrf_token': token}), 200
+    except Exception as e:
+        logger.error(f"Error generating CSRF token: {e}")
+        return jsonify({"error": "Failed to generate CSRF token"}), 500
+
 
 # NEW ENDPOINT: Initialize Session
 @app.route('/api/init', methods=['POST'])
-@limiter.limit("5 per minute") # Limit session initialization requests
-@csrf.exempt # Exempt this route from CSRF protection if CSRF token is not yet available
-             # Or, client must fetch CSRF token first, then send it with this request.
-             # For simplicity and initial setup, exempting here.
-             # In a real app, you'd send CSRF token with this request after fetching it.
+@limiter.limit("5 per minute")
+# Temporarily exempt from CSRF for initial session setup.
+# In a fully secure setup, you'd fetch CSRF token first, then send it with this request.
+@csrf.exempt # IMPORTANT: For production, consider enabling CSRF on this endpoint too,
+             # requiring the client to fetch a token first.
 def init_session():
     """Initializes a new parent session and returns a session_id."""
     try:
-        # Generate a unique session ID
-        # You can use UUID or a combination of random strings.
-        # For this example, let's generate a simple unique ID.
+        # Generate a unique session ID based on current time and random bytes
         new_session_id = generate_secure_id(str(datetime.now(timezone.utc)) + os.urandom(16).hex())
 
-        # Create a dummy Parent entry (you'll want to extend this with real user data later)
-        # For now, we use placeholder data. In a real app, you'd get this from a login/registration form.
         with app.app_context(): # Ensure we are in application context for DB operations
+            # Check if parent with this generated ID already exists (highly unlikely)
             existing_parent = Parent.query.filter_by(id=new_session_id).first()
             if existing_parent:
                 # If by some cosmic chance ID already exists, regenerate
@@ -162,39 +164,46 @@ def init_session():
                 id=new_session_id,
                 name="הורה אורח", # Placeholder
                 gender="לא צוין",  # Placeholder
+                created_at=datetime.now(timezone.utc),
+                last_activity=datetime.now(timezone.utc),
                 data_processing_consent=False, # Should be explicitly granted by user
                 marketing_consent=False
             )
             db.session.add(parent)
-            db.session.commit()
+            # No commit here yet, as we want to commit parent and child together if child is created
 
-            # Create a dummy child for this parent (optional, but good for starting conversation)
-            # In a real app, this would come from the questionnaire.
+            # Create a dummy child for this parent
             child = Child(
                 name="ילד אורח", # Placeholder
                 gender="לא צוין", # Placeholder
                 age=15,          # Placeholder
-                parent_id=parent.id
+                parent_id=parent.id,
+                created_at=datetime.now(timezone.utc)
             )
             db.session.add(child)
-            db.session.commit()
+            db.session.commit() # Commit both parent and child
 
         logger.info(f"New session initialized: {new_session_id}")
         return jsonify({"session_id": new_session_id}), 200
 
     except Exception as e:
-        db.session.rollback()
+        db.session.rollback() # Rollback transaction if any error occurs
         logger.error(f"Error initializing session: {e}")
         error = handle_generic_error(e)
-        return jsonify(error.to_dict()), error.status_code
+        return jsonify(error.to_dict()), 500 # Use 500 for server-side errors
 
 
 @app.route('/api/chat', methods=['POST'])
 @limiter.limit("30 per minute")
-# @csrf.exempt # Temporarily exempt for debugging if CSRF is causing issues with chat, but remove for production
+# Temporarily disable CSRF for this route to debug functionality.
+# REMOVE THIS LINE IN PRODUCTION AFTER CSRF IS FULLY WORKING CLIENT-SIDE!
+@csrf.exempt # TEMPORARY: For debugging CSRF token issues. REMOVE IN PRODUCTION!
 def chat():
     """Enhanced chat endpoint with proper validation and streaming response"""
     try:
+        # Ensure that CSRF token is checked if @csrf.exempt is removed
+        # csrf.check() # Uncomment this line in production
+
         if not request.is_json:
             return jsonify({"error": "הבקשה חייבת להיות בפורמט JSON"}), 400
 
@@ -233,15 +242,13 @@ def chat():
         conversation = None
         parent = None
         try:
-            questionnaire_data = {}
-            if session_id:
-                # Use app.app_context() when querying from the database
-                with app.app_context():
+            with app.app_context(): # Ensure app context for DB operations
+                questionnaire_data = {}
+                if session_id:
                     questionnaire = QuestionnaireResponse.query.filter_by(parent_id=session_id).first()
                     if questionnaire:
                         questionnaire_data = questionnaire.get_response_data()
 
-            with app.app_context():
                 parent = Parent.query.filter_by(id=session_id).first()
                 if not parent:
                     # If parent not found, it means session_id is invalid or not initialized
@@ -254,20 +261,29 @@ def chat():
                 
                 if not conversation:
                     # Create new conversation
-                    # Ensure parent has children, otherwise child_id might be None
+                    # Ensure parent has children. If not, you might need to create a dummy child first.
                     child_id = parent.children[0].id if parent.children else None
                     if not child_id:
-                        logger.warning(f"No child associated with parent {parent.id} for new conversation.")
-                        # You might want to create a default child or raise an error here
-                        # For now, proceed with child_id=None
-                    
+                        logger.warning(f"No child associated with parent {parent.id} for new conversation. Creating a dummy child.")
+                        # Create a default child if none exists
+                        new_child = Child(
+                            name="ילד_ברירת_מחדל", # Default child name
+                            gender="לא צוין",
+                            age=15,
+                            parent_id=parent.id,
+                            created_at=datetime.now(timezone.utc)
+                        )
+                        db.session.add(new_child)
+                        db.session.flush() # Get ID for current transaction
+                        child_id = new_child.id
+
                     conversation = Conversation(
                         parent_id=session_id,
-                        child_id=child_id, # Can be None if no child is associated
+                        child_id=child_id,
                         topic=questionnaire_data.get('main_challenge', 'שיחה כללית')
                     )
                     db.session.add(conversation)
-                    db.session.flush() # Get ID without committing
+                    db.session.flush() # Get ID without committing yet
 
                 if message != "START_CONVERSATION":
                     user_message = Message(
@@ -280,8 +296,7 @@ def chat():
                     
         except Exception as db_error:
             logger.error(f"Database error in chat: {db_error}")
-            db.session.rollback()
-            # If DB error, raise a BotError to trigger generic error handling for frontend
+            db.session.rollback() # Rollback transaction if any error occurs
             raise DatabaseError(f"Failed to interact with database: {db_error}")
 
 

@@ -3,600 +3,702 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>יונתן הפסיכו-בוט: מדריך הורים למתבגרים</title>
-    <meta name="description" content="יונתן הפסיכו-בוט הוא כלי חינוכי מתקדם המבוסס על עקרונות CBT המסייע להורים להתמודד עם אתגרי גיל ההתבגרות.">
-    <meta name="keywords" content="הורות, מתבגרים, CBT, פסיכולוגיה, בוט, AI, תמיכה להורים, גיל ההתבגרות, חרדה, תקשורת">
-    <meta name="author" content="Yonatan Bot Team">
+    <title>יונתן הפסיכו-בוט | כלים להורות מודעת</title>
     
+    <meta name="description" content="יונתן הפסיכו-בוט - ליווי אישי וכלים מבוססי CBT להורים של מתבגרים. תמיכה 24/7 בפתרון אתגרי הורות">
+    <meta name="keywords" content="פסיכו-בוט, הורות, מתבגרים, CBT, תמיכה, ייעוץ, חינוך">
+    <meta name="author" content="יונתן הפסיכו-בוט">
+    
+    <meta property="og:title" content="יונתן הפסיכו-בוט | כלים להורות מודעת">
+    <meta property="og:description" content="ליווי אישי וכלים מבוססי CBT להורים של מתבגרים">
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://yonatan-bot-1.onrender.com/">
-    <meta property="og:title" content="יונתן הפסיכו-בוט: מדריך הורים למתבגרים">
-    <meta property="og:description" content="יונתן הפסיכו-בוט הוא כלי חינוכי מתקדם המבוסס על עקרונות CBT המסייע להורים להתמודד עם אתגרי גיל ההתבגרות.">
-    <meta property="og:image" content="https://yonatan-bot-1.onrender.com/static/images/social_preview.jpg"> <link rel="icon" href="/static/favicon.ico" type="image/x-icon">
-
-    <link href="https://cdn.tailwindcss.com" rel="stylesheet">
+    <meta property="og:image" content="https://placehold.co/1200x630/4f46e5/white?text=יונתן+הפסיכו-בוט">
     
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@200..800&display=swap" rel="stylesheet">
-
-    <style>
-        body {
-            font-family: 'Assistant', sans-serif;
-            direction: rtl; /* Right-to-Left for Hebrew */
-            text-align: right; /* Default text alignment for Hebrew */
-            overflow-x: hidden; /* Prevent horizontal scroll due to animations */
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="icon" href="/static/favicon.ico" type="image/x-icon"> <style>
+        :root { 
+            --primary: #4f46e5; 
+            --secondary: #7c3aed;
+            --accent: #06b6d4;
+            --light-bg: #f8fafc;
+            --gradient-1: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-2: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --gradient-3: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
         }
-        .container {
-            max-width: 1200px;
+        
+        html { scroll-behavior: smooth; }
+        body { 
+            font-family: 'Assistant', sans-serif; 
+            line-height: 1.6;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            direction: rtl; /* Ensure RTL */
+            text-align: right; /* Ensure text aligns right */
         }
-        /* Custom gradient text */
+        
+        .hero-gradient { 
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero-gradient::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><polygon fill="%23ffffff08" points="0,1000 1000,0 1000,1000"/></svg>');
+            background-size: cover;
+        }
+        
+        .feature-card, .article-card, .gallery-card { 
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .feature-card:hover, .article-card:hover { 
+            transform: translateY(-12px) scale(1.02); /* Adjusted hover for consistency */
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+            background: rgba(255, 255, 255, 0.95);
+        }
+        
+        /* Removed .gallery-card:hover as gallery section is removed or changed */
+        
+        .fade-in { 
+            animation: fadeIn 1.2s ease-out forwards; 
+            opacity: 0; 
+        }
+        
+        @keyframes fadeIn { 
+            0% { opacity: 0; transform: translateY(40px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        
+        .slide-up { 
+            animation: slideUp 1s ease-out forwards; 
+            opacity: 0; 
+            transform: translateY(50px); 
+        }
+        
+        @keyframes slideUp { 
+            to { opacity: 1; transform: translateY(0); } 
+        }
+        
         .gradient-text {
-            background: linear-gradient(to right, #4c1d95, #833ab4, #fd1d1d, #fcb045);
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            color: transparent;
-        }
-        /* Custom animations */
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        .fade-in {
-            animation: fadeIn 1s ease-out forwards;
-        }
-
-        @keyframes slideUp {
-            from { transform: translateY(50px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-        .slide-up {
-            animation: slideUp 0.8s ease-out forwards;
-            opacity: 0; /* Hidden by default */
-        }
-        .slide-up:nth-child(1) { animation-delay: 0.1s; }
-        .slide-up:nth-child(2) { animation-delay: 0.2s; }
-        .slide-up:nth-child(3) { animation-delay: 0.3s; }
-        .slide-up:nth-child(4) { animation-delay: 0.4s; }
-        .slide-up:nth-child(5) { animation-delay: 0.5s; }
-        .slide-up:nth-child(6) { animation-delay: 0.6s; }
-
-        @keyframes pulseGlow {
-            0% { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.7); }
-            70% { box-shadow: 0 0 0 20px rgba(139, 92, 246, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0); }
-        }
-        .pulse-glow {
-            animation: pulseGlow 2s infinite;
-        }
-
-        @keyframes floating {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
-            100% { transform: translateY(0px); }
-        }
-        .floating-animation {
-            animation: floating 3s ease-in-out infinite;
-        }
-
-        /* Chat widget styles (basic - will be enhanced by widget.js) */
-        #chat-widget-container {
-            position: fixed;
-            bottom: 20px;
-            left: 20px; /* Changed from right to left for RTL layout */
-            z-index: 1000;
-            display: none; /* Hidden by default */
-        }
-
-        #chat-bubble {
-            background-color: #6366f1; /* Indigo-500 */
-            color: white;
-            border-radius: 9999px; /* Full rounded */
-            width: 64px; /* w-16 */
-            height: 64px; /* h-16 */
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.875rem; /* text-3xl */
-            cursor: pointer;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
-        }
-
-        #chat-bubble:hover {
-            transform: scale(1.05);
-            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        #chat-window {
-            position: fixed;
-            bottom: 100px; /* Above the bubble */
-            left: 20px; /* Aligned with the bubble */
-            width: 380px; /* Adjusted width */
-            height: 500px; /* Adjusted height */
-            background-color: white;
-            border-radius: 1rem; /* rounded-xl */
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-            display: none;
-            flex-direction: column;
-            overflow: hidden;
-            border: 1px solid #e2e8f0; /* border-gray-200 */
-        }
-        @media (max-width: 640px) {
-            #chat-window {
-                width: 90%;
-                left: 5%;
-                bottom: 80px;
-                height: 70%;
-            }
-            #chat-bubble {
-                bottom: 15px;
-                left: 15px;
-            }
-        }
-        .chat-header {
-            background-color: #6366f1; /* Indigo-500 */
-            color: white;
-            padding: 1rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-weight: bold;
-            font-size: 1.125rem;
-        }
-        .chat-messages {
-            flex-grow: 1;
-            padding: 1rem;
-            overflow-y: auto;
-            background-color: #f8fafc; /* Slate-50 */
-            display: flex;
-            flex-direction: column; /* Stack messages vertically */
-        }
-        .chat-input-area {
-            display: flex;
-            padding: 1rem;
-            border-top: 1px solid #e2e8f0;
-            background-color: white;
-        }
-        .chat-input-area input {
-            flex-grow: 1;
-            border: 1px solid #cbd5e1; /* Slate-300 */
-            border-radius: 0.5rem; /* rounded-lg */
-            padding: 0.75rem 1rem;
-            margin-inline-end: 0.5rem; /* mr-2 for RTL */
-        }
-        .chat-input-area button {
-            background-color: #6366f1;
-            color: white;
-            border-radius: 0.5rem;
-            padding: 0.75rem 1rem;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-        .chat-input-area button:hover {
-            background-color: #4f46e5; /* Indigo-600 */
-        }
-
-        /* Message styling */
-        .message-container {
-            display: flex;
-            margin-bottom: 0.75rem;
-        }
-        .user-message .message-bubble {
-            background-color: #e0e7ff; /* Indigo-100 */
-            color: #1e3a8a; /* Dark blue */
-            border-radius: 0.75rem 0.75rem 0.125rem 0.75rem; /* rounded-xl rounded-bl-sm */
-            padding: 0.75rem 1rem;
-            max-width: 80%;
-            margin-inline-start: auto; /* Push to right for RTL */
-            margin-inline-end: 0;
-            text-align: right;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-        }
-        .bot-message .message-bubble {
-            background-color: #ffffff; /* White */
-            color: #334155; /* Slate-700 */
-            border-radius: 0.75rem 0.75rem 0.75rem 0.125rem; /* rounded-xl rounded-br-sm */
-            padding: 0.75rem 1rem;
-            max-width: 80%;
-            margin-inline-end: auto; /* Push to left for RTL */
-            margin-inline-start: 0;
-            text-align: right;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-            border: 1px solid #e2e8f0;
-        }
-
-        .typing-indicator {
-            text-align: center;
-            padding: 0.5rem;
-            font-style: italic;
-            color: #64748b; /* Slate-500 */
         }
         
-        /* Message Card Styles */
-        .message-card {
-            background-color: #eff6ff; /* Blue-50 */
-            border-right: 4px solid #6366f1; /* Indigo-500 border for RTL */
-            padding: 1rem;
-            border-radius: 0.5rem;
-            margin-top: 0.75rem;
-            margin-bottom: 0.5rem;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-            direction: rtl;
-            text-align: right;
-            font-size: 0.95rem;
+        .floating-animation {
+            animation: floating 6s ease-in-out infinite;
         }
-        .message-card strong {
-            display: block;
-            margin-bottom: 0.5rem;
-            color: #4338ca; /* Indigo-700 */
-            font-size: 1rem;
+        
+        @keyframes floating {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
         }
-
-        /* Suggestion Buttons */
-        .suggestion-buttons {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-            margin-top: 0.75rem;
-            justify-content: flex-end; /* Align to right for RTL */
+        
+        .pulse-glow {
+            animation: pulseGlow 2s ease-in-out infinite alternate;
         }
-        .suggestion-btn {
-            background-color: #e0e7ff; /* Indigo-100 */
-            color: #4f46e5; /* Indigo-600 */
-            border: 1px solid #a5b4fc; /* Indigo-300 */
-            padding: 0.5rem 0.75rem;
-            border-radius: 9999px; /* Full rounded */
-            cursor: pointer;
-            transition: all 0.2s ease;
-            font-size: 0.875rem;
-            white-space: nowrap; /* Prevent wrapping */
+        
+        @keyframes pulseGlow {
+            from { box-shadow: 0 0 20px rgba(79, 70, 229, 0.4); }
+            to { box-shadow: 0 0 40px rgba(79, 70, 229, 0.8); }
         }
-        .suggestion-btn:hover {
-            background-color: #c7d2fe; /* Indigo-200 */
+        
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
         }
-        .suggestion-btn:disabled {
-            cursor: not-allowed;
-            opacity: 0.6;
+        
+        .nav-blur {
+            backdrop-filter: blur(20px);
+            background: rgba(255, 255, 255, 0.8);
         }
-
-        /* Hero section specific styles */
-        #hero .feature-icon {
-            background: linear-gradient(to bottom right, #818cf8, #6366f1);
-            box-shadow: 0 10px 20px rgba(99, 102, 241, 0.4);
-            transition: transform 0.3s ease;
+        
+        .feature-icon {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            background-size: 200% 200%;
+            animation: gradientShift 4s ease infinite;
         }
-        #hero .feature-icon:hover {
-            transform: translateY(-5px);
+        
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
         }
-
-        /* Accordion for Articles */
-        .accordion-item {
-            border-bottom: 1px solid #e2e8f0;
+        
+        .testimonial-card {
+            background: linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.7) 100%);
+            backdrop-filter: blur(10px);
+            border-left: 4px solid var(--primary);
         }
-        .accordion-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem;
-            cursor: pointer;
-            background-color: #f8fafc;
+        
+        .stats-counter {
+            background: var(--gradient-3);
+            background-size: 200% 200%;
+            animation: gradientShift 3s ease infinite;
         }
-        .accordion-header:hover {
-            background-color: #f0f4f8;
+        
+        .interactive-button {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
         }
+        
+        .interactive-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s;
+        }
+        
+        .interactive-button:hover::before {
+            left: 100%;
+        }
+        
+        .section-divider {
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--primary), transparent);
+            margin: 4rem 0;
+        }
+        
+        .chat-preview {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 25px;
+            padding: 2rem;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .chat-preview::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: rotate 10s linear infinite;
+        }
+        
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
         .accordion-content {
             max-height: 0;
             overflow: hidden;
-            transition: max-height 0.3s ease-out;
-            padding: 0 1rem;
-        }
-        .accordion-item.active .accordion-content {
-            max-height: 500px; /* Adjust as needed */
-        }
-        .accordion-icon {
-            transition: transform 0.3s ease-out;
-        }
-        .accordion-item.active .accordion-icon {
-            transform: rotate(180deg);
+            transition: max-height 0.5s ease-in-out, padding 0.5s ease-in-out;
         }
         
-        .fallback-mode {
-            border: 1px solid #ef4444 !important; /* Red border */
-            background-color: #fef2f2 !important; /* Light red background */
-        }
-        .fallback-indicator {
-            background-color: #ef4444; /* Red */
-            color: white;
-            padding: 0.25rem 0.5rem;
-            border-radius: 0.375rem;
-            font-size: 0.75rem;
-            margin-bottom: 0.5rem;
-            display: inline-block;
-            direction: rtl;
-            text-align: right;
+        .accordion-content.expanded {
+            max-height: 500px;
+            padding-top: 1rem;
         }
 
-        .error-message {
-            background-color: #fee2e2; /* Red-100 */
-            border-right: 4px solid #dc2626; /* Red-600 border */
-            color: #991b1b; /* Red-800 */
+        /* NEW: Styling for small passport-sized images in articles section */
+        .article-small-image-card {
+            background: #fff;
+            border-radius: 1rem; /* rounded-xl */
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
             padding: 1rem;
-            border-radius: 0.5rem;
-            margin-top: 0.75rem;
+            border: 1px solid #e0e7ff; /* light border */
+        }
+        .article-small-image-card img {
+            width: 120px; /* Passport size width */
+            height: 120px; /* Passport size height */
+            object-fit: cover;
+            border-radius: 50%; /* Make it round */
+            margin-bottom: 0.75rem;
+            border: 3px solid var(--primary); /* Accent border */
+            box-shadow: 0 0 0 5px rgba(79, 70, 229, 0.1); /* light glow */
+        }
+        .article-small-image-card h3 {
+            font-size: 1.125rem; /* text-lg */
+            font-weight: 600; /* semibold */
+            color: #1a202c; /* gray-900 */
             margin-bottom: 0.5rem;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-            direction: rtl;
-            text-align: right;
-            font-size: 0.95rem;
         }
-        .error-message .retry-button {
-            background-color: #ef4444; /* Red-500 */
-            color: white;
-            padding: 0.5rem 1rem;
-            border-radius: 0.5rem;
-            cursor: pointer;
-            margin-top: 0.75rem;
-            transition: background-color 0.2s;
-            display: block; /* Make it a block button */
-            width: fit-content;
+        .article-small-image-card p {
+            font-size: 0.875rem; /* text-sm */
+            color: #4a5568; /* gray-700 */
         }
-        .error-message .retry-button:hover {
-            background-color: #dc2626; /* Red-600 */
-        }
-
     </style>
 </head>
-<body class="bg-gray-50 text-gray-800">
 
-    <header class="bg-white shadow-sm py-4">
-        <div class="container mx-auto px-6 flex justify-between items-center fade-in">
-            <h1 class="text-2xl font-bold text-indigo-600">יונתן הפסיכו-בוט</h1>
-            <nav>
-                <ul class="flex space-x-4 space-x-reverse">
-                    <li><a href="#hero" class="text-gray-600 hover:text-indigo-600 transition-colors">בית</a></li>
-                    <li><a href="#about" class="text-gray-600 hover:text-indigo-600 transition-colors">אודות</a></li>
-                    <li><a href="#articles" class="text-gray-600 hover:text-indigo-600 transition-colors">מאמרים</a></li>
-                    <li><a href="accessibility.html" class="text-gray-600 hover:text-indigo-600 transition-colors">נגישות</a></li>
-                </ul>
-            </nav>
-        </div>
+<body class="text-gray-800">
+    <header class="nav-blur sticky top-0 z-50 shadow-lg">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-4 space-x-reverse">
+                <div class="feature-icon w-12 h-12 rounded-full flex items-center justify-center text-white text-xl font-bold">
+                    🧠
+                </div>
+                <span class="text-3xl font-bold gradient-text">יונתן הפסיכו-בוט</span>
+            </div>
+            
+            <div class="hidden md:flex items-center space-x-8 space-x-reverse text-lg">
+                <a href="#features" class="text-gray-700 hover:text-indigo-600 transition-colors duration-300 font-medium">מה תקבלו?</a>
+                <a href="#testimonials" class="text-gray-700 hover:text-indigo-600 transition-colors duration-300 font-medium">המלצות</a>
+                <a href="#articles" class="text-gray-700 hover:text-indigo-600 transition-colors duration-300 font-medium">מאמרים</a>
+                <a href="#about" class="text-gray-700 hover:text-indigo-600 transition-colors duration-300 font-medium">על הגישה</a>
+            </div>
+            
+            <a href="/accessibility.html" class="text-sm text-gray-500 hover:text-indigo-600 transition-colors">הצהרת נגישות</a>
+        </nav>
     </header>
 
-    <section id="hero" class="relative bg-gradient-to-br from-indigo-500 to-purple-600 text-white py-24 md:py-32 overflow-hidden">
-        <div class="absolute inset-0 bg-pattern opacity-10"></div> <div class="container mx-auto px-6 text-center relative z-10">
-            <div class="max-w-3xl mx-auto">
-                <h2 class="text-4xl md:text-6xl font-extrabold leading-tight mb-6 slide-up">
-                    יונתן: המלווה הדיגיטלי שלך להורות רגועה
-                </h2>
-                <p class="text-xl md:text-2xl mb-10 slide-up" style="animation-delay: 0.3s;">
-                    כלים פסיכולוגיים מעשיים מבוססי CBT להתמודדות עם אתגרי גיל ההתבגרות
+    <main>
+        <section class="hero-gradient text-white pt-24 pb-32 text-center relative">
+            <div class="container mx-auto px-6 relative z-10">
+                <div class="floating-animation">
+                    <h1 class="text-5xl md:text-7xl font-extrabold mb-6 fade-in">
+                        כלים להורות <span class="text-cyan-300">רגועה ומודעת</span> יותר
+                    </h1>
+                </div>
+                
+                <p class="text-xl md:text-2xl mb-8 max-w-4xl mx-auto fade-in leading-relaxed" style="animation-delay: 0.3s;">
+                    יונתן, פסיכו-בוט חינוכי מתקדם, מעניק לכם, הורים למתבגרים, תמיכה וכלים מבוססי-CBT להתמודדות עם אתגרי היומיום. 
+                    <strong>התחילו שיחה וגלו דרכים חדשות לתקשר, להבין ולהתחבר.</strong>
                 </p>
-                <button id="start-chat-hero" class="interactive-button pulse-glow bg-white text-indigo-600 font-bold py-4 px-10 rounded-full text-lg shadow-2xl hover:bg-gray-50 transition-all duration-300 transform hover:scale-105">
-                    🚀 התחילו שיחה עם יונתן
-                </button>
-            </div>
-            
-            <div class="mt-20 grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div class="bg-white bg-opacity-10 rounded-xl p-8 shadow-lg backdrop-blur-sm slide-up">
-                    <div class="feature-icon w-12 h-12 rounded-full flex items-center justify-center text-white text-xl font-bold mb-4 mx-auto floating-animation">
-                        🧠
+                
+                <div class="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12 fade-in" style="animation-delay: 0.6s;">
+                    <button id="start-chat-hero" class="interactive-button pulse-glow bg-white text-indigo-600 font-bold py-4 px-10 rounded-full text-lg shadow-2xl hover:bg-gray-50 transition-all duration-300 transform hover:scale-105">
+                        🚀 התחילו שיחה עם יונתן
+                    </button>
+                    
+                    <button class="interactive-button bg-transparent border-2 border-white text-white font-bold py-4 px-8 rounded-full text-lg hover:bg-white hover:text-indigo-600 transition-all duration-300">
+                        📖 למד עוד על הגישה
+                    </button>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto fade-in" style="animation-delay: 0.9s;">
+                    <div class="glass-effect p-6 text-center">
+                        <div class="text-3xl font-bold text-cyan-300 mb-2">24/7</div>
+                        <div class="text-lg">זמינות מלאה</div>
                     </div>
-                    <h3 class="text-xl font-semibold mb-2">גישה פסיכולוגית</h3>
-                    <p class="text-indigo-100">מבוסס על עקרונות CBT מוכחים מחקרית להתמודדות עם אתגרי מתבגרים.</p>
-                </div>
-                <div class="bg-white bg-opacity-10 rounded-xl p-8 shadow-lg backdrop-blur-sm slide-up" style="animation-delay: 0.2s;">
-                    <div class="feature-icon w-12 h-12 rounded-full flex items-center justify-center text-white text-xl font-bold mb-4 mx-auto floating-animation" style="animation-delay: 0.1s;">
-                        🛠️
+                    <div class="glass-effect p-6 text-center">
+                        <div class="text-3xl font-bold text-cyan-300 mb-2">CBT</div>
+                        <div class="text-lg">גישה מבוססת מדע</div>
                     </div>
-                    <h3 class="text-xl font-semibold mb-2">כלים מעשיים</h3>
-                    <p class="text-indigo-100">טיפים וטכניקות שתוכלו ליישם באופן יומיומי לשיפור התקשורת.</p>
-                </div>
-                <div class="bg-white bg-opacity-10 rounded-xl p-8 shadow-lg backdrop-blur-sm slide-up" style="animation-delay: 0.4s;">
-                    <div class="feature-icon w-12 h-12 rounded-full flex items-center justify-center text-white text-xl font-bold mb-4 mx-auto floating-animation" style="animation-delay: 0.2s;">
-                        🔒
-                    </div>
-                    <h3 class="text-xl font-semibold mb-2">פרטיות ואבטחה</h3>
-                    <p class="text-indigo-100">שיחות מוצפנות ופרטיות מלאה למידע רגיש.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section id="about" class="py-24 bg-white">
-        <div class="container mx-auto px-6 flex flex-col md:flex-row items-center gap-12">
-            <div class="md:w-1/2 slide-up">
-                <img src="/static/images/yonatan_bot_illustration.png" alt="איור של רובוט חמוד עוזר להורים" class="rounded-2xl shadow-xl floating-animation">
-            </div>
-            <div class="md:w-1/2 text-right slide-up" style="animation-delay: 0.3s;">
-                <h2 class="text-4xl md:text-5xl font-bold mb-6 gradient-text">מי אנחנו?</h2>
-                <p class="text-lg leading-relaxed mb-4">
-                    יונתן הפסיכו-בוט הוא יוזמה פורצת דרך המשלבת פסיכולוגיה קלינית עם בינה מלאכותית, במטרה לספק תמיכה והכוונה להורים המתמודדים עם האתגרים הייחודיים של גיל ההתבגרות.
-                </p>
-                <p class="text-lg leading-relaxed mb-4">
-                    אנו מאמינים כי הורים מצוידים בכלים הנכונים יכולים לבנות קשרים חזקים ובריאים יותר עם ילדיהם המתבגרים, ולנווט בהצלחה את השנים המורכבות אך המתגמלות הללו.
-                </p>
-                <p class="text-lg leading-relaxed">
-                    המערכת שלנו מבוססת על עקרונות הטיפול הקוגניטיבי-התנהגותי (CBT), ומספקת מענה מותאם אישית, תובנות מעמיקות ופתרונות מעשיים למגוון רחב של מצבים.
-                </p>
-            </div>
-        </div>
-    </section>
-
-    <section id="how-it-works" class="py-24 bg-gradient-to-br from-indigo-50 to-blue-50">
-        <div class="container mx-auto px-6 text-center">
-            <h2 class="text-4xl md:text-5xl font-bold mb-16 gradient-text slide-up">איך זה עובד?</h2>
-            
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
-                <div class="slide-up">
-                    <div class="w-24 h-24 rounded-full bg-indigo-200 flex items-center justify-center text-indigo-700 text-4xl font-bold mb-6 mx-auto shadow-lg floating-animation">1</div>
-                    <h3 class="text-2xl font-semibold mb-4">הגדירו את האתגר</h3>
-                    <p class="text-gray-700 leading-relaxed">שתפו את יונתן במה שמעסיק אתכם – קשיי תקשורת, חרדות, זמן מסך או כל אתגר אחר.</p>
-                </div>
-                <div class="slide-up" style="animation-delay: 0.2s;">
-                    <div class="w-24 h-24 rounded-full bg-purple-200 flex items-center justify-center text-purple-700 text-4xl font-bold mb-6 mx-auto shadow-lg floating-animation" style="animation-delay: 0.1s;">2</div>
-                    <h3 class="text-2xl font-semibold mb-4">קבלו תובנות מותאמות</h3>
-                    <p class="text-gray-700 leading-relaxed">יונתן ינתח את המצב ויספק תובנות המבוססות על עקרונות פסיכולוגיים והתנהגותיים.</p>
-                </div>
-                <div class="slide-up" style="animation-delay: 0.4s;">
-                    <div class="w-24 h-24 rounded-full bg-pink-200 flex items-center justify-center text-pink-700 text-4xl font-bold mb-6 mx-auto shadow-lg floating-animation" style="animation-delay: 0.2s;">3</div>
-                    <h3 class="text-2xl font-semibold mb-4">יישמו כלים מעשיים</h3>
-                    <p class="text-gray-700 leading-relaxed">הבוט יציע לכם כלים וטכניקות CBT פרקטיות ליישום מיידי בחיי היומיום שלכם.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section id="articles" class="py-24 bg-white">
-        <div class="container mx-auto px-6">
-            <h2 class="text-4xl md:text-5xl font-bold text-center mb-16 gradient-text slide-up">מאמרים וכלים</h2>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
-                <div class="bg-white rounded-lg shadow-md overflow-hidden slide-up">
-                    <img src="/static/images/התמודדות עם חרדה חברתית בבית הספר.jpg" alt="תמונה מאמר: התמודדות עם חרדה חברתית בבית הספר" class="w-full h-auto object-cover rounded-t-lg">
-                    <div class="p-4">
-                        <h3 class="text-xl font-semibold text-gray-800 mb-2">התמודדות עם חרדה חברתית בבית הספר</h3>
-                        <p class="text-gray-700 text-sm">מדריך מקיף לטיפול קוגניטיבי-התנהגותי (CBT) בחרדה חברתית, כולל כלים מעשיים להורים ולמתבגרים.</p>
-                    </div>
-                </div>
-                <div class="bg-white rounded-lg shadow-md overflow-hidden slide-up" style="animation-delay: 0.2s;">
-                    <img src="/static/images/CBT לטיפול בחרדה אצל ילדים ומתבגרים.jpg" alt="תמונה מאמר: CBT לטיפול בחרדה אצל ילדים ומתבגרים" class="w-full h-auto object-cover rounded-t-lg">
-                    <div class="p-4">
-                        <h3 class="text-xl font-semibold text-gray-800 mb-2">CBT לטיפול בחרדה אצל ילדים ומתבגרים</h3>
-                        <p class="text-gray-700 text-sm">מחקר מקיף על יעילות הטיפול הקוגניטיבי-התנהגותי בטיפול בהפרעות חרדה אצל ילדים ומתבגרים.</p>
+                    <div class="glass-effect p-6 text-center">
+                        <div class="text-3xl font-bold text-cyan-300 mb-2">100%</div>
+                        <div class="text-lg">פרטיות ובטיחות</div>
                     </div>
                 </div>
             </div>
+        </section>
 
-            <div id="articles-container" class="space-y-4">
-                </div>
-        </div>
-    </section>
-
-    <section class="py-24 bg-gradient-to-br from-indigo-500 to-purple-600 text-white text-center">
-        <div class="container mx-auto px-6">
-            <h2 class="text-4xl md:text-5xl font-bold mb-8 slide-up">מוכנים לשינוי?</h2>
-            <p class="text-xl md:text-2xl mb-12 slide-up" style="animation-delay: 0.3s;">
-                התחילו את המסע שלכם להורות רגועה ויעילה יותר עוד היום.
-            </p>
-            <button id="start-chat-cta" class="interactive-button pulse-glow bg-white text-indigo-600 font-bold py-4 px-10 rounded-full text-lg shadow-2xl hover:bg-gray-50 transition-all duration-300 transform hover:scale-105">
-                🚀 התחילו שיחה עם יונתן
-            </button>
-        </div>
-    </section>
-
-    <footer class="bg-gray-800 text-gray-300 py-12">
-        <div class="container mx-auto px-6 text-center">
-            <p class="mb-4">&copy; 2024 יונתן הפסיכו-בוט. כל הזכויות שמורות.</p>
-            <ul class="flex justify-center space-x-6 space-x-reverse mb-4">
-                <li><a href="#about" class="hover:text-white transition-colors">אודות</a></li>
-                <li><a href="#articles" class="hover:text-white transition-colors">מאמרים</a></li>
-                <li><a href="accessibility.html" class="hover:text-white transition-colors">נגישות</a></li>
-                <li><a href="mailto:support@yonatanbot.com" class="hover:text-white transition-colors">צור קשר</a></li>
-            </ul>
-            <p class="text-sm">פיתוח עם ❤️ בישראל.</p>
-        </div>
-    </footer>
-
-    <div id="chat-widget-container" class="hidden">
-        <div id="chat-bubble" class="fixed bottom-6 left-6 z-50 bg-indigo-600 text-white rounded-full w-16 h-16 flex items-center justify-center text-3xl cursor-pointer shadow-lg hover:scale-105 transition-transform duration-200">
-            💬
-        </div>
-
-        <div id="chat-window" class="fixed bottom-24 left-6 w-96 h-128 bg-white rounded-xl shadow-2xl flex flex-col overflow-hidden hidden">
-            <div class="chat-header bg-indigo-600 text-white p-4 flex justify-between items-center">
-                <span class="text-lg font-bold">יונתן הפסיכו-בוט</span>
-                <button id="close-chat-btn" class="text-white hover:text-gray-200 text-2xl leading-none">&times;</button>
-            </div>
-            <div class="chat-messages flex-grow p-4 overflow-y-auto bg-gray-50 flex flex-col-reverse" id="messages-container">
-                <div class="text-center text-gray-500 text-sm py-2">
-                    <p class="status-text">מוכן לשיחה!</p>
-                    <span class="typing-indicator hidden">...יונתן מקליד</span>
-                </div>
-            </div>
-            <div class="chat-input-area p-4 border-t border-gray-200 bg-white">
-                <input type="text" id="chat-input" placeholder="כתוב הודעה..." class="flex-grow border border-gray-300 rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-indigo-500" dir="rtl">
-                <button id="send-btn" class="bg-indigo-600 text-white rounded-lg py-3 px-6 hover:bg-indigo-700 transition-colors duration-200 mr-2">שלח</button>
-                <div id="input-counter" class="text-gray-500 text-xs text-left mt-1 hidden"></div>
-            </div>
-        </div>
-    </div>
-    
-    <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
-
-    <script src="/static/widget.js"></script>
-    <script>
-        // Load articles dynamically
-        document.addEventListener('DOMContentLoaded', async () => {
-            const articlesContainer = document.getElementById('articles-container');
-            try {
-                const response = await fetch('/static/articles.json');
-                const articles = await response.json();
-
-                articles.forEach(article => {
-                    const articleHtml = `
-                        <div class="accordion-item bg-white rounded-lg shadow-md overflow-hidden slide-up">
-                            <div class="accordion-header p-4 flex justify-between items-center">
-                                <h3 class="text-lg font-semibold text-gray-800">${article.title}</h3>
-                                <svg class="accordion-icon w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                                </svg>
-                            </div>
-                            <div class="accordion-content">
-                                <div class="p-4 pt-0 text-gray-700">
-                                    <p class="text-sm text-gray-500 mb-2">מאת: ${article.author}</p>
-                                    <p class="mb-4">${article.short_desc}</p>
-                                    <a href="${article.link}" target="_blank" class="text-indigo-600 hover:underline">קראו עוד</a>
+        <section class="py-16 bg-gray-50">
+            <div class="container mx-auto px-6">
+                <div class="max-w-4xl mx-auto">
+                    <div class="chat-preview relative">
+                        <h3 class="text-2xl font-bold mb-6 text-center">התנסו בחוויה עכשיו</h3>
+                        <div class="bg-white/10 rounded-2xl p-6 backdrop-blur-sm">
+                            <div class="space-y-4">
+                                <div class="flex items-start space-x-3 space-x-reverse">
+                                    <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">🧠</div>
+                                    <div class="bg-white/20 rounded-2xl p-4 max-w-sm">
+                                        <p>שלום! אני יונתן. איך אני יכול לעזור לך היום עם המתבגר שלך?</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-start space-x-3 space-x-reverse justify-end">
+                                    <div class="bg-cyan-400 text-gray-800 rounded-2xl p-4 max-w-sm">
+                                        <p>הילד שלי לא מקשיב ואנחנו רבים כל הזמן...</p>
+                                    </div>
+                                    <div class="w-10 h-10 bg-cyan-400 rounded-full flex items-center justify-center">👤</div>
+                                </div>
+                                <div class="flex items-start space-x-3 space-x-reverse">
+                                    <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">🧠</div>
+                                    <div class="bg-white/20 rounded-2xl p-4 max-w-md">
+                                        <p>אני מבין שזה מתסכל. בוא נתחיל מלהבין מה מאחורי ההתנגדות...</p>
+                                        <div class="mt-3 space-x-2 space-x-reverse">
+                                            <span class="bg-white/30 px-3 py-1 rounded-full text-sm">טכניקות הקשבה</span>
+                                            <span class="bg-white/30 px-3 py-1 rounded-full text-sm">זיהוי טריגרים</span>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="features" class="py-24 bg-white">
+            <div class="container mx-auto px-6 text-center">
+                <h2 class="text-4xl md:text-5xl font-bold mb-6 gradient-text slide-up">ליווי אישי וחכם, זמין 24/7</h2>
+                <p class="text-xl text-gray-600 mb-16 max-w-3xl mx-auto slide-up" style="animation-delay: 0.2s;">
+                    יונתן כאן כדי להקשיב, לנתח ולהציע פתרונות מעשיים, בכל זמן שנוח לכם.
+                    <strong>גלו איך טכנולוגיה מתקדמת פוגשת חוכמה פסיכולוגית.</strong>
+                </p>
+                
+                <div class="grid md:grid-cols-3 gap-12">
+                    <div class="feature-card p-10 rounded-3xl shadow-xl slide-up" style="animation-delay: 0.4s;">
+                        <div class="feature-icon w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-8 text-white text-3xl">
+                            💬
+                        </div>
+                        <h3 class="text-2xl font-bold mb-4 gradient-text">שיחות מבוססות CBT</h3>
+                        <p class="text-gray-600 leading-relaxed mb-6">
+                            קבלו הכוונה לפי גישה טיפולית מוכחת, המסייעת לזהות דפוסי חשיבה והתנהגות ולשנות אותם לטובה.
+                        </p>
+                        <div class="space-y-2">
+                            <div class="text-sm text-indigo-600 font-medium">✓ זיהוי דפוסי חשיבה</div>
+                            <div class="text-sm text-indigo-600 font-medium">✓ טכניקות שיחזור קוגניטיבי</div>
+                            <div class="text-sm text-indigo-600 font-medium">✓ כלים להרגעה מיידית</div>
+                        </div>
+                    </div>
+
+                    <div class="feature-card p-10 rounded-3xl shadow-xl slide-up" style="animation-delay: 0.6s;">
+                        <div class="feature-icon w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-8 text-white text-3xl">
+                            🛠️
+                        </div>
+                        <h3 class="text-2xl font-bold mb-4 gradient-text">כלים ופתרונות פרקטיים</h3>
+                        <p class="text-gray-600 leading-relaxed mb-6">
+                            במקום תיאוריות, תקבלו טכניקות פשוטות וברורות ליישום מיידי בבית עם המתבגר/ת שלכם.
+                        </p>
+                        <div class="space-y-2">
+                            <div class="text-sm text-purple-600 font-medium">✓ תרגילי תקשורת</div>
+                            <div class="text-sm text-purple-600 font-medium">✓ אסטרטגיות פתרון קונפליקטים</div>
+                            <div class="text-sm text-purple-600 font-medium">✓ טכניקות בניית אמון</div>
+                        </div>
+                    </div>
+
+                    <div class="feature-card p-10 rounded-3xl shadow-xl slide-up" style="animation-delay: 0.8s;">
+                        <div class="feature-icon w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-8 text-white text-3xl">
+                            🔒
+                        </div>
+                        <h3 class="text-2xl font-bold mb-4 gradient-text">דיסקרטיות ובטיחות</h3>
+                        <p class="text-gray-600 leading-relaxed mb-6">
+                            מרחב בטוח ופרטי עבורכם לשתף, להתייעץ ולקבל תמיכה, מבלי לצאת מהבית.
+                        </p>
+                        <div class="space-y-2">
+                            <div class="text-sm text-cyan-600 font-medium">✓ הצפנה מתקדמת</div>
+                            <div class="text-sm text-cyan-600 font-medium">✓ אנונימיות מלאה</div>
+                            <div class="text-sm text-cyan-600 font-medium">✓ ללא שמירת מידע אישי</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="section-divider"></div>
+
+        <section id="testimonials" class="py-20 bg-gradient-to-br from-indigo-50 to-purple-50">
+            <div class="container mx-auto px-6">
+                <h2 class="text-4xl font-bold text-center mb-16 gradient-text slide-up">מה אומרים הורים</h2>
+                
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div class="testimonial-card p-8 rounded-2xl shadow-lg slide-up">
+                        <div class="text-4xl mb-4">⭐⭐⭐⭐⭐</div>
+                        <p class="text-gray-700 mb-6 italic leading-relaxed">
+                            "יונתן עזר לי להבין את הבן שלי בגיל 16. הכלים שקיבלתי פשוט שינו את האווירה בבית. עכשיו אנחנו מדברים, לא צועקים."
+                        </p>
+                        <div class="font-semibold text-indigo-600">- שרה, אמא לבן 16</div>
+                    </div>
+                    
+                    <div class="testimonial-card p-8 rounded-2xl shadow-lg slide-up" style="animation-delay: 0.2s;">
+                        <div class="text-4xl mb-4">⭐⭐⭐⭐⭐</div>
+                        <p class="text-gray-700 mb-6 italic leading-relaxed">
+                            "חשבתי שאבדתי את הקשר עם הבת שלי. יונתן הראה לי שזה לא איחור, ונתן לי דרכים מעשיות לחזור אליה."
+                        </p>
+                        <div class="font-semibold text-indigo-600">- דוד, אבא לבת 14</div>
+                    </div>
+                    
+                    <div class="testimonial-card p-8 rounded-2xl shadow-lg slide-up" style="animation-delay: 0.4s;">
+                        <div class="text-4xl mb-4">⭐⭐⭐⭐⭐</div>
+                        <p class="text-gray-700 mb-6 italic leading-relaxed">
+                            "הגישה של CBT באמת עובדת. במקום להתעצבן, אני עוצרת, חושבת ומגיבה אחרת. זה שינה הכל."
+                        </p>
+                        <div class="font-semibold text-indigo-600">- מיכל, אמא לתאומים 15</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="articles" class="py-24 bg-white">
+            <div class="container mx-auto px-6">
+                <h2 class="text-4xl md:text-5xl font-bold text-center mb-6 gradient-text slide-up">מאמרים וכלים להתמודדות</h2>
+                <p class="text-xl text-gray-600 text-center mb-16 max-w-3xl mx-auto slide-up" style="animation-delay: 0.2s;">
+                    ידע הוא כוח. אספנו עבורכם מאמרים מבוססי מחקר שיעניקו לכם הבנה וכלים נוספים.
+                </p>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+                    <div class="article-small-image-card slide-up">
+                        <img src="/static/images/התמודדות עם חרדה חברתית בבית הספר.jpg" alt="תמונת מאמר: התמודדות עם חרדה חברתית בבית הספר">
+                        <h3>התמודדות עם חרדה חברתית בבית הספר</h3>
+                        <p>מדריך מקיף לטיפול קוגניטיבי-התנהגותי (CBT) בחרדה חברתית, כולל כלים מעשיים להורים ולמתבגרים.</p>
+                    </div>
+                    <div class="article-small-image-card slide-up" style="animation-delay: 0.2s;">
+                        <img src="/static/images/CBT לטיפול בחרדה אצל ילדים ומתבגרים.jpg" alt="תמונת מאמר: CBT לטיפול בחרדה אצל ילדים ומתבגרים">
+                        <h3>CBT לטיפול בחרדה אצל ילדים ומתבגרים</h3>
+                        <p>מחקר מקיף על יעילות הטיפול הקוגניטיבי-התנהגותי בטיפול בהפרעות חרדה אצל ילדים ומתבגרים.</p>
+                    </div>
+                </div>
+
+                <div id="articles-grid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-10">
+                    </div>
+            </div>
+        </section>
+
+        <section id="about" class="py-24 bg-gradient-to-br from-blue-50 to-indigo-100">
+            <div class="container mx-auto px-6 flex flex-col lg:flex-row items-center gap-16">
+                <div class="lg:w-1/2 slide-up">
+                    <h2 class="text-4xl md:text-5xl font-bold mb-8 gradient-text">מה זה בעצם CBT?</h2>
+                    <div class="space-y-6 text-lg text-gray-700 leading-relaxed">
+                        <p>
+                            <strong>טיפול קוגניטיבי-התנהגותי (CBT)</strong> היא גישה פסיכולוגית ממוקדת וקצרת-מועד, 
+                            שזכתה לביסוס מחקרי נרחב. היא מבוססת על הרעיון שהרגשות וההתנהגויות שלנו לא מושפעים 
+                            ישירות מאירועים, אלא מהפרשנות והמחשבות שלנו על אותם אירועים.
+                        </p>
+                        <p>
+                            במילים פשוטות, אם נלמד לזהות את המחשבות הלא-מועילות שלנו ולאתגר אותן, 
+                            נוכל לשנות את הרגשתנו ואת דרך פעולתנו. יונתן משתמש בעקרונות אלו כדי לעזור לכם 
+                            לראות את הסיטואציות עם המתבגרים שלכם באור חדש ולמצוא פתרונות יעילים.
+                        </p>
+                        
+                        <div class="bg-white p-6 rounded-2xl shadow-lg">
+                            <h4 class="font-bold text-indigo-600 mb-3">העקרונות המרכזיים:</h4>
+                            <ul class="space-y-2">
+                                <li class="flex items-center"><span class="text-green-500 mr-3">✓</span> זיהוי מחשבות אוטומטיות</li>
+                                <li class="flex items-center"><span class="text-green-500 mr-3">✓</span> אתגור אמונות לא מועילות</li>
+                                <li class="flex items-center"><span class="text-green-500 mr-3">✓</span> פיתוח דפוסי חשיבה חדשים</li>
+                                <li class="flex items-center"><span class="text-green-500 mr-3">✓</span> שינוי התנהגותי מתוכנן</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="lg:w-1/2 slide-up" style="animation-delay: 0.3s;">
+                    <div class="relative">
+                        <img src="/static/images/yonatan_bot_illustration.png" 
+                             alt="איור של מודל CBT - מחשבה, רגש, התנהגות" 
+                             class="rounded-3xl shadow-2xl w-full">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent rounded-3xl"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-gray-900 text-white py-16">
+        <div class="container mx-auto px-6">
+            <div class="grid md:grid-cols-4 gap-8 mb-12">
+                <div class="col-span-2">
+                    <div class="flex items-center space-x-3 space-x-reverse mb-6">
+                        <div class="feature-icon w-12 h-12 rounded-full flex items-center justify-center text-white text-xl">🧠</div>
+                        <span class="text-2xl font-bold">יונתן הפסיכו-בוט</span>
+                    </div>
+                    <p class="text-gray-400 leading-relaxed mb-6">
+                        הכלי המתקדם ביותר לליווי הורים של מתבגרים. מבוסס על מחקר, מונע על ידי טכנולוגיה, מונחה על ידי אמפתיה.
+                    </p>
+                    <div class="flex space-x-4 space-x-reverse">
+                        <div class="stats-counter text-white px-4 py-2 rounded-full font-bold">24/7 זמין</div>
+                        <div class="stats-counter text-white px-4 py-2 rounded-full font-bold">CBT מבוסס</div>
+                    </div>
+                </div>
+                
+                <div>
+                    <h4 class="font-bold text-lg mb-4">קישורים מהירים</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="#features" class="hover:text-white transition-colors">תכונות</a></li>
+                        <li><a href="#testimonials" class="hover:text-white transition-colors">המלצות</a></li>
+                        <li><a href="#articles" class="hover:text-white transition-colors">מאמרים</a></li>
+                        <li><a href="#about" class="hover:text-white transition-colors">על הגישה</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="font-bold text-lg mb-4">עזרה ותמיכה</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="/accessibility.html" class="hover:text-white transition-colors">הצהרת נגישות</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">מדיניות פרטיות</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">תנאי שימוש</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">צור קשר</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-800 pt-8 text-center">
+                <p class="text-gray-400">
+                    &copy; 2025 יונתן הפסיכו-בוט. כל הזכויות שמורות. 
+                    <span class="text-indigo-400">נבנה באהבה עבור הורים מדהימים 💙</span>
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="/static/widget.js"></script> 
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        
+        // Enhanced animations on scroll
+        function observeElements() {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                        entry.target.style.animationPlayState = 'running';
+                    }
+                });
+            }, { 
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            });
+
+            document.querySelectorAll('.slide-up, .fade-in').forEach(el => {
+                observer.observe(el);
+            });
+        }
+        
+        // Enhanced article fetching and rendering
+        async function fetchAndRenderArticles() {
+            const articlesGrid = document.getElementById('articles-grid');
+            try {
+                const response = await fetch('/static/articles.json');
+                if (!response.ok) throw new Error('Network response was not ok');
+                const articles = await response.json();
+                
+                articlesGrid.innerHTML = '';
+                articles.slice(0, 6).forEach((article, index) => { // Limit to first 6 articles for display
+                    const articleEl = document.createElement('div');
+                    articleEl.className = 'article-card bg-white p-8 rounded-3xl shadow-xl flex flex-col slide-up border border-gray-100';
+                    articleEl.style.animationDelay = `${index * 0.1}s`;
+                    
+                    articleEl.innerHTML = `
+                        <div class="flex-grow">
+                            <div class="w-full h-48 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-2xl mb-6 flex items-center justify-center">
+                                <span class="text-4xl">📚</span>
+                            </div>
+                            <h3 class="text-xl font-bold mb-3 text-gray-900 line-clamp-2">${article.title}</h3>
+                            <p class="text-sm text-indigo-600 mb-3 font-medium">מאת: ${article.author}</p>
+                            <p class="text-gray-600 mb-4 leading-relaxed">${article.short_desc}</p>
+                            <div class="accordion-content">
+                                <p class="text-gray-600">${article.long_desc}</p>
+                            </div>
+                        </div>
+                        <div class="mt-auto pt-6 flex justify-between items-center">
+                            <button class="toggle-expand text-sm font-semibold text-indigo-600 hover:text-indigo-800 transition-colors">קרא/י עוד</button>
+                            <a href="${article.link}" target="_blank" rel="noopener noreferrer" 
+                               class="interactive-button bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-semibold py-3 px-6 rounded-full text-sm transition-all duration-300 shadow-lg hover:shadow-xl">
+                                למאמר המלא →
+                            </a>
+                        </div>
                     `;
-                    articlesContainer.insertAdjacentHTML('beforeend', articleHtml);
+                    articlesGrid.appendChild(articleEl);
                 });
 
-                // Add accordion functionality
-                articlesContainer.querySelectorAll('.accordion-header').forEach(header => {
-                    header.addEventListener('click', () => {
-                        const item = header.closest('.accordion-item');
-                        item.classList.toggle('active');
-                        const content = item.querySelector('.accordion-content');
-                        if (item.classList.contains('active')) {
-                            content.style.maxHeight = content.scrollHeight + 'px';
-                        } else {
-                            content.style.maxHeight = '0';
-                        }
+                // Enhanced accordion functionality
+                document.querySelectorAll('.toggle-expand').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        const content = e.target.closest('.article-card').querySelector('.accordion-content');
+                        const isExpanded = content.classList.contains('expanded');
+                        
+                        // Close all other accordions
+                        document.querySelectorAll('.accordion-content.expanded').forEach(el => {
+                            if (el !== content) {
+                                el.classList.remove('expanded');
+                                el.closest('.article-card').querySelector('.toggle-expand').textContent = 'קרא/י עוד';
+                            }
+                        });
+                        
+                        content.classList.toggle('expanded');
+                        e.target.textContent = isExpanded ? 'קרא/י עוד' : 'הצג פחות';
                     });
                 });
 
             } catch (error) {
-                console.error('Error loading articles:', error);
-                articlesContainer.innerHTML = '<p class="text-center text-red-500">אירעה שגיאה בטעינת המאמרים.</p>';
+                console.error('Failed to fetch articles:', error);
+                articlesGrid.innerHTML = `
+                    <div class="col-span-full text-center py-12">
+                        <p class="text-gray-500 text-lg">אירעה שגיאה בטעינת המאמרים. נסו לרענן את הדף.</p>
+                        <button onclick="location.reload()" class="mt-4 bg-indigo-600 text-white px-6 py-2 rounded-full hover:bg-indigo-700 transition-colors">
+                            רענן
+                        </button>
+                    </div>
+                `;
             }
-        });
+        }
 
-        // Initialize and open chat widget from hero button or CTA
+        // Enhanced chat button functionality
         document.getElementById('start-chat-hero').addEventListener('click', () => {
+            // Add click animation
+            const button = document.getElementById('start-chat-hero');
+            button.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                button.style.transform = 'scale(1)';
+            }, 150);
+            
+            // Try to open widget
             if (window.yonatanWidget && typeof window.yonatanWidget.open === 'function') {
                 window.yonatanWidget.open();
                 window.yonatanWidget.sendMessage("START_CONVERSATION"); // Send initial greeting
             } else {
-                console.error("יונתן ווידג'ט לא נמצא או שפונקציית 'open' חסרה.");
+                console.error("יונתן ווידג'ט לא נמצא או שפונקציית 'open' חסרה. וודא ש-widget.js נטען כהלכה.");
+                // Fallback to directly show chat window if widget API not ready
+                document.getElementById('chat-window').classList.remove('hidden');
+                document.getElementById('chat-bubble').classList.add('hidden');
+                document.getElementById('chat-input').focus();
             }
         });
-
         document.getElementById('start-chat-cta').addEventListener('click', () => {
+             // Similar logic for CTA button
+            const button = document.getElementById('start-chat-cta');
+            button.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                button.style.transform = 'scale(1)';
+            }, 150);
+            
             if (window.yonatanWidget && typeof window.yonatanWidget.open === 'function') {
                 window.yonatanWidget.open();
-                window.yonatanWidget.sendMessage("START_CONVERSATION"); // Send initial greeting
+                window.yonatanWidget.sendMessage("START_CONVERSATION");
             } else {
-                console.error("יונתן ווידג'ט לא נמצא או שפונקציית 'open' חסרה.");
+                 console.error("יונתן ווידג'ט לא נמצא או שפונקציית 'open' חסרה. וודא ש-widget.js נטען כהלכה.");
+                 document.getElementById('chat-window').classList.remove('hidden');
+                 document.getElementById('chat-bubble').classList.add('hidden');
+                 document.getElementById('chat-input').focus();
             }
         });
-        
-        // Show chat widget container if JS is enabled
-        document.getElementById('chat-widget-container').classList.remove('hidden');
 
+
+        // Initialize all functions
+        fetchAndRenderArticles();
+        observeElements();
+        
+        // Add smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+    });
     </script>
 </body>
 </html>
