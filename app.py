@@ -1,15 +1,15 @@
 # app.py - קובץ מתוקן בשלמותו
 
-from flask import Flask, request, jsonify, Response # Import Flask and other necessary modules
+from flask import Flask, request, jsonify, Response, render_template, send_from_directory # ADDED render_template, send_from_directory
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from flask_cors import CORS
 import logging
 import os
-from datetime import datetime, timezone, timedelta # Added timezone for datetime.now(timezone.utc)
+from datetime import datetime, timezone, timedelta
 import json
-import re # For sanitize_input if used there
-from typing import Dict, Any # ADDED: Import Dict and Any for type hinting
+import re
+from typing import Dict, Any
 
 # Import models and db initialization
 from models import db, init_app_db, Parent, Child, Conversation, Message, QuestionnaireResponse
@@ -36,7 +36,7 @@ current_config.init_app(app)
 # Validate configuration
 if not validate_config(current_config):
     logging.error("❌ Configuration validation failed. Exiting.")
-    exit(1) # Exit if critical configuration is missing
+    exit(1)
 
 # Initialize database
 init_app_db(app)
@@ -68,7 +68,6 @@ if app.config.get('GOOGLE_API_KEY'):
         logger.error(f"❌ Failed to initialize Google Generative AI model: {e}")
         model = None
 else:
-    # Removed emoji from log message to prevent SyntaxError
     logger.warning("GOOGLE_API_KEY not set. AI model will not be available.")
 
 # Initialize advanced fallback system
@@ -85,29 +84,43 @@ def validate_session_id(session_id: str) -> bool:
 
 def is_suspicious_request():
     """Placeholder for more advanced security checks"""
-    # Implement logic to detect suspicious requests (e.g., too many requests from an IP in a short time, unusual patterns)
     return False
 
-def log_security_event(event_type: str, details: Dict[str, Any]): # FIXED: Dict and Any are now imported
+def log_security_event(event_type: str, details: Dict[str, Any]):
     """Log security events"""
     logger.warning(f"SECURITY ALERT: {event_type} - Details: {details}")
 
 def sanitize_input(text: str) -> str:
     """Sanitize user input to prevent injection attacks"""
-    # Simple example: remove HTML tags and limit length
-    cleaned_text = re.sub(r'<[^>]*>', '', text) # Remove HTML tags
-    cleaned_text = cleaned_text[:app.config.get('MAX_MESSAGE_LENGTH', 5000)] # Truncate
+    cleaned_text = re.sub(r'<[^>]*>', '', text)
+    cleaned_text = cleaned_text[:app.config.get('MAX_MESSAGE_LENGTH', 5000)]
     return cleaned_text.strip()
 
 
 # --- Routes ---
+
+@app.route('/')
+def index():
+    """Renders the main index.html page."""
+    return render_template('index.html')
+
+@app.route('/favicon.ico')
+def favicon():
+    """Serves the favicon.ico file (you'll need to place it in the static directory)."""
+    # Assuming you have a favicon.ico in your static folder.
+    # If not, you might want to return an empty response or a default icon.
+    return send_from_directory(os.path.join(app.root_path, 'static'), 'favicon.ico', mimetype='image/vnd.microsoft.icon')
+
+@app.route('/accessibility.html')
+def accessibility():
+    """Renders the accessibility.html page."""
+    return render_template('accessibility.html')
 
 @app.route('/api/chat', methods=['POST'])
 @limiter.limit("30 per minute")
 def chat():
     """Enhanced chat endpoint with proper validation and streaming response"""
     try:
-        # Enhanced request validation
         if not request.is_json:
             return jsonify({"error": "הבקשה חייבת להיות בפורמט JSON"}), 400
 
@@ -115,7 +128,6 @@ def chat():
         if not data:
             return jsonify({"error": "נתוני JSON חסרים"}), 400
 
-        # Validate required fields
         session_id = data.get('session_id')
         message = data.get('message')
         
@@ -124,7 +136,6 @@ def chat():
         if not message:
             return jsonify({"error": "שדה message חסר"}), 400
         
-        # Enhanced validation
         if not validate_session_id(session_id):
             return jsonify({"error": "session_id לא תקין"}), 400
             
@@ -134,7 +145,6 @@ def chat():
         if len(message) > app.config.get('MAX_MESSAGE_LENGTH', 5000):
             return jsonify({"error": "ההודעה ארוכה מדי"}), 400
 
-        # Enhanced security checks
         if is_suspicious_request():
             log_security_event("suspicious_chat_request", {
                 "session_id": session_id[:8] + "...",
@@ -142,43 +152,35 @@ def chat():
             })
             return jsonify({"error": "בקשה חשודה נחסמה"}), 403
 
-        # Sanitize message
         message = sanitize_input(message)
         if not message:
             return jsonify({"error": "הודעה לא תקינה אחרי ניקוי"}), 400
 
-        # Get or create session data
-        # Define conversation and parent here to ensure they are accessible in finally block
         conversation = None
         parent = None
         try:
-            # Try to get questionnaire data for this session
             questionnaire_data = {}
             if session_id:
                 questionnaire = QuestionnaireResponse.query.filter_by(parent_id=session_id).first()
                 if questionnaire:
                     questionnaire_data = questionnaire.get_response_data()
 
-            # Check if conversation exists, if not create one
             parent = Parent.query.filter_by(id=session_id).first()
             if parent:
-                # Find or create active conversation
                 conversation = Conversation.query.filter_by(
                     parent_id=session_id,
                     status='active'
                 ).first()
                 
                 if not conversation:
-                    # Create new conversation
                     conversation = Conversation(
                         parent_id=session_id,
                         child_id=parent.children[0].id if parent.children else None,
                         topic=questionnaire_data.get('main_challenge', 'שיחה כללית')
                     )
                     db.session.add(conversation)
-                    db.session.flush()  # Get ID without committing
+                    db.session.flush()
 
-                # Add user message to conversation (except for START_CONVERSATION)
                 if message != "START_CONVERSATION":
                     user_message = Message(
                         conversation_id=conversation.id,
@@ -186,22 +188,18 @@ def chat():
                         content=message
                     )
                     db.session.add(user_message)
-                    db.session.commit() # Commit here for user message
+                    db.session.commit()
                     
         except Exception as db_error:
             logger.error(f"Database error in chat: {db_error}")
-            db.session.rollback() # Rollback in case of error
-            # Continue without database - let fallback handle it
+            db.session.rollback()
 
-        # Function to generate streaming response
-        def generate_response_stream(): # Renamed to avoid confusion with Response class
-            current_conversation = conversation # Use the conversation object from outer scope
+        def generate_response_stream():
+            current_conversation = conversation
             
             try:
-                # Try AI response first
                 if model:
                     try:
-                        # Build enhanced context
                         context = ""
                         if questionnaire_data:
                             context = f"""
@@ -231,15 +229,13 @@ def chat():
 הודעת המשתמש: {message}
 """
 
-                        # Generate AI response with streaming
-                        response_ai = model.generate_content(prompt) # Renamed variable to avoid conflict
+                        response_ai = model.generate_content(prompt)
                         
                         if response_ai and response_ai.text:
                             full_response = response_ai.text
                             
-                            # Save bot message to conversation
                             try:
-                                if current_conversation: # Check if conversation object exists
+                                if current_conversation:
                                     bot_message = Message(
                                         conversation_id=current_conversation.id,
                                         sender_type='bot',
@@ -252,7 +248,6 @@ def chat():
                                 logger.warning(f"Could not save message to DB: {save_error}")
                                 db.session.rollback()
                             
-                            # Stream the response in chunks
                             chunk_size = 50
                             for i in range(0, len(full_response), chunk_size):
                                 chunk = full_response[i:i+chunk_size]
@@ -261,18 +256,14 @@ def chat():
                             
                     except Exception as ai_error:
                         logger.error(f"AI model error: {ai_error}")
-                        # Fall through to fallback system
 
-                # Use fallback system
                 if advanced_fallback_system:
-                    # Pass the questionnaire_data to the fallback system
                     fallback_response = advanced_fallback_system.get_fallback_response(
                         user_input=message, session_id=session_id, questionnaire_data=questionnaire_data
                     )
                     
-                    # Save fallback response to conversation
                     try:
-                        if current_conversation: # Check if conversation object exists
+                        if current_conversation:
                             bot_message = Message(
                                 conversation_id=current_conversation.id,
                                 sender_type='bot',
@@ -285,14 +276,12 @@ def chat():
                         logger.warning(f"Could not save fallback message to DB: {save_error}")
                         db.session.rollback()
                     
-                    # Stream fallback response
                     chunk_size = 50
                     for i in range(0, len(fallback_response), chunk_size):
                         chunk = fallback_response[i:i+chunk_size]
                         yield chunk
                     return
                 
-                # Last resort - basic response
                 basic_response = "שלום! אני יונתן. מצטער, יש לי קושי טכני כרגע, אבל אני כאן לעזור לך. איך אני יכול לסייע?"
                 yield basic_response
                 
@@ -301,25 +290,23 @@ def chat():
                 error_response = "מצטער, אירעה שגיאה טכנית. אנא נסה שוב."
                 yield error_response
 
-        # Return streaming response
         return Response(
-            generate_response_stream(), # Call the renamed function
+            generate_response_stream(),
             mimetype='text/plain',
             headers={
                 'Cache-Control': 'no-cache',
                 'Connection': 'keep-alive',
-                'X-Accel-Buffering': 'no'  # Disable Nginx buffering
+                'X-Accel-Buffering': 'no'
             }
         )
 
     except ValidationError as e:
+        db.session.rollback()
         return jsonify({"error": "נתונים לא תקינים", "details": e.messages}), 400
     except BotError as e:
-        # Rollback any pending transaction if an error occurs and it's a BotError
         db.session.rollback()
         return jsonify(e.to_dict()), e.status_code
     except Exception as e:
-        # Rollback any pending transaction for unexpected errors
         db.session.rollback()
         logger.error(f"Unexpected error in chat endpoint: {e}")
         error = handle_generic_error(e)
@@ -331,7 +318,6 @@ def health_check():
     """Health check endpoint to verify service status."""
     db_connected = False
     try:
-        # Try to execute a simple query to check DB connection
         with db.engine.connect() as connection:
             connection.execute(db.text("SELECT 1"))
         db_connected = True
@@ -342,7 +328,6 @@ def health_check():
     ai_model_working = False
     if model:
         try:
-            # Try a simple generative call to check AI model
             response = model.generate_content("hello")
             if response and response.text:
                 ai_model_working = True
