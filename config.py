@@ -1,4 +1,4 @@
-# config.py - Enhanced Production Ready Configuration - FIXED
+# config.py - Enhanced Production Ready Configuration - FIXED SyntaxError
 import os
 import logging
 from datetime import timedelta
@@ -37,7 +37,7 @@ class Config:
     RATELIMIT_STRATEGY = 'fixed-window'
     RATELIMIT_HEADERS_ENABLED = True
     
-    # Security Headers - UPDATED Content-Security-Policy
+    # Security Headers - UPDATED Content-Security-Policy (for base Config)
     SECURITY_HEADERS = {
         'X-Content-Type-Options': 'nosniff',
         'X-Frame-Options': 'DENY',
@@ -300,6 +300,16 @@ def get_config(config_name: Optional[str] = None) -> Config:
     config_class = config_by_name.get(config_name, DevelopmentConfig)
     return config_class()
 
+# בדיקת הגדרות - ENHANCED - REMOVED the problematic duplicate SECURITY_HEADERS here.
+# This global SECURITY_HEADERS was causing the unmatched '}' error.
+# SECURITY_HEADERS = {
+#     'X-Content-Type-Options': 'nosniff',
+#     'X-Frame-Options': 'DENY',
+#     'X-XSS-Protection': '1; mode=block',
+#     'Referrer-Policy': 'strict-origin-when-cross-origin'
+# }
+
+
 # בדיקת הגדרות - ENHANCED
 def validate_config(config: Config) -> bool:
     """בדיקת תקינות הגדרות"""
@@ -339,14 +349,6 @@ def validate_config(config: Config) -> bool:
     
     return True
 
-# הגדרות נוספות לביטחון
-SECURITY_HEADERS = {
-    'X-Content-Type-Options': 'nosniff',
-    'X-Frame-Options': 'DENY',
-    'X-XSS-Protection': '1; mode=block',
-    'Referrer-Policy': 'strict-origin-when-cross-origin'
-}
-
 # הגדרות לוגים
 LOG_FORMAT = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 LOG_DATE_FORMAT = '%Y-%m-%d %H:%M:%S'
@@ -371,7 +373,6 @@ __all__ = [
     'config_by_name',
     'get_config',
     'validate_config',
-    'SECURITY_HEADERS',
+    # 'SECURITY_HEADERS', # REMOVED: No longer exporting this global duplicate
     'ADVANCED_SETTINGS'
 ]
-}
