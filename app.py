@@ -1,9 +1,11 @@
-# app.py - קובץ מתוקן בשלמותו
+# app.py - קובץ מתוקן בשלמותו (כולל Endpoints חסרים ושינוי CSP)
 
-from flask import Flask, request, jsonify, Response, render_template, send_from_directory # ADDED render_template, send_from_directory
+from flask import Flask, request, jsonify, Response, render_template, send_from_directory
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from flask_cors import CORS
+from flask_wtf.csrf import CSRFProtect # ADDED for CSRF token generation
+from itsdangerous import URLSafeTimedSerializer # For CSRF token serialization
 import logging
 import os
 from datetime import datetime, timezone, timedelta
@@ -12,7 +14,7 @@ import re
 from typing import Dict, Any
 
 # Import models and db initialization
-from models import db, init_app_db, Parent, Child, Conversation, Message, QuestionnaireResponse
+from models import db, init_app_db, Parent, Child, Conversation, Message, QuestionnaireResponse, generate_secure_id
 
 # Import Config and error handling
 from config import get_config, validate_config
@@ -53,6 +55,9 @@ limiter = Limiter(
     headers_enabled=app.config['RATELIMIT_HEADERS_ENABLED']
 )
 
+# Initialize CSRF Protection
+csrf = CSRFProtect(app) # Initialize CSRFProtect
+
 # Configure logging
 logging.basicConfig(level=getattr(logging, app.config['LOG_LEVEL'].upper()))
 logger = logging.getLogger(__name__)
@@ -74,6 +79,9 @@ else:
 advanced_fallback_system = create_advanced_fallback_system()
 if not advanced_fallback_system:
     logger.error("❌ Advanced Fallback System could not be initialized.")
+
+# Initialize CSRF Serializer (used for token generation if not using Flask-WTF forms)
+s = URLSafeTimedSerializer(app.config['SECRET_KEY'])
 
 
 # --- Helper Functions ---
@@ -109,15 +117,81 @@ def favicon():
     """Serves the favicon.ico file (you'll need to place it in the static directory)."""
     # Assuming you have a favicon.ico in your static folder.
     # If not, you might want to return an empty response or a default icon.
-    return send_from_directory(os.path.join(app.root_path, 'static'), 'favicon.ico', mimetype='image/vnd.microsoft.icon')
+    # Updated to use send_from_directory with app.static_folder directly
+    return send_from_directory(app.static_folder, 'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
 @app.route('/accessibility.html')
 def accessibility():
     """Renders the accessibility.html page."""
     return render_template('accessibility.html')
 
+# NEW ENDPOINT: Get CSRF Token
+@app.route('/api/csrf-token', methods=['GET'])
+def get_csrf_token():
+    """Provides a CSRF token for frontend requests."""
+    # Flask-WTF CSRFProtect usually handles this automatically for forms,
+    # but for pure API calls, we might need to expose it manually.
+    # We can generate a token using itsdangerous.
+    token = s.dumps(request.remote_addr, salt='csrf-salt') # Use remote_addr or session ID
+    return jsonify({'csrf_token': token}), 200
+
+# NEW ENDPOINT: Initialize Session
+@app.route('/api/init', methods=['POST'])
+@limiter.limit("5 per minute") # Limit session initialization requests
+@csrf.exempt # Exempt this route from CSRF protection if CSRF token is not yet available
+             # Or, client must fetch CSRF token first, then send it with this request.
+             # For simplicity and initial setup, exempting here.
+             # In a real app, you'd send CSRF token with this request after fetching it.
+def init_session():
+    """Initializes a new parent session and returns a session_id."""
+    try:
+        # Generate a unique session ID
+        # You can use UUID or a combination of random strings.
+        # For this example, let's generate a simple unique ID.
+        new_session_id = generate_secure_id(str(datetime.now(timezone.utc)) + os.urandom(16).hex())
+
+        # Create a dummy Parent entry (you'll want to extend this with real user data later)
+        # For now, we use placeholder data. In a real app, you'd get this from a login/registration form.
+        with app.app_context(): # Ensure we are in application context for DB operations
+            existing_parent = Parent.query.filter_by(id=new_session_id).first()
+            if existing_parent:
+                # If by some cosmic chance ID already exists, regenerate
+                new_session_id = generate_secure_id(str(datetime.now(timezone.utc)) + os.urandom(16).hex() + "retry")
+
+            parent = Parent(
+                id=new_session_id,
+                name="הורה אורח", # Placeholder
+                gender="לא צוין",  # Placeholder
+                data_processing_consent=False, # Should be explicitly granted by user
+                marketing_consent=False
+            )
+            db.session.add(parent)
+            db.session.commit()
+
+            # Create a dummy child for this parent (optional, but good for starting conversation)
+            # In a real app, this would come from the questionnaire.
+            child = Child(
+                name="ילד אורח", # Placeholder
+                gender="לא צוין", # Placeholder
+                age=15,          # Placeholder
+                parent_id=parent.id
+            )
+            db.session.add(child)
+            db.session.commit()
+
+        logger.info(f"New session initialized: {new_session_id}")
+        return jsonify({"session_id": new_session_id}), 200
+
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error initializing session: {e}")
+        error = handle_generic_error(e)
+        return jsonify(error.to_dict()), error.status_code
+
+
 @app.route('/api/chat', methods=['POST'])
 @limiter.limit("30 per minute")
+# @csrf.exempt # Temporarily exempt for debugging if CSRF is causing issues with chat, but remove for production
 def chat():
     """Enhanced chat endpoint with proper validation and streaming response"""
     try:
@@ -161,25 +235,39 @@ def chat():
         try:
             questionnaire_data = {}
             if session_id:
-                questionnaire = QuestionnaireResponse.query.filter_by(parent_id=session_id).first()
-                if questionnaire:
-                    questionnaire_data = questionnaire.get_response_data()
+                # Use app.app_context() when querying from the database
+                with app.app_context():
+                    questionnaire = QuestionnaireResponse.query.filter_by(parent_id=session_id).first()
+                    if questionnaire:
+                        questionnaire_data = questionnaire.get_response_data()
 
-            parent = Parent.query.filter_by(id=session_id).first()
-            if parent:
+            with app.app_context():
+                parent = Parent.query.filter_by(id=session_id).first()
+                if not parent:
+                    # If parent not found, it means session_id is invalid or not initialized
+                    raise SessionNotFoundError(f"Parent session {session_id} not found.")
+
                 conversation = Conversation.query.filter_by(
                     parent_id=session_id,
                     status='active'
                 ).first()
                 
                 if not conversation:
+                    # Create new conversation
+                    # Ensure parent has children, otherwise child_id might be None
+                    child_id = parent.children[0].id if parent.children else None
+                    if not child_id:
+                        logger.warning(f"No child associated with parent {parent.id} for new conversation.")
+                        # You might want to create a default child or raise an error here
+                        # For now, proceed with child_id=None
+                    
                     conversation = Conversation(
                         parent_id=session_id,
-                        child_id=parent.children[0].id if parent.children else None,
+                        child_id=child_id, # Can be None if no child is associated
                         topic=questionnaire_data.get('main_challenge', 'שיחה כללית')
                     )
                     db.session.add(conversation)
-                    db.session.flush()
+                    db.session.flush() # Get ID without committing
 
                 if message != "START_CONVERSATION":
                     user_message = Message(
@@ -193,6 +281,9 @@ def chat():
         except Exception as db_error:
             logger.error(f"Database error in chat: {db_error}")
             db.session.rollback()
+            # If DB error, raise a BotError to trigger generic error handling for frontend
+            raise DatabaseError(f"Failed to interact with database: {db_error}")
+
 
         def generate_response_stream():
             current_conversation = conversation
@@ -236,14 +327,15 @@ def chat():
                             
                             try:
                                 if current_conversation:
-                                    bot_message = Message(
-                                        conversation_id=current_conversation.id,
-                                        sender_type='bot',
-                                        content=full_response
-                                    )
-                                    db.session.add(bot_message)
-                                    current_conversation.update_message_count()
-                                    db.session.commit()
+                                    with app.app_context(): # Ensure app context for DB commit
+                                        bot_message = Message(
+                                            conversation_id=current_conversation.id,
+                                            sender_type='bot',
+                                            content=full_response
+                                        )
+                                        db.session.add(bot_message)
+                                        current_conversation.update_message_count()
+                                        db.session.commit()
                             except Exception as save_error:
                                 logger.warning(f"Could not save message to DB: {save_error}")
                                 db.session.rollback()
@@ -256,6 +348,7 @@ def chat():
                             
                     except Exception as ai_error:
                         logger.error(f"AI model error: {ai_error}")
+                        # Fall through to fallback system
 
                 if advanced_fallback_system:
                     fallback_response = advanced_fallback_system.get_fallback_response(
@@ -264,14 +357,15 @@ def chat():
                     
                     try:
                         if current_conversation:
-                            bot_message = Message(
-                                conversation_id=current_conversation.id,
-                                sender_type='bot',
-                                content=fallback_response
-                            )
-                            db.session.add(bot_message)
-                            current_conversation.update_message_count()
-                            db.session.commit()
+                            with app.app_context(): # Ensure app context for DB commit
+                                bot_message = Message(
+                                    conversation_id=current_conversation.id,
+                                    sender_type='bot',
+                                    content=fallback_response
+                                )
+                                db.session.add(bot_message)
+                                current_conversation.update_message_count()
+                                db.session.commit()
                     except Exception as save_error:
                         logger.warning(f"Could not save fallback message to DB: {save_error}")
                         db.session.rollback()

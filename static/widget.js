@@ -31,16 +31,21 @@ document.addEventListener('DOMContentLoaded', () => {
     async function getCSRFToken() {
         if (csrfToken) return csrfToken;
         try {
-            const response = await fetch(`${API_URL}/api/csrf-token`); // Assuming you have such an endpoint
-            if (!response.ok) throw new Error('Failed to fetch CSRF token');
+            const response = await fetch(`${API_URL}/api/csrf-token`); // THIS IS THE NEW ENDPOINT
+            if (!response.ok) {
+                // If it's not OK, it might be an HTML response (e.g., 404 page)
+                const errorText = await response.text();
+                console.error("Failed to fetch CSRF token. Server response:", errorText);
+                throw new Error('Failed to fetch CSRF token');
+            }
             const data = await response.json();
             csrfToken = data.csrf_token;
-            console.log("CSRF Token fetched:", csrfToken);
+            console.log("CSRF Token fetched successfully.");
             return csrfToken;
         } catch (error) {
             console.error("Error fetching CSRF token:", error);
             // Fallback for development if CSRF is disabled or endpoint not ready
-            return 'dummy_csrf_token_for_dev';
+            return 'dummy_csrf_token_for_dev'; // Return a dummy token for testing if fetch fails
         }
     }
 
@@ -71,21 +76,18 @@ document.addEventListener('DOMContentLoaded', () => {
         const messageContainer = document.createElement('div');
         messageContainer.classList.add('message-container');
         messageContainer.classList.add(`${sender}-message`);
-        messageContainer.setAttribute('data-message-id', state.currentMessageId++); // Unique ID for each message
+        messageContainer.setAttribute('data-message-id', state.currentMessageId++);
 
         const messageBubble = document.createElement('div');
         messageBubble.classList.add('message-bubble');
 
-        // Initial content will be empty for streaming messages
-        messageBubble.innerHTML = text; // Content is updated during streaming
+        messageBubble.innerHTML = text;
 
-        messageContainer.appendChild(messageBubble);
-        elements.messagesContainer.prepend(messageContainer); // Prepend to show latest message at bottom
+        elements.messagesContainer.prepend(messageContainer);
 
-        // Scroll to bottom (since we prepend, the container needs to scroll up)
         elements.messagesContainer.scrollTop = elements.messagesContainer.scrollHeight;
 
-        return messageContainer; // Return container to update streaming content
+        return messageContainer;
     }
 
     function saveConversationToStorage() {
@@ -94,17 +96,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function parseAndRenderContent(text) {
-        // Handle CARD[Title|Content] format
         let htmlContent = text.replace(/CARD\[(.*?)?\|(.*?)\]/g, (match, title, content) => {
             const cardTitle = title ? `<strong>${title.trim()}</strong>` : '';
             return `<div class="message-card">${cardTitle}${content.trim()}</div>`;
         });
 
-        // Handle [Button Text] format for suggestions
         htmlContent = htmlContent.replace(/\[(.*?)\]/g, (match, buttonText) => {
-            // Check if it's a known placeholder button for existing functionality (e.g., [בעיות תקשורת])
-            // Or if it's a dynamically generated suggestion button
-            // For now, treat all as suggestion buttons
             return `<button class="suggestion-btn" data-text="${buttonText.trim()}">${buttonText.trim()}</button>`;
         });
 
@@ -112,18 +109,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     function detectFallbackResponse(text) {
-        // Check for specific phrases that indicate a fallback response
         return text.includes('המערכת שלי עמוסה') || text.includes('מערכת חכמה של יונתן הפסיכו-בוט');
     }
 
     // --- Main Send Message Function ---
-    let connectionRetries = 0; // Tracks consecutive connection failures
+    let connectionRetries = 0;
 
     async function sendMessage(messageTextOverride) {
         const messageText = messageTextOverride || elements.chatInput.value.trim();
         if (!messageText || state.isTyping) return;
 
-        // DEBUG: Detailed log of sent data
         console.log('🔍 DEBUG - שליחת הודעה:', {
             messageText,
             sessionId: state.sessionId,
@@ -131,7 +126,6 @@ document.addEventListener('DOMContentLoaded', () => {
             isTyping: state.isTyping
         });
 
-        // Update UI state
         state.isTyping = true;
         if (elements.chatInput) {
             elements.chatInput.disabled = true;
@@ -139,14 +133,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if (elements.sendBtn) elements.sendBtn.disabled = true;
 
-        // Add user message to chat (except for START_CONVERSATION)
         if (messageText !== "START_CONVERSATION") {
             addMessageToChat('user', messageText);
             state.conversationHistory.push({ sender: 'user', text: messageText, timestamp: Date.now() });
             saveConversationToStorage();
         }
         
-        // Show typing indicator
         toggleTyping(true);
         updateStatusText('כותב תגובה...');
         
@@ -155,20 +147,17 @@ document.addEventListener('DOMContentLoaded', () => {
         
         async function attemptSendMessage() {
             try {
-                // Enhanced request with timeout and retry logic
                 const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 45000); // 45 seconds timeout
+                const timeoutId = setTimeout(() => controller.abort(), 45000);
                 
-                // DEBUG: Preparing data to send
                 const requestData = { 
                     session_id: state.sessionId, 
                     message: messageText,
-                    timestamp: Date.now() // Add timestamp for server-side logging
+                    timestamp: Date.now()
                 };
                 
                 console.log('🔍 DEBUG - נתוני הבקשה:', JSON.stringify(requestData, null, 2));
                 
-                // Input validation before sending
                 if (!state.sessionId) {
                     throw new Error('חסר session_id. אנא רענן את הדף.');
                 }
@@ -192,7 +181,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
 
                 if (!response.ok) {
-                    // Enhanced error handling with detailed logging
                     const errorText = await response.text().catch(() => 'לא ניתן לקרוא שגיאה');
                     console.error('🔍 DEBUG - שגיאת שרת:', {
                         status: response.status,
@@ -200,7 +188,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         errorText
                     });
                     
-                    // Try to parse error as JSON
                     let errorData = {};
                     try {
                         errorData = JSON.parse(errorText);
@@ -208,14 +195,12 @@ document.addEventListener('DOMContentLoaded', () => {
                         errorData = { error: errorText || `שגיאת שרת: ${response.status}` };
                     }
                     
-                    // Handle specific error responses
                     if (response.status === 400) {
                         if (errorData.error && errorData.error.includes('CSRF')) {
                             console.log('🔄 CSRF token expired, refreshing...');
-                            csrfToken = null; // Clear token to force refetch
-                            await getCSRFToken(); // Attempt to get new token
+                            csrfToken = null;
+                            await getCSRFToken();
                             
-                            // Retry sending message with new token
                             if (retryCount < maxRetries) {
                                 retryCount++;
                                 return attemptSendMessage();
@@ -238,9 +223,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 toggleTyping(false);
                 updateStatusText('מקבל תגובה...');
                 
-                // Enhanced streaming response handling
                 const botMessageWrapper = addMessageToChat('bot', '');
-                const botMessageContent = botMessageWrapper.querySelector('.message-bubble'); // Get the bubble element
+                const botMessageContent = botMessageWrapper.querySelector('.message-bubble');
                 
                 const reader = response.body.getReader();
                 const decoder = new TextDecoder();
@@ -259,12 +243,10 @@ document.addEventListener('DOMContentLoaded', () => {
                             fullResponseText += chunk;
                             lastUpdate = Date.now();
                             
-                            // Enhanced content rendering
                             botMessageContent.innerHTML = parseAndRenderContent(fullResponseText);
                             
-                            // Enhanced fallback detection and styling
                             const isFallback = detectFallbackResponse(fullResponseText);
-                            const messageDiv = botMessageWrapper.querySelector('.message-bubble'); // The bubble itself
+                            const messageDiv = botMessageWrapper.querySelector('.message-bubble');
                             
                             if (isFallback && !messageDiv.classList.contains('fallback-mode')) {
                                 messageDiv.classList.add('fallback-mode');
@@ -273,13 +255,10 @@ document.addEventListener('DOMContentLoaded', () => {
                                 );
                             }
                             
-                            // Auto-scroll during streaming
-                            // This logic needs to scroll the messages container, not its parent
                             elements.messagesContainer.scrollTop = elements.messagesContainer.scrollHeight;
                         }
                     }
                     
-                    // Validate received content
                     if (!receivedAnyContent || !fullResponseText.trim()) {
                         throw new Error('לא התקבל תוכן מהשרת');
                     }
@@ -289,24 +268,20 @@ document.addEventListener('DOMContentLoaded', () => {
                         isFallback: detectFallbackResponse(fullResponseText)
                     });
                     
-                    // Enhanced suggestion button handling after streaming
-                    // Buttons are now parsed dynamically from the fullResponseText
                     setTimeout(() => {
                         botMessageWrapper.querySelectorAll('.suggestion-btn').forEach(btn => {
                             btn.addEventListener('click', () => {
                                 if (btn.disabled) return;
                                 
                                 sendMessage(btn.dataset.text);
-                                // Disable all suggestion buttons after one is clicked
                                 botMessageWrapper.querySelectorAll('.suggestion-btn').forEach(b => { 
                                     b.disabled = true; 
                                     b.style.cssText = 'cursor: not-allowed; opacity: 0.6;'; 
                                 });
                             });
                         });
-                    }, 500); // Small delay to ensure DOM is updated
+                    }, 500);
 
-                    // Save to conversation history
                     state.conversationHistory.push({ 
                         sender: 'bot', 
                         text: fullResponseText, 
@@ -315,7 +290,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     saveConversationToStorage();
                     
                     updateStatusText('מוכן לשיחה');
-                    connectionRetries = 0; // Reset retry counter on success
+                    connectionRetries = 0;
                     
                 } catch (streamError) {
                     console.error("🔍 DEBUG - שגיאת סטרימינג:", streamError);
@@ -325,9 +300,9 @@ document.addEventListener('DOMContentLoaded', () => {
                             <button class="retry-button" id="retry-stream-btn-${state.currentMessageId - 1}">נסה שוב</button>
                         </div>
                     `;
-                    // Unique ID for retry button
+                    
                     document.getElementById(`retry-stream-btn-${state.currentMessageId - 1}`).addEventListener('click', () => {
-                        botMessageWrapper.remove(); // Remove incomplete message
+                        botMessageWrapper.remove();
                         sendMessage(messageText);
                     });
                     
@@ -342,21 +317,18 @@ document.addEventListener('DOMContentLoaded', () => {
                     sessionId: state.sessionId
                 });
                 
-                // Enhanced retry logic with exponential backoff
                 if (retryCount < maxRetries && !error.message.includes('aborted')) {
                     retryCount++;
                     console.log(`🔄 DEBUG - ניסיון ${retryCount} מתוך ${maxRetries}...`);
                     
                     updateStatusText(`ניסיון ${retryCount}...`);
                     
-                    // Exponential backoff
                     const delay = Math.min(1000 * Math.pow(2, retryCount - 1), 5000);
                     await new Promise(resolve => setTimeout(resolve, delay));
                     
-                    return attemptSendMessage(); // Recursive call for retry
+                    return attemptSendMessage();
                 }
                 
-                // Final error handling after retries exhausted
                 toggleTyping(false);
                 updateStatusText('שגיאה בתקשורת');
                 
@@ -370,20 +342,19 @@ document.addEventListener('DOMContentLoaded', () => {
                     errorMessage = 'בעיה בסשן. אנא רענן את הדף.';
                 } else if (error.message.includes('הודעה לא תקינה')) {
                     errorMessage = 'ההודעה לא תקינה. אנא נסה שוב.';
-                } else if (connectionRetries < 2) { // Allow a couple of general connection retries
+                } else if (connectionRetries < 2) {
                     errorMessage = 'בעיית חיבור זמנית. אנא נסה שוב.';
                 } else {
                     errorMessage = 'נתקלנו בבעיה טכנית. אנא רענן את הדף או נסה מאוחר יותר.';
                 }
                 
-                // Add error message to chat with retry button
                 addMessageToChat('bot', `
                     <div class="error-message">
                         ${errorMessage}
                         <button class="retry-button" id="retry-message-btn-${state.currentMessageId - 1}">נסה שוב</button>
                     </div>
                 `);
-                // Unique ID for retry button
+                
                 document.getElementById(`retry-message-btn-${state.currentMessageId - 1}`).addEventListener('click', () => {
                     sendMessage(messageText);
                 });
@@ -395,7 +366,6 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             await attemptSendMessage();
         } finally {
-            // Always reset UI state
             state.isTyping = false;
             if (elements.chatInput) {
                 elements.chatInput.disabled = false;
@@ -409,11 +379,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Widget UI Management ---
 
-    /** Initializes a new chat session. */
     async function initializeSession() {
         if (!state.sessionId) {
             try {
-                const response = await fetchWithCSRF(`${API_URL}/api/init`, { method: 'POST' }); // Assuming an /api/init endpoint
+                // ADDED: Fetch CSRF token before init
+                await getCSRFToken(); 
+                const response = await fetchWithCSRF(`${API_URL}/api/init`, { method: 'POST' });
+                
+                // IMPORTANT: Check if response is JSON, if not, it's likely an HTML error page (like 404)
+                const contentType = response.headers.get("content-type");
+                if (!contentType || !contentType.includes("application/json")) {
+                    const errorBody = await response.text();
+                    console.error("API /api/init did not return JSON. Status:", response.status, "Body:", errorBody);
+                    throw new Error(`API error: ${response.status} - Not JSON response`);
+                }
+
                 const data = await response.json();
                 if (data.session_id) {
                     state.sessionId = data.session_id;
@@ -425,16 +405,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             } catch (error) {
                 console.error("Error initializing session:", error);
-                // Handle error
+                // Show user a message about initialization failure
+                updateStatusText('שגיאה באתחול. אנא רענן.');
             }
         }
     }
 
-    /** Clears chat history and re-initializes session. */
     function resetChat() {
         state.conversationHistory = [];
         localStorage.removeItem('yonatanConversationHistory');
-        state.sessionId = null; // Clear old session ID
+        state.sessionId = null;
         localStorage.removeItem('yonatanSessionId');
         elements.messagesContainer.innerHTML = `
             <div class="text-center text-gray-500 text-sm py-2">
@@ -443,19 +423,24 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
         `;
         state.currentMessageId = 0;
-        initializeSession(); // Get a new session ID
+        initializeSession();
         updateStatusText('התחלה חדשה!');
     }
 
-    /** Opens the chat window. */
     function openChat() {
         elements.chatWindow.classList.remove('hidden');
-        elements.chatBubble.classList.add('hidden');
+        elements.widgetButton.classList.add('hidden');
         elements.chatInput.focus();
-        // Load history when opening
+        
+        elements.messagesContainer.innerHTML = `
+            <div class="text-center text-gray-500 text-sm py-2">
+                <p class="status-text">מוכן לשיחה!</p>
+                <span class="typing-indicator hidden">...יונתן מקליד</span>
+            </div>
+        `; // Clear messages before loading history
+
         state.conversationHistory.forEach(msg => {
             const messageElement = addMessageToChat(msg.sender, parseAndRenderContent(msg.text));
-            // Apply fallback class if it was a fallback message in history
             if (detectFallbackResponse(msg.text)) {
                 messageElement.querySelector('.message-bubble').classList.add('fallback-mode');
                 messageElement.querySelector('.message-bubble').insertAdjacentHTML('beforebegin', 
@@ -463,15 +448,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 );
             }
         });
-        // Scroll to the bottom after loading history
         elements.messagesContainer.scrollTop = elements.messagesContainer.scrollHeight;
-        updateStatusText('מוכן לשיחה'); // Reset status text
+        updateStatusText('מוכן לשיחה');
     }
 
-    /** Closes the chat window. */
     function closeChat() {
         elements.chatWindow.classList.add('hidden');
-        elements.chatBubble.classList.remove('hidden');
+        elements.widgetButton.classList.remove('hidden');
     }
 
     // --- Event Listeners ---
@@ -479,7 +462,7 @@ document.addEventListener('DOMContentLoaded', () => {
     elements.widgetButton.addEventListener('click', () => {
         openChat();
         if (state.conversationHistory.length === 0) {
-            sendMessage("START_CONVERSATION"); // Send initial greeting only on first open
+            sendMessage("START_CONVERSATION");
         }
     });
     elements.closeChatBtn.addEventListener('click', closeChat);
@@ -491,7 +474,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Character counter for input
     elements.chatInput.addEventListener('input', () => {
         if (elements.inputCounter) {
             const currentLength = elements.chatInput.value.length;
